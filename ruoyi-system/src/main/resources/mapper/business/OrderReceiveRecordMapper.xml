@@ -262,12 +262,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
-    <!-- 统计一个用户当日的订单数量 -->
+    <!-- 统计一个用户当日的订单数量（包含update_time为空的记录） -->
     <select id="countNumByUserDate" parameterType="java.util.Map" resultType="java.lang.Integer">
         select count(1) n from m_order_receive_record
         where user_id = #{userId}
-        and update_time <![CDATA[ >= ]]> #{date1} and update_time  <![CDATA[ < ]]> #{date2}
-        <if test="processStatus != null  and processStatus != ''"> and process_status = #{processStatus}</if>
+        <!-- 核心修改：包含update_time为空的记录，或在时间范围内的记录 -->
+        and (
+        update_time is null
+        or (update_time <![CDATA[ >= ]]> #{date1} and update_time <![CDATA[ < ]]> #{date2})
+        )
+        <if test="processStatus != null  and processStatus != ''">
+            and process_status = #{processStatus}
+        </if>
     </select>
 
     <!-- 一个用户一天内的利润总计 -->

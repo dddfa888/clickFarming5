@@ -161,7 +161,7 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
         res.put("remainingNum",remainingNum); //剩余可购买订单
         res.put("balanceAmount",orderReceiveRecord.getBalanceAmount()); //差额金额
         res.put("profit",totalProfit);  //利润总和
-        res.put("cancel",cancel);   //未支付订单
+            res.put("cancel",cancel);   //未支付订单
         res.put("numYesterday", profitYesterday.setScale(2, RoundingMode.HALF_UP).toString()); //昨天折扣
         res.put("numToday", profitToday.setScale(2, RoundingMode.HALF_UP).toString()); //今天折扣
         res.put("withdrawalAddress", mUser.getWithdrawalAddress()); //提现地址  用于判断，页面不显示
