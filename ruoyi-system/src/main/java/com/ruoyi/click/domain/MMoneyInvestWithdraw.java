@@ -65,11 +65,14 @@ public class MMoneyInvestWithdraw
     @Excel(name = "订单id")
     private String orderId;
 
+    /** 提款方式 */
+    private Integer withdrawalMethod;
 
-    @JsonFormat(pattern = "HH:mm:ss")
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date updateTime;
 
-    @JsonFormat(pattern = "HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date createTime;
 
 

@@ -3,12 +3,14 @@ package com.ruoyi.business.service.impl;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.toolkit.Assert;
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.business.mapper.MSettingDevCooperateMapper;
 import com.ruoyi.business.domain.MSettingDevCooperate;
 import com.ruoyi.business.service.IMSettingDevCooperateService;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * 设置发展合作Service业务层处理
@@ -92,9 +94,20 @@ public class MSettingDevCooperateServiceImpl implements IMSettingDevCooperateSer
     /**
      * 根据语种查询设置发展合作信息
      *
-     * @param lang 语种
      * @return 设置发展合作信息
      */
+    @Override
+    public MSettingDevCooperate selectByLang()
+    {
+        return mSettingDevCooperateMapper.selectByLang();
+    }
+
+/*    *//**
+     * 根据语种查询设置发展合作信息
+     *
+     * @param lang 语种
+     * @return 设置发展合作信息
+     *//*
     @Override
     public MSettingDevCooperate selectByLang(String lang) {
         if (lang == null
@@ -103,6 +116,7 @@ public class MSettingDevCooperateServiceImpl implements IMSettingDevCooperateSer
             lang = "en";
         }
         return mSettingDevCooperateMapper.selectByLang(lang);
-    }
+    }*/
+
 
 }

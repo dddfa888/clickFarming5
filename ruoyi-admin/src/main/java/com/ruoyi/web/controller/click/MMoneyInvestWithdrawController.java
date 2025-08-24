@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.click;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +18,10 @@ import com.ruoyi.business.mapper.OrderReceiveRecordMapper;
 import com.ruoyi.click.domain.MAccountChangeRecords;
 import com.ruoyi.click.domain.MMoneyInvestWithdraw;
 import com.ruoyi.click.domain.UserGrade;
+import com.ruoyi.click.domain.vo.AccountQueryVO;
 import com.ruoyi.click.domain.vo.BackOperateVo;
 import com.ruoyi.click.domain.vo.WithdrawVo;
+import com.ruoyi.click.domain.vo.WithdrawalVO;
 import com.ruoyi.click.service.IMAccountChangeRecordsService;
 import com.ruoyi.click.service.IMMoneyInvestWithdrawService;
 import com.ruoyi.click.service.IMUserService;
@@ -33,6 +36,7 @@ import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.mapper.SysConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -92,6 +96,42 @@ public class MMoneyInvestWithdrawController extends BaseController
     }
 
     /**
+     * 根据类型查询充值或提款记录
+     * @param mMoneyInvestWithdraw
+     * @return
+     */
+    @GetMapping("/userList2")
+    public TableDataInfo userList2(MMoneyInvestWithdraw mMoneyInvestWithdraw) {
+        startPage();
+        MMoneyInvestWithdraw withdraw = new MMoneyInvestWithdraw();
+        withdraw.setUserId(mMoneyInvestWithdraw.getUserId());
+        withdraw.setType(mMoneyInvestWithdraw.getType());
+        List<MMoneyInvestWithdraw> list = mMoneyInvestWithdrawService.selectMMoneyInvestWithdrawList(withdraw);
+        return getDataTable(list);
+    }
+
+
+    /**
+     * 个人详细咨询记录
+     * @param accountQueryVO
+     * @return
+     */
+    @GetMapping("/userList3")
+    public TableDataInfo userList3(AccountQueryVO accountQueryVO) {
+        startPage();
+        MMoneyInvestWithdraw withdraw = new MMoneyInvestWithdraw();
+        withdraw.setUserId(accountQueryVO.getUserId());
+        withdraw.setType(accountQueryVO.getType());
+        // 获取时间范围参数
+        LocalDateTime startTime = accountQueryVO.getStartTime();
+        LocalDateTime endTime = accountQueryVO.getEndTime();
+        // 调用带时间条件的查询方法
+        List<MMoneyInvestWithdraw> list = mMoneyInvestWithdrawService.selectWithdrawByTimeRange(withdraw, startTime, endTime);
+        return getDataTable(list);
+    }
+
+
+    /**
      * 查询存款取款记录列表
      */
     @GetMapping("/list")
@@ -133,18 +173,98 @@ public class MMoneyInvestWithdrawController extends BaseController
     }
 
     /**
-     * 同意
+     * 充值
+     * @param userId
+     * @param amount
+     * @return
+     */
+    @PostMapping("/recharge/{userId}/{amount}")
+    public AjaxResult recharge(@PathVariable("userId") Long userId, @PathVariable("amount") BigDecimal amount){
+        if (amount == null) {
+            return AjaxResult.error("充值金额不能为空");
+        }
+        // 拦截 0 和负数（前端传 0、-2 等非法值）
+        // BigDecimal 不能用 >/< 直接比较，必须用 compareTo：返回 1=大于，0=等于，-1=小于
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return AjaxResult.error("充值金额必须大于0，请重新输入");
+        }
+        // 正确：判断金额是否超过100万（>=1000000）
+        if (amount.compareTo(new BigDecimal("1000000")) >= 0) {
+            return AjaxResult.error("充值金额最大为1000000，请重新输入");
+        }
+        mMoneyInvestWithdrawService.insertRecharge(userId,amount);
+
+        return success();
+    }
+
+    /**
+     * 提款
+     * @param withdrawalVO
+     * @return
+     */
+    @PostMapping("/draw")
+    public AjaxResult draw(@RequestBody WithdrawalVO withdrawalVO){
+        MUser mUser = mUserService.selectMUserByUid(withdrawalVO.getUserId());
+        // 1. 账户余额校验（BigDecimal必须用compareTo比较）
+        BigDecimal balance = mUser.getAccountBalance();
+
+        // 2. 先判断金额是否为null
+        if (withdrawalVO.getAmount() == null) {
+            return AjaxResult.error("提款金额不能为空");
+        }
+
+        // 3. 再判断金额是否大于0（提款场景下的正确提示）
+        if (withdrawalVO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            return AjaxResult.error("提款金额必须大于0，请重新输入");
+        }
+
+        // 4. 资金密码非空校验（VO中存储的是前端传递的明文密码）
+        String plainFundPassword = withdrawalVO.getFundPassword();
+        if (StringUtils.isBlank(plainFundPassword)) {
+            return AjaxResult.error("请输入资金密码");
+        }
+
+        // 5. 核心验证：使用BCrypt比对明文与密文（自动处理盐值）
+        if (!BCrypt.checkpw(plainFundPassword, mUser.getFundPassword())) {
+            return AjaxResult.error("资金密码错误，请重新输入");
+        }
+
+        // 6. 比较：如果余额 < 提款金额
+        if (balance.compareTo(withdrawalVO.getAmount()) < 0) {
+            return AjaxResult.error("账户余额不足，无法提款");
+        }
+
+        mMoneyInvestWithdrawService.insertDraw(withdrawalVO);
+
+        return success();
+    }
+
+    /**
+     * 同意提现或充值
      * @param backOperateVo
      * @return
      */
     @PostMapping(value = "/agree")
-    public AjaxResult agree(@Validated @RequestBody BackOperateVo  backOperateVo) {
+    public AjaxResult agreeRecharge(@Validated @RequestBody BackOperateVo  backOperateVo) {
+
         MMoneyInvestWithdraw withdraw = mMoneyInvestWithdrawService.selectMMoneyInvestWithdrawById(backOperateVo.getId());
         if (withdraw == null) {
             return error("提现订单不存在");
         }
-        withdraw.setStatus(1);
-        mMoneyInvestWithdrawService.updateMMoneyInvestWithdraw( withdraw);
+        //提款
+        if (withdraw.getType() != null && withdraw.getType().equals("0")){
+            // 3.2 校验：提款金额不能大于账户余额
+            if (withdraw.getAmount().compareTo(withdraw.getAccountForward()) > 0) {
+                return error("提款金额超过账户余额，无法操作");
+            }
+            withdraw.setStatus(1);
+            mMoneyInvestWithdrawService.updateMMoneyInvestWithdrawWithdrawal( withdraw);
+        }
+        //充值
+        if (withdraw.getType() != null && withdraw.getType().equals("1")){
+            withdraw.setStatus(1);
+            mMoneyInvestWithdrawService.updateMMoneyInvestWithdrawRecharge( withdraw);
+        }
         return success();
     }
 
@@ -366,5 +486,4 @@ public class MMoneyInvestWithdrawController extends BaseController
     {
         return toAjax(mMoneyInvestWithdrawService.updateUserInfoByUserId(param));
     }
-
 }

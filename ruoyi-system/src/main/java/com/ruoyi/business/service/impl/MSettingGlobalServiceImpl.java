@@ -99,14 +99,25 @@ public class MSettingGlobalServiceImpl implements IMSettingGlobalService
     /**
      * 根据语种查询设置全球化
      *
-     * @param lang 语种
      * @return 设置全球化
      */
+    @Override
+    public MSettingGlobal selectByLang()
+    {
+        return mSettingGlobalMapper.selectByLang();
+    }
+
+/*    *//**
+     * 根据语种查询设置全球化
+     *
+     * @param lang 语种
+     * @return 设置全球化
+     *//*
     @Override
     public MSettingGlobal selectByLang(String lang)
     {
         Assert.notEmpty(lang, "请选择语种");
         return mSettingGlobalMapper.selectByLang(lang);
-    }
+    }*/
 
 }

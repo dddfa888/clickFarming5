@@ -100,9 +100,18 @@ public class MSettingDevCooperateController extends BaseController
      * 根据语言查询设置发展合作
      */
     @GetMapping("/getByLang")
+    public AjaxResult getByLang()
+    {
+        return success(mSettingDevCooperateService.selectByLang());
+    }
+
+/*    *//**
+     * 根据语言查询设置发展合作
+     *//*
+    @GetMapping("/getByLang")
     public AjaxResult getByLang(String lang)
     {
         return success(mSettingDevCooperateService.selectByLang(lang));
-    }
+    }*/
 
 }

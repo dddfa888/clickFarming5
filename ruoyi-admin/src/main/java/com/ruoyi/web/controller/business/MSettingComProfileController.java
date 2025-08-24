@@ -101,9 +101,17 @@ public class MSettingComProfileController extends BaseController
      * 根据语言查询设置公司简介
      */
     @GetMapping("/getByLang")
+    public AjaxResult getByLang(){
+        return success(mSettingComProfileService.selectByLang());
+    }
+
+/*    *//**
+     * 根据语言查询设置公司简介
+     *//*
+    @GetMapping("/getByLang")
     public AjaxResult getByLang(String lang)
     {
         return success(mSettingComProfileService.selectByLang(lang));
-    }
+    }*/
 
 }

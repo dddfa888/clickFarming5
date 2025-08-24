@@ -65,8 +65,15 @@ public interface MSettingDevCooperateMapper
     /**
      * 根据语种查询设置公司简介
      *
-     * @param language 语种
      * @return 设置公司简介
      */
-    MSettingDevCooperate selectByLang(String language);
+    MSettingDevCooperate selectByLang();
+
+/*    *//**
+     * 根据语种查询设置公司简介
+     *
+     * @param language 语种
+     * @return 设置公司简介
+     *//*
+    MSettingDevCooperate selectByLang(String language);*/
 }

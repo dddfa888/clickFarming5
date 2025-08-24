@@ -1,12 +1,15 @@
 package com.ruoyi.click.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.click.domain.MMoneyInvestWithdraw;
 import com.ruoyi.click.domain.UserGrade;
+import com.ruoyi.click.domain.vo.WithdrawalVO;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 存款取款记录Service接口
@@ -82,4 +85,41 @@ public interface IMMoneyInvestWithdrawService extends IService<MMoneyInvestWithd
      * 获取今天的提现记录
      */
     MMoneyInvestWithdraw getTodayWithdraw(Long userId);
+
+    /**
+     * 同意提款
+     * @param withdraw
+     */
+    int updateMMoneyInvestWithdrawWithdrawal(MMoneyInvestWithdraw withdraw);
+
+    /**
+     * 同意充值
+     * @param withdraw
+     */
+    int updateMMoneyInvestWithdrawRecharge(MMoneyInvestWithdraw withdraw);
+
+
+    /**
+     * 充值功能
+     *
+     * @param userId
+     * @param amount
+     */
+    int insertRecharge(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
+
+    /**
+     * 提现功能
+     * @param withdrawalVO
+     */
+    int insertDraw(WithdrawalVO withdrawalVO);
+
+    /**
+     * 个人咨询详情
+     * @param withdraw
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<MMoneyInvestWithdraw> selectWithdrawByTimeRange(MMoneyInvestWithdraw withdraw, LocalDateTime startTime, LocalDateTime endTime);
+
 }

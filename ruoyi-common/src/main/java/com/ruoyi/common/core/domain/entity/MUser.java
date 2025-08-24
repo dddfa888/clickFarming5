@@ -24,7 +24,6 @@ public class MUser
     @TableId
     private Long uid;
 
-
     /** 头像 */
     @Excel(name = "头像")
     private String headImg;
@@ -114,13 +113,18 @@ public class MUser
     @Excel(name = "当天刷单数量")
     private Integer brushNumber;
 
+    /** 当天刷单数量 */
+    @Excel(name = "信用分")
+    private Integer creditScore;
+
     @Excel(name = "连单数量")
     private Integer multiOrderNum;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date updateTime;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date createTime;
 
 

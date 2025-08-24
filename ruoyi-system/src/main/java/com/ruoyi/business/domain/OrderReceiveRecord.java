@@ -62,6 +62,18 @@ public class OrderReceiveRecord extends BaseEntity
     @Excel(name = "利润")
     private BigDecimal profit;
 
+    public BigDecimal getBalanceAmount() {
+        return balanceAmount;
+    }
+
+    public void setBalanceAmount(BigDecimal balanceAmount) {
+        this.balanceAmount = balanceAmount;
+    }
+
+    /** 差额金额 */
+    @Excel(name = "差额金额")
+    private BigDecimal balanceAmount;
+
     /** 退款金额 */
     @Excel(name = "退款金额")
     private BigDecimal refundAmount;
@@ -261,25 +273,25 @@ public class OrderReceiveRecord extends BaseEntity
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("userId", getUserId())
-            .append("userName", getUserName())
-            .append("productId", getProductId())
-            .append("productName", getProductName())
-            .append("productImageUrl", getProductImageUrl())
-            .append("unitPrice", getUnitPrice())
-            .append("number", getNumber())
-            .append("totalAmount", getTotalAmount())
-            .append("profit", getProfit())
-            .append("refundAmount", getRefundAmount())
-            .append("processStatus", getProcessStatus())
-            .append("multiType", getMultiType())
-            .append("multiId", getMultiId())
-            .append("freezeStatus", getFreezeStatus())
-            .append("createBy", getCreateBy())
-            .append("createTime", getCreateTime())
-            .append("updateBy", getUpdateBy())
-            .append("updateTime", getUpdateTime())
-            .toString();
+                .append("id", getId())
+                .append("userId", getUserId())
+                .append("userName", getUserName())
+                .append("productId", getProductId())
+                .append("productName", getProductName())
+                .append("productImageUrl", getProductImageUrl())
+                .append("unitPrice", getUnitPrice())
+                .append("number", getNumber())
+                .append("totalAmount", getTotalAmount())
+                .append("profit", getProfit())
+                .append("refundAmount", getRefundAmount())
+                .append("processStatus", getProcessStatus())
+                .append("multiType", getMultiType())
+                .append("multiId", getMultiId())
+                .append("freezeStatus", getFreezeStatus())
+                .append("createBy", getCreateBy())
+                .append("createTime", getCreateTime())
+                .append("updateBy", getUpdateBy())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.click.domain.MMoneyInvestWithdraw;
 import com.ruoyi.click.domain.UserGrade;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -80,4 +82,18 @@ public interface MMoneyInvestWithdrawMapper extends BaseMapper<MMoneyInvestWithd
      * @return 结果
      */
     int updateUserInfoByUserId(Map<String,Object> param);
+
+    /**
+     * 个人详情咨询信息
+     * @param withdraw
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<MMoneyInvestWithdraw> selectWithdrawByTimeRange1(
+            @Param("withdraw") MMoneyInvestWithdraw withdraw,  // 指定参数名为withdraw
+            @Param("startTime") LocalDateTime startTime,       // 指定参数名为startTime
+            @Param("endTime") LocalDateTime endTime            // 指定参数名为endTime
+    );
+
 }

@@ -96,18 +96,27 @@ public class MSettingComProfileServiceImpl implements IMSettingComProfileService
         return mSettingComProfileMapper.deleteMSettingComProfileById(id);
     }
 
-
     /**
+     * 根据语种查询设置公司简介
+     *
+     * @return 设置公司简介
+     */
+    @Override
+    public MSettingComProfile selectByLang(){
+        return mSettingComProfileMapper.selectByLang();
+    }
+
+/*    *//**
      * 根据语种查询设置公司简介
      *
      * @param lang 语种
      * @return 设置公司简介
-     */
+     *//*
     @Override
     public MSettingComProfile selectByLang(String lang)
     {
         Assert.notEmpty(lang, "请选择语种");
         return mSettingComProfileMapper.selectByLang(lang);
-    }
+    }*/
 
 }

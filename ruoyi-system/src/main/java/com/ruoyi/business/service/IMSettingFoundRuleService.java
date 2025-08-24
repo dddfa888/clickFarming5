@@ -59,12 +59,18 @@ public interface IMSettingFoundRuleService
      */
     public int deleteMSettingFoundRuleById(Long id);
 
+
     /**
+     * 根据语种查询设置基本原则信息
+     */
+    MSettingFoundRule selectByLang();
+
+/*    *//**
      * 根据语种查询设置基本原则信息
      *
      * @param lang 语种
      * @return 设置基本原则信息
-     */
-    MSettingFoundRule selectByLang(String lang);
+     *//*
+    MSettingFoundRule selectByLang(String lang);*/
 
 }

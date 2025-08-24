@@ -96,7 +96,11 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
     {
         //用户、等级信息
         MUser mUser = mUserMapper.selectMUserByUid(getUserId());
+        //根据用户id去查询等级信息
         UserGrade userGrade = userGradeMapper.selectUserGradeBySortNum(mUser.getLevel());
+        //差额金额
+        OrderReceiveRecord orderReceiveRecord = orderReceiveRecordMapper.selectOrderReceiveRecordById(getUserId());
+
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = LocalDate.now();
@@ -112,17 +116,32 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
         param.put("date2", strTomorrow);
         long finishNum = orderReceiveRecordMapper.countNumByUserDate(param);
 
+        //获得所有佣金
+        Map<String,Object> param1 = new HashMap<>();
+        param1.put("userId", getUserId());
+        param1.put("processStatus", OrderReceiveRecord.PROCESS_STATUS_SUCCESS);
+        BigDecimal totalProfit  = orderReceiveRecordMapper.sumProfit(param1);
+
+        //未支付订单总和
+        Map<String,Object> param2 = new HashMap<>();
+        param2.put("userId", getUserId());
+        param2.put("processStatus", OrderReceiveRecord.PROCESS_STATUS_WAIT);
+        param2.put("date1", strToday);
+        param2.put("date2", strTomorrow);
+        long cancel = orderReceiveRecordMapper.countNumByUserDate(param2);
+
+
         //近2日订单利润 （前端的“昨天折扣”和“今天折扣”）
-        param = new HashMap<>();
-        param.put("userId", getUserId());
-        param.put("processStatus", OrderReceiveRecord.PROCESS_STATUS_SUCCESS);
+        param1 = new HashMap<>();
+        param1.put("userId", getUserId());
+        param1.put("processStatus", OrderReceiveRecord.PROCESS_STATUS_SUCCESS);
         //param.put("transactionType", 3); // 3:专用于标记订单利润，用于查账变表
-        param.put("date1", strYesterday);
-        param.put("date2", strToday);
-        BigDecimal profitYesterday = orderReceiveRecordMapper.sumAmountByUserDate(param);
-        param.put("date1", strToday);
-        param.put("date2", strTomorrow);
-        BigDecimal profitToday = orderReceiveRecordMapper.sumAmountByUserDate(param);
+        param1.put("date1", strYesterday);
+        param1.put("date2", strToday);
+        BigDecimal profitYesterday = orderReceiveRecordMapper.sumAmountByUserDate(param1);
+        param1.put("date1", strToday);
+        param1.put("date2", strTomorrow);
+        BigDecimal profitToday = orderReceiveRecordMapper.sumAmountByUserDate(param1);
         //近2日提现数额 —— 无用
         /*param = new HashMap<>();
         param.put("userId", getUserId());
@@ -134,19 +153,21 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
         param.put("date2", strTomorrow);
         BigDecimal withdrawToday = mMoneyInvestWithdrawMapper.sumAmountByUserDateType(param);*/
 
+        int remainingNum = userGrade.getBuyProdNum() - (int) finishNum;// 计算剩余可购买数量
         Map<String, Object> res = new HashMap<>();
         res.put("userBalance", mUser.getAccountBalance().setScale(2, RoundingMode.HALF_UP)); //用户余额
         res.put("userLevel", userGrade.getGradeName()); //用户等级
-        res.put("orderNum", finishNum + "/" + userGrade.getBuyProdNum()); //已付款订单数量
+        res.put("orderNum", finishNum); //完整的订单数量
+        res.put("remainingNum",remainingNum); //剩余可购买订单
+        res.put("balanceAmount",orderReceiveRecord.getBalanceAmount()); //差额金额
+        res.put("profit",totalProfit);  //利润总和
+        res.put("cancel",cancel);   //未支付订单
         res.put("numYesterday", profitYesterday.setScale(2, RoundingMode.HALF_UP).toString()); //昨天折扣
         res.put("numToday", profitToday.setScale(2, RoundingMode.HALF_UP).toString()); //今天折扣
         res.put("withdrawalAddress", mUser.getWithdrawalAddress()); //提现地址  用于判断，页面不显示
-        Date nowDate = DateUtils.getNowDate();  // 获取当前时间
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String timeStr = sdf.format(nowDate);
-        res.put("localTime", timeStr); //当前时间
         return res;
     }
+
 
     /**
      * 新增账变记录

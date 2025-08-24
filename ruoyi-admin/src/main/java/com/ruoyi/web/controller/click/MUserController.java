@@ -10,10 +10,13 @@ import javax.validation.constraints.NotNull;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.business.domain.MRewardRecord;
 import com.ruoyi.business.service.IMRewardRecordService;
+import com.ruoyi.click.domain.vo.PasswordUpdateVO;
 import com.ruoyi.click.service.IMMoneyInvestWithdrawService;
 import com.ruoyi.common.core.domain.entity.MUser;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.DecimalUtil;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.click.domain.MAccountChangeRecords;
 import com.ruoyi.click.domain.UserGrade;
@@ -21,6 +24,9 @@ import com.ruoyi.click.domain.vo.BalanceModel;
 import com.ruoyi.click.service.IMAccountChangeRecordsService;
 import com.ruoyi.click.service.IMUserService;
 import com.ruoyi.click.service.IUserGradeService;
+import com.ruoyi.system.domain.SysConfig;
+import com.ruoyi.system.mapper.SysConfigMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +36,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户Controller
@@ -37,6 +44,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2025-06-15
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/user")
 public class MUserController extends BaseController
@@ -55,8 +63,12 @@ public class MUserController extends BaseController
 
     @Autowired
     private IMRewardRecordService mRewardRecordService;
+
     @Autowired
     private IMMoneyInvestWithdrawService mMoneyInvestWithdrawService;
+
+    @Autowired
+    private SysConfigMapper configMapper;
 
 
     @GetMapping("/userInfo")
@@ -387,6 +399,114 @@ public class MUserController extends BaseController
     {
         Long userId = tokenService.getLoginUser(request).getmUser().getUid();
         return toAjax(mUserService.updateGrade(gradeId, userId));
+    }
+
+    /**
+     * 单个上传(头像)
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/upload")
+    public AjaxResult uploadFile(@RequestParam("file") MultipartFile file) throws Exception
+    {
+        try
+        {
+            //从ThreadLocal获取用户uid
+            Long uId = SecurityUtils.getUserId();
+            log.info("用户id:{}",uId);
+            if (uId == null){
+                return AjaxResult.error("用户未登录");
+            }
+
+            int result =  mUserService.updateUserAvatar(uId,file);
+
+            if (result <= 0){
+                return AjaxResult.error("头像更新失败");
+            }
+
+            SysConfig imageUrl = configMapper.checkConfigKeyUnique("image_url");
+            String fileName = file.getOriginalFilename(); // 需要调整，实际文件名在Service中生成
+            String url = imageUrl.getConfigValue() + fileName;
+
+            AjaxResult ajax = AjaxResult.success("上传成功");
+            ajax.put("url", url);
+            ajax.put("fileName", fileName);
+            ajax.put("userId", uId);
+            return ajax;
+        }
+        catch (Exception e)
+        {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 修改信用分
+     * @param mUser
+     * @return
+     */
+    @PostMapping("/updateCreditScore")
+    public AjaxResult updateCreditScore(@RequestBody MUser mUser){
+        return toAjax(mUserService.updateScore(mUser));
+    }
+
+    /**
+     * 修改账户名
+     * @param mUser
+     * @return
+     */
+    @PutMapping("/updateLoginAccount")
+    public AjaxResult updateLoginAccount(@RequestBody MUser mUser){
+        return toAjax(mUserService.updateLoginAccount(mUser));
+    }
+
+    /**
+     * 修改用户登录密码
+     * @param passwordUpdateVO
+     * @return
+     */
+    @PutMapping("/updateLoginPassword")
+    public AjaxResult updateLoginPassword(@RequestBody PasswordUpdateVO passwordUpdateVO){
+        //通过Security获取用户uid
+        Long uid = SecurityUtils.getUserId();
+        //判断传递的数据是否为空
+        if (passwordUpdateVO.getOldPassword()==""){
+            throw new ServiceException("旧密码不能为空");
+        }
+        if (passwordUpdateVO.getNewPassword()==""){
+            throw new ServiceException("新密码不能为空");
+        }
+        // 校验新密码和确认密码是否一致
+        if (!passwordUpdateVO.getNewPassword().equals(passwordUpdateVO.getConfirmPassword())) {
+            throw new ServiceException("俩次输入的新密码不一致");
+        }
+        // 调用服务层修改密码
+        return toAjax(mUserService.updatePassword(uid, passwordUpdateVO.getOldPassword(), passwordUpdateVO.getNewPassword()));
+    }
+
+    /**
+     * 修改资金密码
+     * @param passwordUpdateVO
+     * @return
+     */
+    @PutMapping("/updateFundPassword")
+    public AjaxResult updateFundPassword(@RequestBody PasswordUpdateVO passwordUpdateVO){
+        //通过Security获取用户uid
+        Long uid = SecurityUtils.getUserId();
+        //判断传递的数据是否为空
+        if (passwordUpdateVO.getOldPassword()==""){
+            throw new ServiceException("旧密码不能为空");
+        }
+        if (passwordUpdateVO.getNewPassword()==""){
+            throw new ServiceException("新密码不能为空");
+        }
+        // 校验新密码和确认密码是否一致
+        if (!passwordUpdateVO.getNewPassword().equals(passwordUpdateVO.getConfirmPassword())) {
+            throw new ServiceException("俩次输入的新密码不一致");
+        }
+        // 调用服务层修改密码
+        return toAjax(mUserService.updateFoundPassword(uid, passwordUpdateVO.getOldPassword(), passwordUpdateVO.getNewPassword()));
     }
 
 }

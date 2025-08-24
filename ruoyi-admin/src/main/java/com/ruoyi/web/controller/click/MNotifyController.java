@@ -45,7 +45,6 @@ public class MNotifyController extends BaseController {
     @Autowired
     private TokenService tokenService;
 
-
     @GetMapping("/userList")
     public AjaxResult userList(HttpServletRequest request) {
         Long userId = tokenService.getLoginUser(request).getmUser().getUid();

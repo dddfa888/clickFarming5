@@ -51,7 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="selectOrderReceiveRecordVo">
         select
             id, user_id, user_name, product_id, product_name, product_image_url, unit_price, number, total_amount, profit,
-            refund_amount, process_status, num_target,num_seq, multi_type, multi_id, freeze_status,
+            balance_amount,refund_amount, process_status, num_target,num_seq, multi_type, multi_id, freeze_status,
             create_by, create_time, update_by, update_time
         from m_order_receive_record
     </sql>
@@ -278,4 +278,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="processStatus != null  and processStatus != ''"> and process_status = #{processStatus}</if>
     </select>
 
+    <select id="sumProfit" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(profit), 0)
+        FROM m_order_receive_record
+        WHERE user_id = #{userId}
+          AND process_status = #{processStatus}
+    </select>
 </mapper>

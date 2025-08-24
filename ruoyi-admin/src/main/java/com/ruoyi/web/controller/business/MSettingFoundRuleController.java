@@ -96,13 +96,23 @@ public class MSettingFoundRuleController extends BaseController
         return toAjax(mSettingFoundRuleService.deleteMSettingFoundRuleByIds(ids));
     }
 
+
     /**
      * 根据语言查询设置基本原则
      */
     @GetMapping("/getByLang")
+    public AjaxResult getByLang()
+    {
+        return success(mSettingFoundRuleService.selectByLang());
+    }
+
+/*    *//**
+     * 根据语言查询设置基本原则
+     *//*
+    @GetMapping("/getByLang")
     public AjaxResult getByLang(String lang)
     {
         return success(mSettingFoundRuleService.selectByLang(lang));
-    }
+    }*/
 
 }

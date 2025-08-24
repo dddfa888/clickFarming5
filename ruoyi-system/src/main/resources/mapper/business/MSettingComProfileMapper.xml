@@ -75,13 +75,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
 
+    <select id="selectByLang" resultType="com.ruoyi.business.domain.MSettingComProfile">
+        select id, content, language, create_time
+        from m_setting_com_profile
+    </select>
 
-    <!-- 根据语种查询 -->
+<!--    &lt;!&ndash; 根据语种查询 &ndash;&gt;
     <select id="selectByLang" parameterType="String" resultMap="MSettingComProfileResult">
         <include refid="selectMSettingComProfileVo"/>
         where language = #{language}
         order by create_time
         limit 1
-    </select>
+    </select>-->
 
 </mapper>

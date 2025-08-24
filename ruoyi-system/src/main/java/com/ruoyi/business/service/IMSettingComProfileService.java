@@ -59,11 +59,17 @@ public interface IMSettingComProfileService
      */
     public int deleteMSettingComProfileById(Long id);
 
+
     /**
+     * 根据语种查询设置公司简介
+     */
+    MSettingComProfile selectByLang();
+
+/*    *//**
      * 根据语种查询设置公司简介
      *
      * @param lang 语种
      * @return 设置公司简介
-     */
-    MSettingComProfile selectByLang(String lang);
+     *//*
+    MSettingComProfile selectByLang(String lang);*/
 }

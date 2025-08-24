@@ -33,7 +33,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectMUserVo">
-        select uid, head_img,level, login_account, login_password, fund_password, withdrawal_address, register_type, phone_number, phone_number_type, account_balance, invitation_code, inviter, inviter_code, inviter_name, status, bank_name, bank_account_name, bank_account_number, higher_uid, last_login_ip, last_login_ip_address, create_time, update_time, brush_number,multi_order_num from m_user
+        select uid, head_img,level, login_account, login_password, fund_password, withdrawal_address, register_type, phone_number, phone_number_type, account_balance, invitation_code, inviter, inviter_code, inviter_name, status, bank_name, bank_account_name, bank_account_number, higher_uid, last_login_ip, last_login_ip_address, create_time, update_time, brush_number,multi_order_num,credit_score from m_user
     </sql>
 
     <select id="selectMUserList" parameterType="MUser" resultMap="MUserResult">
@@ -132,8 +132,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateMUser" parameterType="MUser">
         update m_user
         <trim prefix="SET" suffixOverrides=",">
-            <if test="level != null">level = #{level},</if>
             <if test="headImg != null">head_img = #{headImg},</if>
+            <if test="level != null">`level` = #{level},</if>
             <if test="loginAccount != null and loginAccount != ''">login_account = #{loginAccount},</if>
             <if test="loginPassword != null and loginPassword != ''">login_password = #{loginPassword},</if>
             <if test="fundPassword != null and fundPassword != ''">fund_password = #{fundPassword},</if>
@@ -156,11 +156,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="brushNumber != null">brush_number = #{brushNumber},</if>
+            <if test="creditScore != null">credit_score = #{creditScore},</if>
             <if test="multiOrderNum != null">multi_order_num = #{multiOrderNum},</if>
         </trim>
         where uid = #{uid}
     </update>
-
     <update id="clearBrushNumber">
         update m_user set brush_number = 0
     </update>
@@ -179,4 +179,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{uid}
         </foreach>
     </delete>
+
+    <update id="updateUserAvatar">
+        update m_user set head_img = #{avatarUrl} , update_time = NOW() where uid = #{uId}
+    </update>
 </mapper>

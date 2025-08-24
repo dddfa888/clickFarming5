@@ -99,9 +99,21 @@ public class MSettingFoundRuleServiceImpl implements IMSettingFoundRuleService
     /**
      * 根据语种查询设置基本原则信息
      *
-     * @param lang 语种
      * @return 设置基本原则信息
      */
+    @Override
+    public MSettingFoundRule selectByLang()
+    {
+
+        return mSettingFoundRuleMapper.selectByLang();
+    }
+
+/*    *//**
+     * 根据语种查询设置基本原则信息
+     *
+     * @param lang 语种
+     * @return 设置基本原则信息
+     *//*
     @Override
     public MSettingFoundRule selectByLang(String lang)
     {
@@ -111,6 +123,6 @@ public class MSettingFoundRuleServiceImpl implements IMSettingFoundRuleService
             lang = "en";
         }
         return mSettingFoundRuleMapper.selectByLang(lang);
-    }
+    }*/
 
 }

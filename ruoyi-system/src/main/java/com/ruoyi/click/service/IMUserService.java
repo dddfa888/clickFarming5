@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.common.core.domain.entity.MUser;
 import com.ruoyi.click.domain.vo.UserRegisterModel;
 import com.ruoyi.click.domain.vo.BalanceModel;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -123,4 +124,42 @@ public interface IMUserService extends IService<MUser> {
      * 根据登录账号获取
      */
     MUser getByLoginAccount(String loginAccount);
+    /**
+     * 根据uid更改头像
+     * @param uId
+     * @param file
+     */
+    int updateUserAvatar(Long uId, MultipartFile file);
+
+    /**
+     * 更改信用分
+     * @param mUser
+     * @return
+     */
+    int updateScore(MUser mUser);
+
+    /**
+     * 更改用户账号
+     * @param mUser
+     * @return
+     */
+    int updateLoginAccount(MUser mUser);
+
+    /**
+     * 更改用户登录密码
+     * @param uid
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    int updatePassword(Long uid, String oldPassword, String newPassword);
+
+    /**
+     * 更改用户的资金密码
+     * @param uid
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    int updateFoundPassword(Long uid, String oldPassword, String newPassword);
 }

@@ -110,4 +110,11 @@ public interface OrderReceiveRecordMapper
      */
     @Select("select * FROM m_order_receive_record where user_id=#{uid} order by create_time desc limit 1")
     OrderReceiveRecord selectLastOrder(Long uid);
+
+    /**
+     * 利润总和
+     * @param param1
+     * @return
+     */
+    BigDecimal sumProfit(Map<String, Object> param1);
 }

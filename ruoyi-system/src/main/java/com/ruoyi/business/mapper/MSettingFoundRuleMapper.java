@@ -65,8 +65,16 @@ public interface MSettingFoundRuleMapper
     /**
      * 根据语种查询设置公司简介
      *
-     * @param language 语种
+     *
      * @return 设置公司简介
      */
-    MSettingFoundRule selectByLang(String language);
+    public MSettingFoundRule selectByLang();
+
+/*    *//**
+     * 根据语种查询设置公司简介
+     *
+     * @param language 语种
+     * @return 设置公司简介
+     *//*
+    MSettingFoundRule selectByLang(String language);*/
 }

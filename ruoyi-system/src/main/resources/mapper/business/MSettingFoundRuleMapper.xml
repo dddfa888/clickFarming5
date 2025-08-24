@@ -76,12 +76,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
 
-    <!-- 根据语种查询 -->
+    <select id="selectByLang" resultType="com.ruoyi.business.domain.MSettingFoundRule">
+        select id,content, language, create_time
+        from m_setting_found_rule
+    </select>
+
+<!--    &lt;!&ndash; 根据语种查询 &ndash;&gt;
     <select id="selectByLang" parameterType="String" resultMap="MSettingFoundRuleResult">
         <include refid="selectMSettingFoundRuleVo"/>
         where language = #{language}
         order by create_time
         limit 1
-    </select>
+    </select>-->
 
 </mapper>

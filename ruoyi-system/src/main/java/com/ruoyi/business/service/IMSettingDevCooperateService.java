@@ -62,8 +62,15 @@ public interface IMSettingDevCooperateService
     /**
      * 根据语种查询设置发展合作信息
      *
-     * @param lang 语种
      * @return 设置发展合作信息
      */
-    MSettingDevCooperate selectByLang(String lang);
+    MSettingDevCooperate selectByLang();
+
+/*    *//**
+     * 根据语种查询设置发展合作信息
+     *
+     * @param lang 语种
+     * @return 设置发展合作信息
+     *//*
+    MSettingDevCooperate selectByLang(String lang);*/
 }

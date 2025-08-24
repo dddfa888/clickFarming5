@@ -1,16 +1,14 @@
 package com.ruoyi.click.service.impl;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.click.domain.MMoneyInvestWithdraw;
 import com.ruoyi.click.mapper.MAccountChangeRecordsMapper;
 import com.ruoyi.click.mapper.UserGradeMapper;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.*;
 import com.ruoyi.common.core.domain.entity.MUser;
@@ -22,9 +20,14 @@ import com.ruoyi.click.mapper.MUserMapper;
 import com.ruoyi.click.service.IMAccountChangeRecordsService;
 import com.ruoyi.click.service.IMUserService;
 import com.ruoyi.click.service.IUserGradeService;
+import com.ruoyi.common.utils.file.FileUploadUtils;
+import com.ruoyi.system.domain.SysConfig;
+import com.ruoyi.system.mapper.SysConfigMapper;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户Service业务层处理
@@ -45,7 +48,10 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
     private IMAccountChangeRecordsService  accountChangeRecordsService;
     @Autowired
     private MAccountChangeRecordsMapper mAccountChangeRecordsMapper;
-
+    @Autowired
+    private SysConfigMapper configMapper;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
     /**
      * 查询用户
      *
@@ -138,22 +144,41 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
         mUser.setUpdateTime(DateUtils.getNowDate());
         MUser user = mUserMapper.selectMUserByUid(mUser.getUid());
         String loginAccount = mUser.getLoginAccount();
-        if(!user.getLoginAccount().equals(loginAccount)){
+
+        if (!user.getLoginAccount().equals(loginAccount)) {
             MUser one1 = this.getByLoginAccount(mUser.getLoginAccount());
-            if(one1!=null){
-                throw new ServiceException("账号已存在");//user
+            if (one1 != null) {
+                throw new ServiceException("账号已存在");
             }
         }
-        if(!user.getLoginPassword().equals(mUser.getLoginPassword())){
-            mUser.setLoginPassword(EncoderUtil.encoder(mUser.getLoginPassword()));
 
+        // 修改点1：检查前端传递的登录密码是否为null
+        if (mUser.getLoginPassword() != null) {
+            // 只有前端传递了新密码时才加密
+            if (!mUser.getLoginPassword().equals(user.getLoginPassword())) {
+                mUser.setLoginPassword(EncoderUtil.encoder(mUser.getLoginPassword()));
+            } else {
+                // 密码相同，设置为null避免更新
+                mUser.setLoginPassword(null);
+            }
+        } else {
+            // 前端传递的密码为null，设置为null避免更新
+            mUser.setLoginPassword(null);
         }
-        if(!user.getFundPassword().equals(mUser.getFundPassword())){
-            mUser.setFundPassword(EncoderUtil.encoder(mUser.getFundPassword()));
 
+        // 修改点2：检查前端传递的资金密码是否为null
+        if (mUser.getFundPassword() != null) {
+            if (!mUser.getFundPassword().equals(user.getFundPassword())) {
+                mUser.setFundPassword(EncoderUtil.encoder(mUser.getFundPassword()));
+            } else {
+                mUser.setFundPassword(null);
+            }
+        } else {
+            mUser.setFundPassword(null);
         }
-        if(mUser.getInviterCode()!=null){
-            if(!user.getInviterCode().equals(mUser.getInviterCode())){
+
+        if (mUser.getInviterCode() != null) {
+            if (!user.getInviterCode().equals(mUser.getInviterCode())) {
                 MUser one = this.getOne(new LambdaQueryWrapper<MUser>()
                         .eq(MUser::getInvitationCode, mUser.getInviterCode()));
                 mUser.setInviter(String.valueOf(one.getUid()));
@@ -441,6 +466,97 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
                 .eq(MUser::getLoginAccount, loginAccount)
                 .last("LIMIT 1")
                 .one();
+    }
+
+    @Override
+    public int updateUserAvatar(Long uId, MultipartFile file) {
+        try {
+            // 1. 上传文件
+            String filePath = RuoYiConfig.getUploadPath();
+            String fileName = FileUploadUtils.upload(filePath, file);
+
+            // 2. 构建完整URL
+            SysConfig imageUrl = configMapper.checkConfigKeyUnique("image_url");
+            String avatarUrl = imageUrl.getConfigValue() + fileName;
+
+            // 3. 调用Mapper更新数据库（传URL字符串）
+            return mUserMapper.updateUserAvatar(uId, avatarUrl);
+
+        } catch (Exception e) {
+            throw new ServiceException("头像更新失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public int updateScore(MUser mUser) {
+        return mUserMapper.updateMUser(mUser);
+    }
+
+    @Override
+    public int updateLoginAccount(MUser mUser) {
+        MUser user = mUserMapper.selectMUserByUid(mUser.getUid());
+        String loginAccount = mUser.getLoginAccount();
+        if(!user.getLoginAccount().equals(loginAccount)){
+            MUser one1 = this.getByLoginAccount(mUser.getLoginAccount());
+            if(one1!=null){
+                throw new ServiceException("账号已存在");
+            }
+        }
+        return mUserMapper.updateMUser(mUser);
+    }
+
+    @Override
+    public int updatePassword(Long uid, String oldPassword, String newPassword) {
+        // 查询用户信息
+        MUser user = mUserMapper.selectById(uid);
+        if (user == null) {
+            throw new ServiceException("用户不存在");
+        }
+
+        // 验证原始密码是否正确
+        if (!passwordEncoder.matches(oldPassword, user.getLoginPassword())) {
+            throw new ServiceException("原始密码错误");
+        }
+
+        // 检查新密码是否与原始密码相同
+        if (passwordEncoder.matches(newPassword, user.getLoginPassword())) {
+            throw new ServiceException("新密码不能与原始密码相同");
+        }
+
+        // 加密新密码并更新
+        MUser updateUser = new MUser();
+        updateUser.setUid(uid);
+        updateUser.setLoginPassword(passwordEncoder.encode(newPassword));
+        updateUser.setUpdateTime(new Date());
+
+        return mUserMapper.updateById(updateUser);
+    }
+
+    @Override
+    public int updateFoundPassword(Long uid, String oldPassword, String newPassword) {
+        // 查询用户信息
+        MUser user = mUserMapper.selectById(uid);
+        if (user == null) {
+            throw new ServiceException("用户不存在");
+        }
+
+        // 验证原始密码是否正确
+        if (!passwordEncoder.matches(oldPassword, user.getFundPassword())) {
+            throw new ServiceException("原始密码错误");
+        }
+
+        // 检查新密码是否与原始密码相同
+        if (passwordEncoder.matches(newPassword, user.getFundPassword())) {
+            throw new ServiceException("新密码不能与原始密码相同");
+        }
+
+        // 加密新密码并更新
+        MUser updateUser = new MUser();
+        updateUser.setUid(uid);
+        updateUser.setFundPassword(passwordEncoder.encode(newPassword));
+        updateUser.setUpdateTime(new Date());
+
+        return mUserMapper.updateById(updateUser);
     }
 
 }

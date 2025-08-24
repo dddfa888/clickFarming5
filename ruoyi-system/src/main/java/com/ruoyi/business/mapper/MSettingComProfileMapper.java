@@ -64,8 +64,15 @@ public interface MSettingComProfileMapper
     /**
      * 根据语种查询设置公司简介
      *
-     * @param language 语种
      * @return 设置公司简介
      */
-    MSettingComProfile selectByLang(String language);
+    MSettingComProfile selectByLang();
+
+/*    *//**
+     * 根据语种查询设置公司简介
+     *
+     * @param language 语种
+     * @return 设置公司简介
+     *//*
+    MSettingComProfile selectByLang(String language);*/
 }

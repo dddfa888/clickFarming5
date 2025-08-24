@@ -59,6 +59,8 @@ public interface IMSettingGlobalService
      */
     public int deleteMSettingGlobalById(Long id);
 
-    MSettingGlobal selectByLang(String lang);
+    MSettingGlobal selectByLang();
+
+/*    MSettingGlobal selectByLang(String lang);*/
 
 }

@@ -74,4 +74,11 @@ public interface MUserMapper extends BaseMapper<MUser> {
      * @return
      */
     int increaseBrushNumber(@Param("uid") Long uid, @Param("num") Integer num);
+
+    /**
+     * 用户更改头像
+     * @param uId
+     * @param avatarUrl
+     */
+    int updateUserAvatar(@Param("uId") Long uId,@Param("avatarUrl") String avatarUrl);
 }

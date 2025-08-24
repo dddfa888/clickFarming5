@@ -102,7 +102,16 @@ public class MSettingGlobalController extends BaseController
     @GetMapping("/getByLang")
     public AjaxResult getByLang(String lang)
     {
-        return success(mSettingGlobalService.selectByLang(lang));
+        return success(mSettingGlobalService.selectByLang());
     }
+
+/*    *//**
+     * 根据语言查询设置全球化
+     *//*
+    @GetMapping("/getByLang")
+    public AjaxResult getByLang(String lang)
+    {
+        return success(mSettingGlobalService.selectByLang(lang));
+    }*/
 
 }
