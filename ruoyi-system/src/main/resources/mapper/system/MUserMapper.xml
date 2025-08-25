@@ -62,6 +62,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="brushNumber != null "> and brush_number = #{brushNumber}</if>
             <if test="multiOrderNum != null "> and multi_order_num = #{multiOrderNum}</if>
         </where>
+        order by create_time desc
     </select>
 
     <select id="selectMUserByUid" parameterType="Long" resultMap="MUserResult">
