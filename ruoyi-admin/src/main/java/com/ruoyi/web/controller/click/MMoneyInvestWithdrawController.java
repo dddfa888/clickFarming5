@@ -213,6 +213,11 @@ public class MMoneyInvestWithdrawController extends BaseController
             return AjaxResult.error("提款金额不能为空");
         }
 
+        // 新增：判断金额是否为整数（小数部分必须为0）
+        if (withdrawalVO.getAmount().stripTrailingZeros().scale() > 0) {
+            return AjaxResult.error("提款金额必须为整数，不能包含小数");
+        }
+
         // 3. 再判断金额是否大于0（提款场景下的正确提示）
         if (withdrawalVO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             return AjaxResult.error("提款金额必须大于0，请重新输入");
