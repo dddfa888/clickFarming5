@@ -27,10 +27,11 @@ export function getGroupReport() {
 }
 
 // 获取个人的提现记录
-export function getWithdrawRecord(pageNum, pageSize) {
+export function getWithdrawRecord(params) {
     return request({
-        url: `/api/withdraw/userList?pageNum=${pageNum}&pageSize=${pageSize}`, // data
-        method: 'get'
+        url: `/api/withdraw/userList`, // data
+        method: 'get',
+        params
     })
 }
 
@@ -123,7 +124,15 @@ export function getOrderById(id) {
 // 用户等级、余额、折扣
 export function getUserGradeAndBalanceAndDiscount() {
     return request({
-        url: '/api/records/getUserProfitInfo',
+        url: '/api/records/getInformation',
+        method: 'get',
+    })
+}
+
+// 总资产
+export function getTotalAssets() {
+    return request({
+        url: '/api/records/totalAssets',
         method: 'get',
     })
 }
@@ -178,14 +187,6 @@ export function getPartnership() {
 }
 
 
-// 修改用户信息
-export function updateUserInfo(data) {
-    return request({
-        url: '/api/user/updateUserBank',
-        method: 'post',
-        data
-    })
-}
 
 // 公司资格
 export function getCompanyQualification() {
@@ -257,5 +258,44 @@ export function withdraw(data) {
         url: `/api/withdraw/draw`,
         method: 'post',
         data
+    })
+}
+
+
+
+
+// 商品主页
+export function getProductList(params) {
+    return request({
+        url: '/api/product/list',
+        method: 'get',
+        params
+    })
+}
+
+// 排行榜单
+export function getRankList(params) {
+    return request({
+        url: '/api/order/rankingList',
+        method: 'get',
+        params
+    })
+}
+
+// 修改用户信息
+export function updateUserInfo(data) {
+    return request({
+        url: '/api/user/updateUser',
+        method: 'put',
+        data
+    })
+}
+
+// 团队
+export function getTeamList(params) {
+    return request({
+        url: '/api/user/getUpToFourLevelInviters',
+        method: 'get',
+        params
     })
 }

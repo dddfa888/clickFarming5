@@ -1,1425 +1,742 @@
 <template>
-  <div class="home">
-    <div class="home-header">
-      <div></div>
-      <h3>{{ $t("主页") }}</h3>
-      <!--分开的语言选择区域 -->
-      <div class="language-selector">
-        <div class="dropdown-wrapper" @click="toggleLangList">
-          <!-- 当前语言图标 + 名称 -->
-          <img
-            v-if="selectedLanguage"
-            class="flag-icon"
-            :src="flagMap[langMap[selectedLanguage]]"
-            alt
-          />
-          <span>{{ t(selectedLanguage) }}</span>
-
-          <!-- 下拉菜单 -->
-          <ul v-if="showLangList" class="lang-dropdown">
-            <li
-              v-for="(lang, index) in languageList"
-              :key="index"
-              @click.stop="selectLanguage(lang)"
-              :class="{ active: lang === selectedLanguage }"
-            >
-              <img class="flag-icon" :src="flagMap[langMap[lang]]" alt />
-              <span>{{ t(lang) }}</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!--轮播图-->
-    <div class="carousel">
-      <div class="carousel-container" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-        <div class="carousel-slide" v-for="(slide, index) in slides" :key="index">
-          <img :src="slide" alt />
+  <div class="ecommerce-container">
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
+      <div class="nav-tabs">
+        <div
+          v-for="(tab, index) in tabs"
+          :key="index"
+          class="nav-tab"
+          :class="{ active: activeTabIndex === index }"
+          @click="switchTab(index)"
+        >{{ tab.name }}</div>
+        <div @click="router.push('/income')" class="nav-tab-more">
+          <img src="../../assets/image/nav_tb.svg" alt />
         </div>
       </div>
     </div>
 
-    <!-- nav导航-->
-    <div class="user-nav">
-      <ul v-for="item in navList" :key="item" @click="handleNavClick(item.path)">
-        <li>
-          <img :src="item.icon" alt />
-        </li>
-        <li>{{ $t(item.label) }}</li>
-      </ul>
+    <!-- 会员福利横幅 -->
+    <div class="member-banner">
+      <img src="../../assets/image/back.png" alt="会员福利" />
     </div>
 
-    <!--消息提示-->
-    <div class="marquee-container">
-      <!-- 左侧固定图标 -->
-      <div class="marquee-icon">
-        <img style="width: 23px;" src="../../assets/img/index-gg.png" alt />
+    <!-- 应用图标区 -->
+    <div class="app-icons">
+      <div class="app-icon-item">
+        <div class="app-icon taobao">
+          <img src="../../assets/image/tb.png" alt="淘宝" />
+        </div>
+        <div class="app-name">淘宝</div>
       </div>
+      <div class="app-icon-item">
+        <div class="app-icon pinduoduo">
+          <img src="../../assets/image/pdd.png" alt="拼多多" />
+        </div>
+        <div class="app-name">拼多多</div>
+      </div>
+      <div class="app-icon-item">
+        <div class="app-icon vip">
+          <img src="../../assets/image/wph.png" alt="唯品会" />
+        </div>
+        <div class="app-name">唯品会</div>
+      </div>
+      <div class="app-icon-item">
+        <div class="app-icon jd">
+          <img src="../../assets/image/jd.png" alt="京东" />
+        </div>
+        <div class="app-name">京东</div>
+      </div>
+      <div class="app-icon-item">
+        <div class="app-icon tmall">
+          <img src="../../assets/image/tm.png" alt="天猫" />
+        </div>
+        <div class="app-name">天猫</div>
+      </div>
+    </div>
 
-      <!-- 滚动内容 -->
-      <div class="marquee-wrapper">
-        <div class="marquee-content" :style="{ animationDuration: speed + 's' }">
-          <span
-            v-for="(msg, index) in messages"
-            :key="index"
-          >{{ msg }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <!-- 收益排行 -->
+    <div class="earnings-ranking" @click="router.push('/income')">
+      <div class="ranking-title">
+        <img src="../../assets/image/syph.png" alt />
+      </div>
+      <div class="ranking-list">
+        <div class="ranking-item">
+          <div class="user-avatar">
+            <img src="../../assets/avatars/1.png" alt="用户头像" />
+          </div>
+          <div class="user-name">大山</div>
+          <div class="user-earnings">+213.36</div>
+          <div class="earnings-date">2025-08-28</div>
+          <div class="arrow-right">
+            <img src="../../assets/img/right.png" alt />
+          </div>
+        </div>
+        <div class="ranking-item">
+          <div class="user-avatar">
+            <img src="../../assets/avatars/12.png" alt="用户头像" />
+          </div>
+          <div class="user-name">王强</div>
+          <div class="user-earnings">+192.96</div>
+          <div class="earnings-date">2025-08-28</div>
+          <div class="arrow-right">
+            <img src="../../assets/img/right.png" alt />
+          </div>
         </div>
       </div>
     </div>
 
-    <h4 style="font-weight:bold;">{{ $t("COMPANY INTRODUCTION") }}</h4>
-    <nav>
-      <div
-        class="nav-item"
-        v-for="item in navList2"
-        :key="item"
-        @click="handleNavItemClick(item.path)"
-      >
-        <img :src="item.icon" alt />
-        <span>{{ $t(item.label) }}</span>
-      </div>
-    </nav>
-
-    <!-- 奖励获得者名单 -->
-    <div class="reward">
-      <div class="reward-list">
-        <div v-for="(reward, index) in rewards" :key="index" class="reward-item">
-          <span>
-            <img style="width: 30px;" :src="reward.imgurl" alt />
-          </span>
-          <span class="reward-date">
-            <p>{{$t("恭喜")}}{{reward.username }}</p>
-            <p style="color: #A4A5AB;">{{ reward.data }}</p>
-          </span>
-          <span style="color: #DEBB7A;" class="reward-message">${{ reward.amount }}</span>
+    <!-- 商品展示区 -->
+    <div class="product-showcase">
+      <div v-for="(product, index) in currentProducts" :key="index" class="product-item">
+        <div class="product-image">
+          <img :src="product.imageUrl" :alt="product.name" />
         </div>
+        <div class="product-tag">{{ t("热卖") }}</div>
+        <div class="product-delivery">{{ product.delivery }}</div>
+        <div class="product-name">
+          {{ product.productName
+          }}
+        </div>
+        <div class="product-price">¥{{ product.price }}</div>
+        <div class="product-market-price">市场价¥{{ product.marketPrice }}</div>
       </div>
     </div>
-    <PromotionModal />
-
-    <BaseModal
-      v-model="showModal"
-      :title="t('确认升级')"
-      @confirm="handleConfirm"
-      @cancel="handleCancel"
-    >
-      <template #body>
-        <p>{{ t("您想升级到这个级别吗?") }}</p>
-      </template>
-    </BaseModal>
   </div>
 </template>
 
 <script setup>
-import {
-  onMounted,
-  ref,
-  computed,
-  reactive,
-  watch,
-  onBeforeUnmount
-} from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import PromotionModal from "../../components/PromotionModal.vue";
-import BaseModal from "../../components/BaseModal.vue";
-import company from "../../assets/img/company.png";
-import rule from "../../assets/img/rule.png";
-import cooperation from "../../assets/img/cooperation.png";
-import notice from "../../assets/img/notice.png";
-import nav1 from "../../assets/img/index-cz.png";
-import nav2 from "../../assets/img/index-qk.png";
-import nav3 from "../../assets/img/index-yq.png";
-import {
-  getMemberRecord,
-  getUserNotifyNum,
-  updateGrade,
-  updateAvatar,
-  updateUserSimpleFront
-} from "../../api/index.js";
+import { getProductList } from "../../api/index";
 import { useI18n } from "vue-i18n";
-import { showAlert } from "../../utils/notify.js";
-import { useLangStore } from "../../store/useLangStore.js";
-import banner1 from "../../assets/img/banner.jpg";
-import banner2 from "../../assets/img/banner1.jpg";
-import banner3 from "../../assets/img/banner2.jpg";
-import banner4 from "../../assets/img/banner3.jpg";
-import avatar1 from "../../assets/avatars/1.png";
-import avatar2 from "../../assets/avatars/12.png";
-import avatar3 from "../../assets/avatars/1.png";
-import avatar4 from "../../assets/avatars/6.png";
-import avatar5 from "../../assets/avatars/9.png";
 
-const promoRef = ref();
 const router = useRouter();
-const Recordlist = ref([]);
-const level = ref(null);
 const { t } = useI18n();
-const notifyNum = ref(0);
-const showModal = ref(false);
-const uid = ref(null);
-const avatarUrl = ref(""); // 初始头像
-const fileInput = ref(null);
-const uploadFile = ref(null);
-const showLangList = ref(false);
-const langStore = useLangStore();
-const { locale } = useI18n();
 
-const navList = [
-  { label: "充值", icon: nav1, path: "/recharge" },
-  { label: "提款", icon: nav2, path: "/withdraw" },
-  { label: "邀请", icon: nav3, path: "/invite" }
+// 定义标签页
+const tabs = [
+  { name: "全部" },
+  { name: "淘宝" },
+  { name: "拼多多" },
+  { name: "唯品会" },
+  { name: "京东" },
+  { name: "天猫" }
 ];
 
-const navList2 = [
-  { label: "公司介绍", icon: notice, path: "/company" },
-  { label: "规格描述", icon: rule, path: "/rule" },
-  { label: "代理合作", icon: cooperation, path: "/cooperation" },
-  { label: "公司资格", icon: company, path: "/qualification" }
-];
+// 当前激活的标签页索引
+const activeTabIndex = ref(0);
 
-const handleNavItemClick = path => {
-  router.push(path);
-};
-
-const messages = ref([
-  "전 세계의 신사 숙녀 여러분! HBOmax 필름스에 오신 것을 환영합니다. ",
-  "Ladies and gentlemen of the world! Welcome to HBOmax Movies.",
-  "Mesdames et Messieurs du monde ! Bienvenue chez HBOmax Movies..",
-  "Meine Damen und Herren dieser Welt! Willkommen bei HBOmax  Movies.",
-  "Signore e signori di tutto il mondo! Benvenuti a HBOmax Movies."
-]);
-const speed = 50;
-
-const langMap = {
-  한국인: "ko",
-  Português: "pt",
-  English: "en",
-  繁体中文: "zhTW",
-  ภาษาไทย: "th",
-  日本語: "ja",
-  Español: "es",
-  "Việt Nam": "vi",
-  Turkey: "tr",
-  हिंदी: "hi"
-};
-const slides = reactive([banner1, banner2, banner3, banner4]);
-const languageList = Object.keys(langMap);
-const reverseLangMap = Object.fromEntries(
-  Object.entries(langMap).map(([k, v]) => [v, k])
-);
-
-const flagMap = {
-  en: new URL("../../assets/img/en-ww.png", import.meta.url).href,
-  zhTW: new URL("../../assets/img/zh-tw.png", import.meta.url).href,
-  ko: new URL("../../assets/img/ko-kr.png", import.meta.url).href,
-  ja: new URL("../../assets/img/jr-rbg.png", import.meta.url).href,
-  th: new URL("../../assets/img/th-th.png", import.meta.url).href,
-  es: new URL("../../assets/img/es-mx.png", import.meta.url).href,
-  vi: new URL("../../assets/img/iv-vn.png", import.meta.url).href,
-  tr: new URL("../../assets/img/tr-tr.png", import.meta.url).href,
-  hi: new URL("../../assets/img/the.png", import.meta.url).href,
-  pt: new URL("../../assets/img/pt-br.png", import.meta.url).href
-};
-
-// 初始化选中语言
-const selectedLanguage = ref(reverseLangMap[langStore.locale]);
-locale.value = langStore.locale;
-
-function selectLanguage(lang) {
-  selectedLanguage.value = lang;
-  const langCode = langMap[lang] || "ko";
-  langStore.setLocale(langCode);
-  locale.value = langCode;
-  showLangList.value = !showLangList.value;
-}
-
-function toggleLangList() {
-  showLangList.value = !showLangList.value;
-}
-
-const currentSlide = ref(0);
-const autoplayInterval = ref(null);
-
-const startAutoplay = () => {
-  stopAutoplay();
-  autoplayInterval.value = setInterval(() => {
-    currentSlide.value = (currentSlide.value + 1) % slides.length;
-  }, 3000); // 每3秒切换
-};
-
-const stopAutoplay = () => {
-  if (autoplayInterval.value) {
-    clearInterval(autoplayInterval.value);
-    autoplayInterval.value = null;
-  }
-};
-
-onMounted(() => {
-  startAutoplay();
-});
-onBeforeUnmount(() => {
-  stopAutoplay();
-});
-
-getMemberRecord().then(res => {
-  if (res.code === 200) {
-    Recordlist.value = res.data.userGrade || "";
-    level.value = res.data.level;
-  }
-});
-getUserNotifyNum().then(res => {
-  notifyNum.value = res.data;
-});
-
-const handleConfirm = () => {
-  let gradeId = uid.value;
-  updateGrade(uid.value).then(res => {
-    console.log(res);
-    if (res.code === 200) {
-      showAlert(t(res.msg), 2000);
-    } else {
-      showAlert(t(res.msg), 2000);
+// 定义不同平台的商品数据
+const allProducts = {
+  all: [
+    {
+      id: 1,
+      name: "Dior迪奥女士太阳镜女...",
+      brand: "DIOR",
+      tag: "热卖",
+      delivery: "1h可退欧洲直邮",
+      price: "2657.00",
+      marketPrice: "2657.00",
+      image: "../../assets/img/banner1.jpg"
+    },
+    {
+      id: 2,
+      name: "能10万水精华水浓萃型...",
+      brand: "DIOR",
+      tag: "热卖",
+      delivery: "Dior迪奥肌活蘊",
+      price: "685.00",
+      marketPrice: "685.00",
+      image: "../../assets/img/banner2.jpg"
     }
+  ],
+  taobao: [
+    {
+      id: 3,
+      name: "淘宝特惠商品限时抢购...",
+      brand: "淘宝",
+      tag: "特惠",
+      delivery: "24小时发货",
+      price: "199.00",
+      marketPrice: "299.00",
+      image: "../../assets/img/banner3.jpg"
+    },
+    {
+      id: 4,
+      name: "淘宝爆款商品推荐...",
+      brand: "淘宝",
+      tag: "爆款",
+      delivery: "极速发货",
+      price: "99.00",
+      marketPrice: "199.00",
+      image: "../../assets/img/banner.jpg"
+    }
+  ],
+  pinduoduo: [
+    {
+      id: 5,
+      name: "拼多多超值优惠商品...",
+      brand: "拼多多",
+      tag: "拼团",
+      delivery: "48小时发货",
+      price: "59.00",
+      marketPrice: "159.00",
+      image: "../../assets/img/banner2.jpg"
+    },
+    {
+      id: 6,
+      name: "拼多多爆款推荐...",
+      brand: "拼多多",
+      tag: "秒杀",
+      delivery: "拼团优惠",
+      price: "39.00",
+      marketPrice: "99.00",
+      image: "../../assets/img/banner1.jpg"
+    }
+  ],
+  vip: [
+    {
+      id: 7,
+      name: "唯品会品牌折扣商品...",
+      brand: "唯品会",
+      tag: "折扣",
+      delivery: "品牌直发",
+      price: "299.00",
+      marketPrice: "599.00",
+      image: "../../assets/img/banner.jpg"
+    },
+    {
+      id: 8,
+      name: "唯品会限时特卖...",
+      brand: "唯品会",
+      tag: "特卖",
+      delivery: "正品保障",
+      price: "199.00",
+      marketPrice: "499.00",
+      image: "../../assets/img/banner3.jpg"
+    }
+  ],
+  jd: [
+    {
+      id: 9,
+      name: "京东自营商品推荐...",
+      brand: "京东",
+      tag: "自营",
+      delivery: "211限时达",
+      price: "399.00",
+      marketPrice: "499.00",
+      image: "../../assets/img/banner2.jpg"
+    },
+    {
+      id: 10,
+      name: "京东超值优惠商品...",
+      brand: "京东",
+      tag: "PLUS",
+      delivery: "京东物流",
+      price: "299.00",
+      marketPrice: "399.00",
+      image: "../../assets/img/banner1.jpg"
+    }
+  ],
+  tmall: [
+    {
+      id: 11,
+      name: "天猫国际商品推荐...",
+      brand: "天猫",
+      tag: "国际",
+      delivery: "天猫国际直邮",
+      price: "599.00",
+      marketPrice: "799.00",
+      image: "../../assets/img/banner3.jpg"
+    },
+    {
+      id: 12,
+      name: "天猫超级品牌日特惠...",
+      brand: "天猫",
+      tag: "品牌日",
+      delivery: "品牌直发",
+      price: "499.00",
+      marketPrice: "699.00",
+      image: "../../assets/img/banner.jpg"
+    }
+  ]
+};
+
+// 根据当前选中的标签页计算显示的商品
+const currentProducts = ref([]);
+
+// 切换标签页
+const switchTab = index => {
+  activeTabIndex.value = index;
+};
+function goToSearch(params = {}) {
+  getProductList(params).then(res => {
+    console.log(res.rows);
+    currentProducts.value = res.rows;
   });
-};
+}
 
-const handleCancel = () => {
-  console.log("取消了");
-};
-
-// 生成随机用户名
-const generateUsername = () => {
-  const prefix = [
-    "rhu",
-    "pea",
-    "pon",
-    "dur",
-    "cra",
-    "wil",
-    "geo",
-    "mar",
-    "jan",
-    "tom"
-  ];
-  const suffix = ["b", "r", "e", "n", "y", "k", "m", "s", "d", "f"];
-  const randomPrefix = prefix[Math.floor(Math.random() * prefix.length)];
-  const randomSuffix = suffix[Math.floor(Math.random() * suffix.length)];
-
-  return `${randomPrefix}****${randomSuffix}`;
-};
-
-// 生成随机金额 (100-1999.99之间的随机金额)
-const generateAmount = () => {
-  const whole = 100 + Math.floor(Math.random() * 1900); // 100-1999
-  const decimal = Math.floor(Math.random() * 100); // 0-99
-
-  return `${whole.toLocaleString("de-DE")}.${decimal
-    .toString()
-    .padStart(2, "0")}`;
-};
-
-// 格式化金额显示
-const formatAmount = amount => {
-  return amount.replace(",", "."); // 转换为点分隔的格式
-};
-
-const rewards = ref([
-  {
-    data: new Date().toISOString().split("T")[0],
-    username: generateUsername(),
-    amount: generateAmount(),
-    imgurl: avatar1
-  },
-  {
-    data: new Date().toISOString().split("T")[0],
-    username: generateUsername(),
-    amount: generateAmount(),
-    imgurl: avatar2
-  },
-  {
-    data: new Date().toISOString().split("T")[0],
-    username: generateUsername(),
-    amount: generateAmount(),
-    imgurl: avatar3
-  },
-  {
-    data: new Date().toISOString().split("T")[0],
-    username: generateUsername(),
-    amount: generateAmount(),
-    imgurl: avatar4
-  },
-  {
-    data: new Date().toISOString().split("T")[0],
-    username: generateUsername(),
-    amount: generateAmount(),
-    imgurl: avatar5
-  }
-]);
-
-// 定时更新数据
+// 页面加载时的初始化
 onMounted(() => {
-  promoRef.value?.show();
+  goToSearch();
 });
 
-const handleButtonClick = icon => {
-  if (icon === notice) {
-    router.push({ path: "/company" });
-  } else if (icon === rule) {
-    router.push({ path: "/rule" });
-  } else if (icon === cooperation) {
-    router.push({ path: "/cooperation" });
-  } else {
-    router.push({ path: "/notice" });
-  }
-};
-
-const handleNavClick = path => {
-  console.log(path);
-  router.push(path);
-};
-
-const onDeposit = () => {
-  //console.log("执行提款操作");
-  window.open(
-    "https://chat.ichatlink.net/widget/standalone.html?eid=6df096f4e9b05ad245f542d63ed1c8d7&language=en",
-    "_blank"
-  );
-};
-
-function withTimeout(promise, timeout = 5000) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("请求超时")), timeout)
-    )
-  ]);
-}
+watch(activeTabIndex, (newValue, oldValue) => {
+  console.log("新值:", newValue);
+  goToSearch({ platform: newValue });
+});
 </script>
 
 <style scoped>
-.home {
-  padding: 10px;
-  min-height: 100vh;
-  color: white;
-  background-color: #121212;
-  padding-bottom: 120px;
-}
-
-.home-header {
-  width: 100%;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-nav {
-  width: 100%;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  color: #575757;
-  margin-bottom: 30px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  background-color: #1d1d1f;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 8px;
-  margin: 5px;
-}
-
-.nav-item img {
-  width: 25px;
-  height: 25px;
-}
-
-.nav-item span {
-  font-size: 10px;
-  font-weight: bold;
-  margin-top: 5px;
-  text-align: center;
-}
-
-.home-content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.home-content-left {
-  width: 50%;
-}
-
-.home-header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.home-header-right img {
-  width: 30px;
-  height: 30px;
-}
-
-.language-selector {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: #fff;
-  z-index: 20;
-}
-.language-selector .label {
-  margin-right: 6px;
-  color: #fff;
-}
-.dropdown-wrapper {
-  position: relative;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 5px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #fff;
-  user-select: none;
-}
-.lang-dropdown {
-  position: absolute;
-  top: 35px;
-  right: 0;
-  background: #0c0c0c;
-  color: #fff;
-  list-style: none;
-  padding: 5px 0;
+/* 基础样式 */
+* {
   margin: 0;
-  border-radius: 4px;
-  width: 100px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  z-index: 999;
-}
-.lang-dropdown li {
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: background-color 0.3s;
-  white-space: nowrap;
-}
-.lang-dropdown li:hover,
-.lang-dropdown li.active {
-  background-color: #d3d3d3;
-  color: #000;
-}
-
-/* 样式 */
-.flag-icon {
-  width: 18px;
-  height: 12px;
-  margin-right: 6px;
-  object-fit: cover;
-  border-radius: 2px;
-}
-.lang-dropdown li {
-  display: flex;
-  align-items: center;
-}
-.dropdown-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.home-header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.home-header-left-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #ccc;
-  display: flex;
-  align-items: center;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-}
-
-.user-info-avatar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.user-details {
-  line-height: 1.4;
-}
-
-.username {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.user-info-balance img {
-  width: 25px;
-  height: 25px;
-  cursor: pointer;
-}
-.notifyNum {
-  position: relative;
-  top: -20px;
-  left: -12px;
-  display: inline-block;
-  background-color: rgb(244, 67, 54);
-  height: 20px;
-  text-align: center;
-  border-radius: 10px;
-  line-height: 21px;
-  padding: 0px 5px;
-}
-
-.balance-price {
-  display: flex;
-  max-width: 100%;
-  margin: 10px auto;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.balance-display {
-  width: 110px;
-  height: 90%;
-  text-align: center;
-  border: 1px solid #fff;
-  border-radius: 20px;
-}
-
-.reward {
-  background-color: #1d1d1f;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border-radius: 20px;
-  font-size: 10px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.reward-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.reward-item {
-  width: 100%;
-  background-color: transparent;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  transition: all 0.3s ease;
-  animation: fadeIn 0.5s ease-out;
-  font-size: 12px;
-  color: #fff;
-  padding: 2px;
-}
-
-.reward-date {
-  color: #fff;
-}
-
-.reward-message {
-  color: #fff;
-  white-space: nowrap; /* 不换行 */
-  overflow: hidden; /* 超出隐藏 */
-  text-overflow: ellipsis; /* 超出显示省略号 */
-  max-width: 220px; /* 根据布局调整宽度 */
-}
-
-.carousel-container {
-  height: 150px;
-  display: flex;
-  transition: transform 0.5s ease-in-out;
-}
-
-.carousel-slide {
-  min-width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-.carousel-slide img {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.user-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  margin-top: 20px;
-}
-.user-nav ul {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  align-items: center;
-}
-.user-nav ul li img {
-  width: 40px;
-}
-
-.marquee-container {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  background: #111;
-  color: #fff;
-  padding: 6px 10px;
+  padding: 0;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
-.marquee-icon {
-  margin-right: 10px;
-  font-size: 18px;
-}
-
-.marquee-wrapper {
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  position: relative;
-  font-size: 12px;
-  background-color: #1d1d1f;
-}
-
-.marquee-content {
-  display: inline-block;
-  padding-left: 100%;
-  animation: marquee linear infinite;
-  padding: 5px;
-}
-
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-.balance-label {
-  font-size: 14px;
-}
-
-.balance-amount {
-  font-size: 14px;
-  font-weight: bold;
-  color: #fff;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.action-btn {
-  flex: 1;
-  padding: 10px 0;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.withdraw {
-  background-color: #4caf50;
-  color: white;
-}
-
-.deposit {
-  background-color: #2196f3;
-  color: white;
-}
-
-.action-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.action-btn:active {
-  transform: translateY(0);
-}
-
-.videos {
+.ecommerce-container {
   width: 100%;
-  border-radius: 8px;
-  margin: 15px 0;
-  z-index: 1;
+  max-width: 450px;
+  margin: 0 auto;
+  background-color: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  color: #333;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+/* 顶部状态栏 */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 15px;
+  background-color: #ff4e44;
+  color: white;
+  height: 24px;
+}
+
+.time {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+}
+
+.camera-hole {
+  width: 8px;
+  height: 8px;
+  background-color: #000;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.right-icons {
+  display: flex;
+  gap: 5px;
+}
+
+/* 顶部导航栏 */
+.top-nav {
+  background-color: #ff4e44;
+  padding: 10px 10px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.nav-tabs {
+  display: flex;
+}
+
+.nav-tab {
+  padding: 5px 10px;
+  color: white;
+  font-size: 14px;
+  position: relative;
+  cursor: pointer;
+}
+
+.nav-tab.active {
+  font-weight: bold;
+}
+
+.nav-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background-color: white;
+}
+
+.nav-tab-more {
+  padding: 5px 10px;
+  color: white;
+}
+
+.nav-tab-more img {
+  width: 20px;
+  height: 20px;
+}
+
+.member-banner {
+  text-align: center;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.member-banner img {
+  width: 100%;
+}
+
+.banner-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.banner-left {
+  flex: 2;
+}
+
+.banner-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.banner-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.banner-desc {
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
+}
+
+.banner-button {
+  display: inline-block;
+  background-color: #ff4e44;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.banner-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.shopping-basket {
+  width: 60px;
+  height: 60px;
+  background-color: #e6a8d3;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: relative;
 }
 
-.info-buttons {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  margin: 20px 0;
-  padding: 10px;
-  font-size: 14px;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+.discount {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #ff4e44;
+  color: white;
+  font-size: 12px;
+  padding: 2px 5px;
   border-radius: 10px;
-  gap: 10px;
 }
-.btn {
+
+/* 应用图标区 */
+.app-icons {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 10px;
+  background-color: white;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+.app-icon-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: pointer;
-  transition: transform 0.2s;
-  padding: 8px;
-  background-color: #1d1d1f;
+  width: 20%;
+}
+
+.app-icon {
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
-}
-
-.btn:hover {
-  transform: translateY(-3px);
-}
-
-.icon-img {
-  width: 22px;
-  height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 5px;
 }
 
-.member-level {
-  font-size: 15px;
-  background-color: transparent;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border-radius: 10px;
-  border: 1px solid #7a797d;
-  margin-bottom: 15px;
-  padding: 15px;
+.app-icon img {
+  width: 100%;
+  height: 100%;
 }
 
-.title {
+.app-name {
+  font-size: 12px;
+  color: #666;
+}
+
+.taobao {
+  background-color: #ff6a00;
+}
+
+.pinduoduo {
+  background-color: #e02e24;
+}
+
+.vip {
+  background-color: #7b00ff;
+}
+
+.jd {
+  background-color: #d71c1c;
+}
+
+.tmall {
+  background-color: #ff0036;
+}
+
+/* 收益排行 */
+.earnings-ranking {
+  margin: 10px;
+  background-color: white;
+  border-radius: 10px;
+  display: flex;
+}
+
+.ranking-title {
+  width: 20%;
+  font-size: 16px;
   font-weight: bold;
   margin-bottom: 10px;
 }
 
-.level-info {
-  display: flex;
-  padding: 10px;
-  justify-content: space-between;
+.ranking-title img {
+  width: 100%;
 }
 
-.col {
-  position: relative;
-  text-align: center;
-  flex: 1;
-}
-
-.card {
-  position: relative;
-  border-radius: 8px;
-  /* 其他样式 */
-}
-
-.badge-box {
-  position: absolute;
-  top: -6.86667vw;
-  right: -4.86667vw;
-  display: flex;
-  align-items: center;
-  gap: 1.6vw;
-  z-index: 1;
-}
-
-.badge {
-  background-color: #b13330;
-  color: #fff;
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.lock-icon {
-  background-color: #ffe747;
-  color: #000;
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.content {
+.ranking-list {
+  width: 75%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ranking-item {
+  display: flex;
   align-items: center;
 }
 
-.carousel {
-  position: relative;
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 10px;
+}
+
+.user-avatar img {
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.user-earnings {
+  color: #ff4e44;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.earnings-date {
+  color: #999;
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.arrow-right {
+  color: #ccc;
+}
+
+.arrow-right img {
+  width: 8px;
+}
+
+/* 商品展示区 */
+.product-showcase {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  margin-bottom: 60px;
+}
+
+.product-item {
+  width: calc(50% - 5px);
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  padding-bottom: 10px;
+}
+
+.product-image {
+  width: 100%;
+  height: 150px;
   overflow: hidden;
 }
 
-@media screen and (min-width: 768px) {
-  .home {
-    padding: 10px;
-    width: 450px;
-    height: 100vh;
-    color: white;
-    background-color: #121212;
-    padding-bottom: 120px;
-    margin: 0 auto;
-  }
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-  .home-header {
-    width: 100%;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.product-brand {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 5px 10px;
+  text-align: right;
+}
 
-  nav {
-    width: 100%;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    color: #575757;
-    margin-bottom: 30px;
-  }
+.product-tag {
+  display: inline-block;
+  background-color: #ff4e44;
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin: 0 10px;
+}
 
-  .nav-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    background-color: #1d1d1f;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 8px;
-    margin: 5px;
-  }
+.product-delivery {
+  font-size: 12px;
+  color: #666;
+  padding: 5px 10px;
+}
 
-  .nav-item img {
-    width: 25px;
-    height: 25px;
-  }
+.product-name {
+  font-size: 14px;
+  padding: 0 10px;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .nav-item span {
-    font-size: 12px;
-    font-weight: bold;
-    margin-top: 5px;
-    text-align: center;
-  }
+.product-price {
+  font-size: 16px;
+  color: #ff4e44;
+  font-weight: bold;
+  padding: 0 10px;
+}
 
-  .home-content {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.product-market-price {
+  font-size: 12px;
+  color: #999;
+  padding: 0 10px;
+}
 
-  .home-content-left {
-    width: 50%;
-  }
+/* 底部导航栏 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background-color: white;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  max-width: 450px;
+  margin: 0 auto;
+}
 
-  .home-header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+  color: #999;
+}
 
-  .home-header-right img {
-    width: 30px;
-    height: 30px;
-  }
+.bottom-nav-item.active {
+  color: #ff4e44;
+}
 
-  .language-selector {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    color: #fff;
-    z-index: 20;
-  }
-  .language-selector .label {
-    margin-right: 6px;
-    color: #fff;
-  }
-  .dropdown-wrapper {
-    position: relative;
-    right: 38vw;
-    top: 0;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 5px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #fff;
-    user-select: none;
-  }
-  .lang-dropdown {
-    position: absolute;
-    top: 35px;
-    right: 0;
-    background: #0c0c0c;
-    color: #fff;
-    list-style: none;
-    padding: 5px 0;
-    margin: 0;
-    border-radius: 4px;
-    width: 100px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    z-index: 999;
-  }
-  .lang-dropdown li {
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 13px;
-    transition: background-color 0.3s;
-    white-space: nowrap;
-  }
-  .lang-dropdown li:hover,
-  .lang-dropdown li.active {
-    background-color: #d3d3d3;
-    color: #000;
-  }
+.bottom-nav-item i {
+  font-size: 20px;
+  margin-bottom: 3px;
+}
 
-  /* 样式 */
-  .flag-icon {
-    width: 18px;
-    height: 12px;
-    margin-right: 6px;
-    object-fit: cover;
-    border-radius: 2px;
-  }
-  .lang-dropdown li {
-    display: flex;
-    align-items: center;
-  }
-  .dropdown-wrapper {
-    display: flex;
-    align-items: center;
-  }
+/* 图标样式 */
+.icon-home::before {
+  content: "🏠";
+}
 
-  .home-header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+.icon-message::before {
+  content: "💬";
+}
 
-  .home-header-left-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #ccc;
-    display: flex;
-    align-items: center;
-  }
+.icon-shopping::before {
+  content: "🛒";
+}
 
-  .user-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-  }
+.icon-web::before {
+  content: "🌐";
+}
 
-  .user-info-avatar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+.icon-user::before {
+  content: "👤";
+}
 
-  .avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
+.icon-more::before {
+  content: "⋮";
+}
 
-  .user-details {
-    line-height: 1.4;
-  }
+.icon-arrow-right::before {
+  content: ">";
+}
 
-  .username {
-    font-size: 18px;
-    font-weight: bold;
-  }
+.icon-signal::before {
+  content: "📶";
+}
 
-  .user-info-balance img {
-    width: 25px;
-    height: 25px;
-    cursor: pointer;
-  }
-  .notifyNum {
-    position: relative;
-    top: -20px;
-    left: -12px;
-    display: inline-block;
-    background-color: rgb(244, 67, 54);
-    height: 20px;
-    text-align: center;
-    border-radius: 10px;
-    line-height: 21px;
-    padding: 0px 5px;
-  }
+.icon-wifi::before {
+  content: "📡";
+}
 
-  .balance-price {
-    display: flex;
-    max-width: 100%;
-    margin: 10px auto;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .balance-display {
-    width: 110px;
-    height: 90%;
-    text-align: center;
-    border: 1px solid #fff;
-    border-radius: 20px;
-  }
-
-  .reward {
-    background-color: #1d1d1f;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border-radius: 20px;
-    font-size: 10px;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .reward-list {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .reward-item {
-    width: 100%;
-    background-color: transparent;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    transition: all 0.3s ease;
-    animation: fadeIn 0.5s ease-out;
-    font-size: 12px;
-    color: #fff;
-    padding: 2px;
-  }
-
-  .reward-date {
-    color: #fff;
-  }
-
-  .reward-message {
-    color: #fff;
-    white-space: nowrap; /* 不换行 */
-    overflow: hidden; /* 超出隐藏 */
-    text-overflow: ellipsis; /* 超出显示省略号 */
-    max-width: 220px; /* 根据布局调整宽度 */
-  }
-
-  .carousel-container {
-    height: 150px;
-    display: flex;
-    transition: transform 0.5s ease-in-out;
-  }
-
-  .carousel-slide {
-    min-width: 100%;
-    height: 100%;
-    position: relative;
-  }
-
-  .carousel-slide img {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .user-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    margin-top: 20px;
-  }
-  .user-nav ul {
-    display: flex;
-    flex-direction: column;
-    font-size: 12px;
-    align-items: center;
-  }
-  .user-nav ul li img {
-    width: 40px;
-  }
-
-  .marquee-container {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    background: #111;
-    color: #fff;
-    padding: 6px 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-
-  .marquee-icon {
-    margin-right: 10px;
-    font-size: 18px;
-  }
-
-  .marquee-wrapper {
-    flex: 1;
-    overflow: hidden;
-    white-space: nowrap;
-    position: relative;
-    font-size: 12px;
-    background-color: #1d1d1f;
-  }
-
-  .marquee-content {
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee linear infinite;
-    padding: 5px;
-  }
-
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-100%);
-    }
-  }
-
-  .balance-label {
-    font-size: 14px;
-  }
-
-  .balance-amount {
-    font-size: 14px;
-    font-weight: bold;
-    color: #fff;
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: 10px;
-  }
-
-  .action-btn {
-    flex: 1;
-    padding: 10px 0;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .withdraw {
-    background-color: #4caf50;
-    color: white;
-  }
-
-  .deposit {
-    background-color: #2196f3;
-    color: white;
-  }
-
-  .action-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-  }
-
-  .action-btn:active {
-    transform: translateY(0);
-  }
-
-  .videos {
-    width: 100%;
-    border-radius: 8px;
-    margin: 15px 0;
-    z-index: 1;
-    position: relative;
-  }
-
-  .info-buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    margin: 20px 0;
-    padding: 10px;
-    font-size: 14px;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border-radius: 10px;
-    gap: 10px;
-  }
-  .btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-    padding: 8px;
-    background-color: #1d1d1f;
-    border-radius: 10px;
-  }
-
-  .btn:hover {
-    transform: translateY(-3px);
-  }
-
-  .icon-img {
-    width: 22px;
-    height: 22px;
-    margin-bottom: 5px;
-  }
-
-  .member-level {
-    font-size: 15px;
-    background-color: transparent;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border-radius: 10px;
-    border: 1px solid #7a797d;
-    margin-bottom: 15px;
-    padding: 15px;
-  }
-
-  .title {
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-
-  .level-info {
-    display: flex;
-    padding: 10px;
-    justify-content: space-between;
-  }
-
-  .col {
-    position: relative;
-    text-align: center;
-    flex: 1;
-  }
-
-  .card {
-    position: relative;
-    border-radius: 8px;
-    /* 其他样式 */
-  }
-
-  .badge-box {
-    position: absolute;
-    top: -6.86667vw;
-    right: -4.86667vw;
-    display: flex;
-    align-items: center;
-    gap: 1.6vw;
-    z-index: 1;
-  }
-
-  .badge {
-    background-color: #b13330;
-    color: #fff;
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
-
-  .lock-icon {
-    background-color: #ffe747;
-    color: #000;
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .carousel {
-    position: relative;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-    overflow: hidden;
-  }
+.icon-battery::before {
+  content: "🔋";
 }
 </style>

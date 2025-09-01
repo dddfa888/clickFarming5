@@ -11,25 +11,7 @@ import { computed } from "vue";
 import TabBar from "./components/TabBar.vue";
 
 const route = useRoute();
-const tabbarPaths = [
-  "/",
-  "/warehouse",
-  "/cskh",
-  "/me",
-  "/company",
-  "/rule",
-  "/cooperation",
-  "/notice",
-  "/withdraw",
-  "/orderHistory",
-  "/orderdetail",
-  "/address",
-  "/bankInfo",
-  "/groupReport",
-  "/rewardHistory",
-  "/depositHistory",
-  "/withdrawHistory"
-];
+const tabbarPaths = ["/", "/warehouse", "/cskh", "/me", "/record"];
 
 const showTabBar = computed(() => tabbarPaths.includes(route.path));
 </script>

@@ -2,28 +2,13 @@
   <div class="tabbar">
     <div
       class="tabbar-item"
-      v-for="(item, index) in tabs.slice(0, 2)"
+      v-for="(item, index) in tabs"
       :key="index"
       :class="{ active: currentRoute === item.path }"
       @click="navigate(item.path, item.name)"
     >
       <img :src="currentRoute === item.path ? item.iconActive : item.icon" class="tabbar-icon" />
       <span style="text-align: center;">{{ $t(item.name)}}</span>
-    </div>
-
-    <div class="tabbar-middle" @click="onCenterClick">
-      <img :src="centerIcon" class="center-icon" />
-    </div>
-
-    <div
-      class="tabbar-item"
-      v-for="(item, index) in tabs.slice(2)"
-      :key="index + 2"
-      :class="{ active: currentRoute === item.path }"
-      @click="navigate(item.path, item.name)"
-    >
-      <img :src="currentRoute === item.path ? item.iconActive : item.icon" class="tabbar-icon" />
-      <span>{{ item.name }}</span>
     </div>
   </div>
   <!-- 客服弹窗组件 -->
@@ -38,7 +23,7 @@ import { getUserInfo } from "../api/index";
 
 const { t } = useI18n();
 const getImageUrl = name =>
-  new URL(`../assets/img/${name}`, import.meta.url).href;
+  new URL(`../assets/image/${name}`, import.meta.url).href;
 
 const router = useRouter();
 const route = useRoute();
@@ -46,44 +31,34 @@ const showCustomerService = ref(false);
 
 const tabs = computed(() => [
   {
-    name: t("首页"),
+    name: t("发现"),
     path: "/",
-    icon: getImageUrl("black-tb2.png"),
-    iconActive: getImageUrl("black-tb22.png")
+    icon: getImageUrl("home.svg"),
+    iconActive: getImageUrl("homeactive.svg")
   },
   {
-    name: t("仓库"),
+    name: t("聚品坊"),
     path: "/warehouse",
-    icon: getImageUrl("black-tb3.png"),
-    iconActive: getImageUrl("black-tb33.png")
+    icon: getImageUrl("shop.svg"),
+    iconActive: getImageUrl("shopactive.svg")
   },
   {
-    name: t("客服"), // 客服，不跳转
-    path:
-      "https://chatlink.ichatlinks.net/widget/standalone.html?eid=6df096f4e9b05ad245f542d63ed1c8d7&language=en",
-    icon: getImageUrl("black-tb4.png"),
-    iconActive: getImageUrl("black-tb44.png")
+    name: t("记录"),
+    path: "/record",
+    icon: getImageUrl("jl.svg"),
+    iconActive: getImageUrl("jlactive.svg")
   },
   {
-    name: t("我"),
+    name: t("个人中心"),
     path: "/me",
-    icon: getImageUrl("black-tb1.png"),
-    iconActive: getImageUrl("black-tb11.png")
+    icon: getImageUrl("gr.svg"),
+    iconActive: getImageUrl("gractive.svg")
   }
 ]);
 
-const centerIcon = getImageUrl("gif_1.png");
 const currentRoute = computed(() => route.path);
 
 const navigate = (path, name = "") => {
-  if (name === "CSKH") {
-    window.open(
-      "https://chat.ichatlink.net/widget/standalone.html?eid=6df096f4e9b05ad245f542d63ed1c8d7&language=en",
-      "_blank"
-    );
-    return;
-  }
-
   if (path.startsWith("http")) {
     window.open(path, "_blank");
   } else if (path !== currentRoute.value) {
@@ -105,7 +80,7 @@ const onCenterClick = () => {
   right: 0;
   max-width: 100%;
   height: 60px;
-  background-color: #1d1d1f;
+  background-color: #e4e2e2;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -120,12 +95,12 @@ const onCenterClick = () => {
   font-size: 12px;
   flex-direction: column;
   align-items: center;
-  color: #ccc;
+  color: #000;
   cursor: pointer;
 }
 
 .tabbar-item.active {
-  color: #dcb671;
+  color: #1296db;
   font-weight: bold;
 }
 

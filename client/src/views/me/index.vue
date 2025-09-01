@@ -1,490 +1,401 @@
 <template>
-  <div class="user-center">
-    <!-- Header -->
-    <header>
-      <div class="header">
-        <span></span>
-        <span class="title">{{ $t("用户") }}</span>
-        <div class="icons">
-          <img src="../../assets/img/black-sz.png" @click="router.push('/personalInfo')" alt />
-          <img src="../../assets/img/ld-black.png" @click="router.push('/notice')" alt />
-        </div>
-      </div>
-
-      <!-- 用户信息卡片，重叠 header -->
-      <div class="card">
-        <div class="card-top">
-          <div class="avatar" @click="router.push('/avatar')">
-            <img v-if="infoStore.getUserinfo.headImg" :src="infoStore.getUserinfo.headImg" alt />
-            <img v-else src="../../assets/img/black-tx.png" alt />
+  <div class="personal-center">
+    <!-- 头部信息区域 -->
+    <div class="header">
+      <div class="header-info">
+        <img class="avatar" :src="userInfo.headImg" alt="用户头像" />
+        <div class="text-info">
+          <div class="user-base">
+            <span class="nickname">{{ userInfo.loginAccount }}</span>
+            <span class="credit">信用分: {{ userInfo.creditScore }}</span>
+            <span class="member">{{ userInfo.levelName }}</span>
           </div>
-          <div class="info">
-            <p class="name">{{ infoStore.getUserinfo.loginAccount }}</p>
-            <p class="desc">{{ $t("推广程式码") }}: {{ infoStore.getUserinfo.invitationCode }}</p>
-            <p class="desc">{{ $t("信用分数") }}: {{ infoStore.getUserinfo.creditScore }}</p>
-          </div>
-          <div class="vip">{{ infoStore.getUserinfo.levelName }}</div>
+          <div class="invite-code">邀请码: {{ userInfo.invitationCode }}</div>
         </div>
+        <img src="../../assets/img/right.png" alt @click="router.push('/personal')" />
+      </div>
+      <div class="signature">个性签名: {{ userInfo.signature }}</div>
+    </div>
 
-        <div class="card-balance">
-          <p class="label">{{ $t("我的余额") }}</p>
-          <p class="amount">${{ infoStore.getUserinfo.accountBalance }}</p>
-        </div>
+    <!-- 资产卡片区域 -->
+    <div class="asset-card">
+      <div class="total-asset">
+        <span class="icon">
+          <!-- 替换为更贴近原图的图标（示例用红色背景+白色对勾） -->
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="w-6 h-6"
+          >
+            <rect x="2" y="6" width="20" height="12" rx="2" ry="2" fill="red" />
+            <path d="M9 12l2 2 4-4" />
+          </svg>
+        </span>
+        <span class="label">总资产</span>
 
-        <div class="card-actions">
-          <button class="btn withdraw" @click="router.push('/withdraw')">{{ $t("提款") }}</button>
-          <button class="btn recharge" @click="router.push('/recharge')">{{ $t("充值") }}</button>
+        <!-- 新增“方块图标” -->
+        <span class="grid-icon">
+          <svg viewBox="0 0 24 24" fill="white" class="w-5 h-5">
+            <rect x="3" y="3" width="4" height="4" rx="1" />
+            <rect x="10" y="3" width="4" height="4" rx="1" />
+            <rect x="17" y="3" width="4" height="4" rx="1" />
+            <rect x="3" y="10" width="4" height="4" rx="1" />
+            <rect x="10" y="10" width="4" height="4" rx="1" />
+            <rect x="17" y="10" width="4" height="4" rx="1" />
+          </svg>
+        </span>
+      </div>
+      <div class="action-buttons">
+        <div class="amount">{{ userGrade.userBalance }}</div>
+        <div style="display: flex; justify-content: space-between;width: 45%">
+          <button class="withdraw" @click="router.push('/reflect')">提现</button>
+          <button class="recharge" @click="popupRef.openPopup">充值</button>
         </div>
       </div>
-    </header>
-
-    <!-- 其他模块 -->
-    <div class="shortcut">
-      <div class="item" @click="router.push('/depositHistory')">
-        <img src="../../assets/img/black-tkjl.png" alt />
-        <p>{{ $t("充值记录") }}</p>
-      </div>
-      <div class="item" @click="router.push('/warehouse')">
-        <img src="../../assets/img/black-ddls.png" alt />
-        <p>{{ $t("拍卖纪录") }}</p>
-      </div>
-      <div class="item" @click="router.push('/withdrawHistory')">
-        <img src="../../assets/img/black-ls.png" alt />
-        <p>{{ $t("提款记录") }}</p>
+      <div class="profit">
+        <div class="item">
+          <span>{{userGrade.profit}}</span>
+          <span>今日收益</span>
+        </div>
+        <div class="item">
+          <span>{{userGrade.profit1}}</span>
+          <span>昨日收益</span>
+        </div>
+        <div class="item">
+          <span>{{Number(userGrade.profit)+Number(userGrade.profit1)}}</span>
+          <span>总收益</span>
+        </div>
       </div>
     </div>
 
-    <div class="menu">
-      <div class="menu-item" @click="router.push('/personalInfo')">
-        <img src="../../assets/img/black-grxx.png" alt />
-        {{ $t("个人资讯") }}
-      </div>
-      <div class="menu-item" @click="router.push('/accountdetail')">
-        <img src="../../assets/img/black-khxx.png" alt />
-        {{ $t("帐户详细资讯") }}
-      </div>
-      <div class="menu-item" @click="router.push('/bankinfo')">
-        <img src="../../assets/img/black-grxx.png" alt />
-        {{ $t("我的银行卡") }}
-      </div>
-      <div class="menu-item" @click="router.push('/address')">
-        <img src="../../assets/img/black-grxx.png" alt />
-        {{ $t("TRC 20 地址") }}
-      </div>
-      <div class="menu-item" @click="router.push('/invite')">
-        <img src="../../assets/img/black-yqpy.png" alt />
-        {{ $t("邀请朋友") }}
-      </div>
-      <div class="menu-item" @click="router.push('/notice')">
-        <img src="../../assets/img/ld-black.png" alt />
-        {{ $t("系统消息") }}
+    <!-- 功能列表区域 -->
+    <div class="function-list">
+      <div
+        v-for="(item, index) in functionItems"
+        :key="index"
+        class="function-item"
+        @click="handleFunctionClick(item.path)"
+      >
+        <span class="icon">
+          <img :src="item.iconPath" alt />
+        </span>
+        <span class="label">{{ item.label }}</span>
+        <span class="arrow">
+          <img src="../../assets/img/right.png" alt />
+        </span>
       </div>
     </div>
 
-    <div class="footer">
-      <button class="exit-btn" @click="handleLogout">{{ $t("退出") }}</button>
-    </div>
+    <Popup ref="popupRef" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
-import { storeToRefs } from "pinia";
-import { useInfoStore } from "../../store/useInfoStore.js";
-import { getUserInfo } from "../../api/index";
+import Popup from "../../components/Popup.vue";
+import { getUserInfo, getTotalAssets } from "../../api/index";
 
 const router = useRouter();
-const { locale: i18nLocale } = useI18n();
-const { t } = useI18n();
-const infoStore = useInfoStore();
+const popupRef = ref(null);
 
-const handleAction = row => {
-  if (row === "deposit") {
-    window.open(
-      "https://chat.ichatlink.net/widget/standalone.html?eid=6df096f4e9b05ad245f542d63ed1c8d7&language=en",
-      "_blank"
-    );
-  } else if (row === "withdraw") {
-    router.push("/withdraw");
-  } else if (row === "withdrawHistory") {
-    router.push("/withdrawHistory");
-  } else if (row === "depositHistory") {
-    router.push("/depositHistory");
-  } else if (row === "orderHistory") {
-    router.push("/orderHistory");
-  } else if (row === "rewardHistory") {
-    router.push("/rewardHistory");
-  } else if (row === "groupReport") {
-    router.push("/groupReport");
-  } else if (row === "bankInfo") {
-    router.push("/bankInfo");
-  } else if (row === "address") {
-    router.push("/address");
+const getImageUrl = name =>
+  new URL(`../../assets/image/${name}`, import.meta.url).href;
+
+// 功能项数据
+const functionItems = ref([
+  {
+    label: "会员中心",
+    iconPath: getImageUrl("zs.svg"),
+    path: "/member"
+  },
+  {
+    label: "充值记录",
+    iconPath: getImageUrl("cz.svg"),
+    path: "/deposit"
+  },
+  {
+    label: "提现记录",
+    iconPath: getImageUrl("tx.svg"),
+    path: "/withdrawhistory"
+  },
+  {
+    label: "我的团队",
+    iconPath: getImageUrl("td.svg"),
+    path: "/team"
+  },
+  {
+    label: "余额宝",
+    iconPath: getImageUrl("ye.svg"),
+    path: "/yubao"
+  },
+  {
+    label: "收货地址",
+    iconPath: getImageUrl("sk.svg"),
+    path: "/backcard"
+  },
+  {
+    label: "设置",
+    iconPath: getImageUrl("sz.svg"),
+    path: "/setup"
   }
-};
+]);
 
-const handleLogout = () => {
-  localStorage.removeItem("token");
-  infoStore.clearUserinfo();
-  router.push("/login");
+// 当前激活的导航项
+const activeNav = ref(4);
+const userInfo = ref({});
+const userGrade = ref({});
+
+// 功能项点击处理
+const handleFunctionClick = path => {
+  router.push(path);
+  // 这里可以添加对应的路由跳转或功能处理
 };
 
 onMounted(() => {
   getUserInfo().then(res => {
-    infoStore.setUserinfo(res.data);
+    console.log(res.data);
+    userInfo.value = res.data;
+  });
+
+  getTotalAssets().then(res => {
+    console.log(res.data, "jhjih");
+    userGrade.value = res.data;
   });
 });
 </script>
 
 <style scoped>
-.user-center {
-  max-width: 375px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: #1e201f;
-  color: #fff;
+.personal-center {
   display: flex;
   flex-direction: column;
-}
-
-header {
-  height: 300px;
-}
-
-/* 顶部 header */
-.header {
-  height: 200px;
-  background: url("../../assets/img/my-black.png") no-repeat center/cover; /* 可放背景 */
-  display: flex;
-  justify-content: space-between;
-  padding: 16px;
+  min-height: 100vh;
+  background-color: #eeeeee;
   position: relative;
-  z-index: 1;
 }
-.header .title {
-  font-size: 18px;
-  font-weight: bold;
+
+.header {
+  padding: 16px;
 }
-.header .icons {
+
+/* 头部信息样式 */
+.header-info {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  padding: 20px 0;
 }
-.header .icons img {
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-bottom: 12px;
+  border: 2px solid #eee;
+  align-self: center;
+}
+
+.text-info {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.user-base {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.nickname {
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+}
+
+.credit,
+.member {
+  font-size: 14px;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #f5f5f5;
+}
+
+.account,
+.invite-code {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.account::before,
+.invite-code::before {
+  content: "•";
+  margin-right: 6px;
+  color: #ccc;
+  font-size: 8px;
+}
+
+.signature {
+  font-size: 15px;
+  color: #333;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 资产卡片样式 */
+.asset-card {
+  background-color: #fff; /* 蓝色背景 */
+  color: #000;
+  border-radius: 10px;
+  margin: 0 16px 16px;
+}
+.total-asset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 让图标和文字两端对齐 */
+  margin-bottom: 8px;
+  background-color: #2563eb;
+  color: #fff;
+  padding: 10px;
+  border-radius: 10px 10px 0 0;
+}
+.icon img {
   width: 24px;
   height: 24px;
+  border-radius: 4px;
+  padding: 2px;
 }
-
-/* 卡片浮动效果 */
-.card {
-  margin: -40px 16px 0; /* 让卡片往上顶出 header */
-  background: url("../../assets/img/black-kp.png") no-repeat center/cover;
-  color: #000;
-  border-radius: 16px;
-  padding: 5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  z-index: 2;
-  position: relative;
-  top: -38vw;
-}
-.card-top {
-  display: flex;
-  align-items: center;
-}
-.avatar {
-  width: 48px;
-  height: 48px;
-  background: #ccc;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.avatar img {
-  width: 100%;
-}
-.info {
-  margin-left: 12px;
-}
-.info .name {
-  font-weight: bold;
-}
-.info .desc {
-  font-size: 12px;
-  color: #555;
-}
-.vip {
-  background-image: url("../../assets/img/logo-black.png");
-  width: 130px;
-  height: 130px;
-  text-align: center;
-  line-height: 130px;
-  color: #d1790f;
-  font-weight: bold;
-  font-size: 18px;
-  position: absolute;
-  bottom: 30px;
-  right: 10px;
-}
-.card-balance {
-  margin-top: 12px;
-  color: #664630;
-}
-.card-balance .label {
-  font-size: 14px;
-}
-.card-balance .amount {
-  font-size: 22px;
-  font-weight: bold;
-}
-.card-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-.card-actions .btn {
-  width: 60px;
-  padding: 4px 0;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 12px;
-  border: none;
-}
-.card-actions .withdraw {
-  background: #e5c990;
-  color: #664630;
-}
-.card-actions .recharge {
-  background: #e5c990;
-  color: #664630;
-}
-
-/* 下面的部分保持不变 */
-.shortcut {
-  display: flex;
-  justify-content: space-around;
-  background: #252726;
-  border-radius: 8px;
-  margin: 20px 16px 0;
-  padding: 16px 0;
-  text-align: center;
-}
-.shortcut .item img {
-  width: 25px;
-}
-.shortcut .item p {
-  font-size: 12px;
-}
-
-.menu {
-  margin: 20px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 1;
-  background-color: #252726;
-}
-.menu-item {
-  background: #252726;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  border-radius: 8px;
-  font-size: 14px;
-}
-.menu-item img {
-  width: 25px;
-  margin-right: 10px;
-}
-
-.footer {
-  margin: 5px 16px;
-  margin-bottom: 80px;
-}
-.exit-btn {
-  width: 100%;
-  background: #dc2626;
-  color: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  border: none;
+.label {
   font-size: 16px;
 }
-@media screen and (min-width: 768px) {
-  .user-center {
-    width: 450px;
-    margin: 0 auto;
-    min-height: 100vh;
-    background: #1e201f;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-  }
+.amount {
+  font-size: 30px;
+  color: #ffc107;
+}
+.grid-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.profit {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+  padding: 20px;
+}
 
-  header {
-    height: 300px;
-  }
+.profit .item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  /* 顶部 header */
-  .header {
-    height: 200px;
-    background: url("../../assets/img/my-black.png") no-repeat center/cover; /* 可放背景 */
-    display: flex;
-    justify-content: space-between;
-    padding: 16px;
-    position: relative;
-    z-index: 1;
-  }
-  .header .title {
-    font-size: 18px;
-    font-weight: bold;
-  }
-  .header .icons {
-    display: flex;
-    gap: 16px;
-  }
-  .header .icons img {
-    width: 24px;
-    height: 24px;
-  }
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px;
+}
+.withdraw,
+.recharge {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+.withdraw {
+  background-color: #2563eb;
+  color: #fff;
+}
+.recharge {
+  background-color: #ef4444;
+}
 
-  /* 卡片浮动效果 */
-  .card {
-    margin: -40px 16px 0; /* 让卡片往上顶出 header */
-    background: url("../../assets/img/black-kp.png") no-repeat center/cover;
-    color: #000;
-    border-radius: 16px;
-    padding: 5px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 2;
-    position: relative;
-    top: -7vw;
-  }
-  .card-top {
-    display: flex;
-    align-items: center;
-  }
-  .avatar {
-    width: 48px;
-    height: 48px;
-    background: #ccc;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .avatar img {
-    width: 100%;
-  }
-  .info {
-    margin-left: 12px;
-  }
-  .info .name {
-    font-weight: bold;
-  }
-  .info .desc {
-    font-size: 12px;
-    color: #555;
-  }
-  .vip {
-    background-image: url("../../assets/img/logo-black.png");
-    width: 130px;
-    height: 130px;
-    text-align: center;
-    line-height: 130px;
-    color: #d1790f;
-    font-weight: bold;
-    font-size: 18px;
-    position: absolute;
-    bottom: 30px;
-    right: 10px;
-  }
-  .card-balance {
-    margin-top: 12px;
-    color: #664630;
-  }
-  .card-balance .label {
-    font-size: 14px;
-  }
-  .card-balance .amount {
-    font-size: 22px;
-    font-weight: bold;
-  }
-  .card-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-  }
-  .card-actions .btn {
-    width: 60px;
-    padding: 4px 0;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 12px;
-    border: none;
-  }
-  .card-actions .withdraw {
-    background: #e5c990;
-    color: #664630;
-  }
-  .card-actions .recharge {
-    background: #e5c990;
-    color: #664630;
-  }
+/* 功能列表样式 */
+.function-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 16px 80px; /* 底部留出导航栏空间 */
+  background-color: #eee;
+  overflow: hidden;
+}
 
-  /* 下面的部分保持不变 */
-  .shortcut {
-    display: flex;
-    justify-content: space-around;
-    background: #252726;
-    border-radius: 8px;
-    margin: 20px 16px 0;
-    padding: 16px 0;
-    text-align: center;
-  }
-  .shortcut .item img {
-    width: 25px;
-  }
-  .shortcut .item p {
-    font-size: 12px;
-  }
+.function-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 12px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
-  .menu {
-    margin: 20px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex: 1;
-    background-color: #252726;
-  }
-  .menu-item {
-    background: #252726;
-    padding: 12px;
-    display: flex;
-    align-items: center;
-    border-radius: 8px;
-    font-size: 14px;
-  }
-  .menu-item img {
-    width: 25px;
-    margin-right: 10px;
-  }
+.function-item:hover {
+  background-color: #f9f9f9;
+}
 
-  .footer {
-    margin: 5px 16px;
-    margin-bottom: 80px;
-  }
-  .exit-btn {
-    width: 100%;
-    background: #dc2626;
-    color: #fff;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    border: none;
-    font-size: 16px;
-  }
+.function-item .label {
+  flex: 1;
+  margin: 0 12px;
+  font-size: 14px;
+  color: #333;
+}
+
+.arrow svg {
+  color: #ccc;
+  width: 20px;
+  height: 20px;
+}
+
+/* 底部导航样式 */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0 4px;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  width: 20%;
+}
+
+.nav-item.active {
+  color: #2563eb;
+}
+
+.nav-item .icon svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+}
+
+.nav-item .label {
+  font-size: 12px;
 }
 </style>

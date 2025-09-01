@@ -1,25 +1,48 @@
 <template>
   <div class="register-container">
-    <!-- 多语言选择器 -->
-    <img
-      width="120px"
-      style="margin-top: 50px;border-radius: 10px;"
-      src="../../assets/img/login.png"
-      alt
-    />
+    <!-- 语言选择器 -->
+    <div class="language-selector">
+      <div class="dropdown-wrapper" @click="toggleLangList">
+        <img :src="flagMap[langStore.locale]" class="flag-icon" />
+        {{ selectedLanguage }}
+      </div>
+      <ul class="lang-dropdown" v-if="showLangList">
+        <li
+          v-for="lang in languageList"
+          :key="lang"
+          :class="{ active: selectedLanguage === lang }"
+          @click="selectLanguage(lang)"
+        >
+          <img :src="flagMap[langMap[lang]]" class="flag-icon" />
+          {{ lang }}
+        </li>
+      </ul>
+    </div>
 
-    <!-- 表单 -->
+    <!-- 应用Logo和名称 -->
+    <div class="app-logo">
+      <div class="logo-icon">
+        <img src="../../assets/image/logo.png" alt="聚品坊" />
+      </div>
+      <div class="app-name">聚品坊</div>
+    </div>
+
+    <!-- 注册表单 -->
     <div class="register-form">
       <form>
-        <!-- 账号 -->
-        <div class="form-group">
-          <i class="iconfont icon-user input-icon"></i>
-          <input v-model="form.loginAccount" type="text" :placeholder="t('请输入账号')" />
+        <!-- 用户名输入框 -->
+        <div class="form-group username-group">
+          <div class="input-icon">
+            <img src="../../assets/image/user.svg" alt />
+          </div>
+          <input type="text" v-model="form.loginAccount" :placeholder="t('输入用户名')" />
         </div>
 
         <!-- 手机号带区号 -->
         <div class="form-group phone-group">
-          <i class="iconfont icon-phone input-icon"></i>
+          <div class="input-icon">
+            <img src="../../assets/image/phone.svg" alt />
+          </div>
           <select v-model="form.areaCode" class="area-select">
             <option value="+84">+84</option>
             <option value="+65">+65</option>
@@ -54,58 +77,53 @@
           <input v-model="form.phone" type="tel" :placeholder="t('请输入电话号码')" class="phone-input" />
         </div>
 
-        <!-- 动态字段 -->
-        <div class="form-group" v-for="(item, key) in fields" :key="key">
-          <i :class="item.icon" class="input-icon"></i>
+        <!-- 密码输入框 -->
+        <div class="form-group password-group">
+          <div class="input-icon">
+            <img src="../../assets/image/pwd.svg" alt />
+          </div>
           <input
-            v-model="form[key]"
-            :type="passwordVisible[key] ? 'text' : item.type"
-            :placeholder="t(item.placeholder)"
+            :type="passwordVisible.loginPassword ? 'text' : 'password'"
+            v-model="form.loginPassword"
+            :placeholder="t('请输入密码')"
           />
-          <!-- 仅 password 字段显示切换图标 -->
-          <!-- 明文图标（eye-open） -->
-          <svg
-            v-if="item.type === 'password' && passwordVisible[key]"
-            @click="togglePassword(key)"
-            xmlns="http://www.w3.org/2000/svg"
-            class="toggle-eye"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          <div class="eye-icon" @click="togglePassword('loginPassword')">
+            <i :class="passwordVisible.loginPassword ? 'eye-open' : 'eye-closed'"></i>
+          </div>
+        </div>
 
-          <!-- 密文图标（eye-off） -->
-          <svg
-            v-else-if="item.type === 'password'"
-            @click="togglePassword(key)"
-            xmlns="http://www.w3.org/2000/svg"
-            class="toggle-eye"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12A21.84 21.84 0 0 1 6.29 6.29M9.88 9.88A3 3 0 0 0 12 15a3 3 0 0 0 2.12-5.12"
-            />
-            <line x1="1" y1="1" x2="23" y2="23" />
-          </svg>
+        <!-- 确认密码输入框 -->
+        <div class="form-group password-group">
+          <div class="input-icon">
+            <img src="../../assets/image/pwd.svg" alt />
+          </div>
+          <input
+            :type="passwordVisible.fundPassword ? 'text' : 'password'"
+            v-model="form.fundPassword"
+            :placeholder="t('请输入确认密码')"
+          />
+          <div class="eye-icon" @click="togglePassword('fundPassword')">
+            <i :class="passwordVisible.fundPassword ? 'eye-open' : 'eye-closed'"></i>
+          </div>
+        </div>
+
+        <!-- 邀请码输入框 -->
+        <div class="form-group invite-group">
+          <div class="input-icon">
+            <img src="../../assets/image/init.svg" alt />
+          </div>
+          <input type="text" v-model="form.invitationCode" :placeholder="t('请输入邀请码')" />
+        </div>
+
+        <!-- 登录链接 -->
+        <div class="login-link">
+          <span>{{ t("已有账号？") }}</span>
+          <a @click="router.push('/login')">{{ t("立即登录") }}</a>
         </div>
 
         <!-- 注册按钮 -->
-        <div class="btn-wrapper">
-          <button @click="onSubmit" type="submit" class="register-btn">{{ t("注册") }}</button>
-        </div>
-        <div class="btn-wrapper">
-          <button @click="router.push('/login')" type="submit" class="register-btn">{{ t("登录") }}</button>
+        <div class="register-btn">
+          <button @click.prevent="onSubmit" type="submit">{{ t("注册") }}</button>
         </div>
       </form>
     </div>
@@ -133,6 +151,9 @@ const form = reactive({
   invitationCode: ""
 });
 
+// 用户协议勾选状态
+const agreedToTerms = ref(false);
+
 // 监听路由变化，更新语言
 onMounted(() => {
   if (route.query.invite) {
@@ -149,27 +170,79 @@ function togglePassword(key) {
   passwordVisible[key] = !passwordVisible[key];
 }
 
-// 动态渲染字段（不包含 loginAccount 和 phone）
-const fields = {
-  loginPassword: {
-    placeholder: "请输入密码",
-    type: "password",
-    icon: "iconfont icon-lock"
-  },
-  fundPassword: {
-    placeholder: "请输入确认密码",
-    type: "password",
-    icon: "iconfont icon-lock"
-  },
-  invitationCode: {
-    placeholder: "请输入邀请码",
-    type: "text",
-    icon: "iconfont icon-invite"
-  }
+// 语言选择相关
+const flagMap = {
+  en: new URL("../../assets/img/en-ww.png", import.meta.url).href,
+  zhTW: new URL("../../assets/img/zh-tw.png", import.meta.url).href,
+  ko: new URL("../../assets/img/ko-kr.png", import.meta.url).href,
+  ja: new URL("../../assets/img/jr-rbg.png", import.meta.url).href,
+  th: new URL("../../assets/img/th-th.png", import.meta.url).href,
+  es: new URL("../../assets/img/es-mx.png", import.meta.url).href,
+  vi: new URL("../../assets/img/iv-vn.png", import.meta.url).href,
+  tr: new URL("../../assets/img/es-mx.png", import.meta.url).href,
+  hi: new URL("../../assets/img/the.png", import.meta.url).href,
+  pt: new URL("../../assets/img/pt-br.png", import.meta.url).href
 };
+
+const showLangList = ref(false);
+const langMap = {
+  한국인: "ko",
+  Português: "pt",
+  English: "en",
+  繁体中文: "zhTW",
+  ภาษาไทย: "th",
+  日本語: "ja",
+  Español: "es",
+  "Việt Nam": "vi",
+  Turkey: "tr",
+  हिंदी: "hi"
+};
+const languageList = Object.keys(langMap);
+const reverseLangMap = Object.fromEntries(
+  Object.entries(langMap).map(([k, v]) => [v, k])
+);
+
+// 初始化选中语言
+const selectedLanguage = ref(reverseLangMap[langStore.locale]);
+locale.value = langStore.locale;
+
+function selectLanguage(lang) {
+  selectedLanguage.value = lang;
+  const langCode = langMap[lang] || "ko";
+  langStore.setLocale(langCode);
+  locale.value = langCode;
+  showLangList.value = !showLangList.value;
+}
+
+function toggleLangList() {
+  showLangList.value = !showLangList.value;
+}
 
 // 表单提交
 function onSubmit() {
+  // 验证用户是否同意协议
+  if (!agreedToTerms.value) {
+    showAlert(t("请先阅读并同意用户协议和隐私协议"), 2000);
+    return;
+  }
+
+  // 验证密码是否一致
+  if (form.loginPassword !== form.fundPassword) {
+    showAlert(t("两次输入的密码不一致"), 2000);
+    return;
+  }
+
+  // 验证必填字段
+  if (
+    !form.loginAccount ||
+    !form.phone ||
+    !form.loginPassword ||
+    !form.fundPassword
+  ) {
+    showAlert(t("请填写完整信息"), 2000);
+    return;
+  }
+
   const payload = {
     ...form,
     phone: form.areaCode + form.phone // 拼接完整手机号
@@ -177,7 +250,7 @@ function onSubmit() {
 
   register(payload).then(res => {
     if (res.code === 200) {
-      showAlert(t("操作成功"), 2000);
+      showAlert(t("注册成功"), 2000);
       router.push("/login");
     } else {
       showAlert(t(res.msg), 2000);
@@ -188,96 +261,19 @@ function onSubmit() {
 
 <style scoped>
 .register-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: url("../../assets/img/login-bg.png") no-repeat center center;
   min-height: 100vh;
   width: 100%;
-  padding: 20px;
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 0;
   box-sizing: border-box;
+  background-color: #f5f5f5;
 }
 
-.toggle-eye {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  stroke: #888;
-  cursor: pointer;
-}
-
-.phone-group {
-  display: flex;
-  align-items: center;
-  background: #c5c5c5;
-  border-radius: 999px;
-  border: 1px solid #181818;
-  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  position: relative;
-}
-
-.toggle-eye {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: #888;
-  cursor: pointer;
-}
-
-.area-select {
-  border: none;
-  outline: none;
-  background: transparent;
-  padding: 12px 10px;
-  font-size: 14px;
-  appearance: none;
-  width: 80px;
-  text-align: center;
-  color: #000;
-  background-color: transparent;
-}
-
-.phone-input {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  outline: none;
-  font-size: 16px;
-  background-color: transparent;
-  color: #000;
-}
-
-.input-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: #888;
-}
-
-.register-footer {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
-  color: #fff;
-  margin-bottom: 20px;
-}
-
-.language-selector {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 14px;
-  color: #fff;
-}
 /* 语言选择器 */
 .language-selector {
   position: absolute;
@@ -289,290 +285,330 @@ function onSubmit() {
   color: #fff;
   z-index: 20;
 }
+
 .language-selector .label {
   margin-right: 6px;
   color: #fff;
 }
+
 .dropdown-wrapper {
   position: relative;
   background: rgba(255, 255, 255, 0.15);
   padding: 5px 10px;
   border-radius: 6px;
   cursor: pointer;
-  color: #fff;
-
+  color: #333;
   user-select: none;
+  display: flex;
+  align-items: center;
 }
+
+.flag-icon {
+  width: 20px;
+  height: 15px;
+  margin-right: 5px;
+}
+
 .lang-dropdown {
   position: absolute;
   top: 35px;
   right: 0;
-  background: #e5e5e5;
-  color: #000;
+  background: #ffffff;
+  color: #333;
   list-style: none;
   padding: 5px 0;
   margin: 0;
   border-radius: 4px;
-  width: 100px;
+  width: 120px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 999;
 }
+
 .lang-dropdown li {
   padding: 8px 12px;
   cursor: pointer;
   transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
 }
+
 .lang-dropdown li:hover,
 .lang-dropdown li.active {
-  background-color: #d3d3d3;
+  background-color: #f5f5f5;
 }
 
+/* 应用Logo和名称 */
+.app-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  margin-bottom: 40px;
+}
+
+.logo-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.logo-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.app-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+/* 注册表单 */
 .register-form {
   width: 100%;
-  max-width: 400px;
-  margin: 20px auto;
-}
-
-.form-group {
-  width: 100%;
-  position: relative;
-  margin-bottom: 16px;
-  border: 1px solid #181818;
-  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  background: #edfbff;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 12px 12px 12px 40px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  background: #edfbff;
+  padding: 0 20px;
   box-sizing: border-box;
 }
 
+.form-group {
+  position: relative;
+  margin-bottom: 20px;
+  background-color: #ffff;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  height: 50px;
+}
+
 .input-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: #888;
-}
-
-.register-btn {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 16px;
-  border: none;
-  border-radius: 25px;
-  background-color: #d6ba82;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
-}
-
-.btn-wrapper {
+  width: 50px;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
-@media screen and (min-width: 768px) {
+.input-icon img {
+  width: 50%;
+}
+.user-icon::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url("../../assets/img/user-icon.png") no-repeat center center /
+    contain;
+  opacity: 0.7;
+}
+
+.lock-icon::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url("../../assets/img/lock-icon.png") no-repeat center center /
+    contain;
+  opacity: 0.7;
+}
+
+.phone-icon::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url("../../assets/img/phone-icon.png") no-repeat center center /
+    contain;
+  opacity: 0.7;
+}
+
+.invite-icon::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url("../../assets/img/invite-icon.png") no-repeat center center /
+    contain;
+  opacity: 0.7;
+}
+
+.form-group input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  padding: 0 10px;
+  font-size: 16px;
+  color: #333;
+  outline: none;
+}
+
+.eye-icon {
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.eye-open::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url("../../assets/img/eye-open.png") no-repeat center center /
+    contain;
+  opacity: 0.9;
+}
+
+.eye-closed::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url("../../assets/img/eye-closed.png") no-repeat center center /
+    contain;
+  opacity: 0.7;
+}
+
+/* 手机号输入框 */
+.phone-group {
+  display: flex;
+  align-items: center;
+  background-color: #ffff;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+
+.area-select {
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 5px;
+  font-size: 14px;
+  appearance: none;
+  width: 70px;
+  text-align: center;
+  color: #333;
+}
+
+.phone-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  padding: 0 10px;
+  font-size: 16px;
+  color: #333;
+  outline: none;
+}
+
+/* 用户协议 */
+.agreement {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.checkbox-container {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #2196f3;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.agreement a {
+  color: #2196f3;
+  text-decoration: none;
+}
+
+/* 注册按钮 */
+.register-btn {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.register-btn button {
+  width: 100%;
+  height: 50px;
+  background-color: #ffff;
+  color: #f1c40f;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 登录链接 */
+.login-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.login-link a {
+  color: #f1c40f;
+  text-decoration: none;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 450px) {
   .register-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: url("../../assets/img/login-bg.png") no-repeat center center;
-    min-height: 100vh;
-    width: 450px;
-    padding: 20px;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-
-  .toggle-eye {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    stroke: #888;
-    cursor: pointer;
-  }
-
-  .phone-group {
-    display: flex;
-    align-items: center;
-    background: #c5c5c5;
-    border-radius: 999px;
-    border: 1px solid #181818;
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    position: relative;
-  }
-
-  .toggle-eye {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #888;
-    cursor: pointer;
-  }
-
-  .area-select {
-    border: none;
-    outline: none;
-    background: transparent;
-    padding: 12px 10px;
-    font-size: 14px;
-    appearance: none;
-    width: 80px;
-    text-align: center;
-    color: #000;
-    background-color: transparent;
-  }
-
-  .phone-input {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    background-color: transparent;
-    color: #000;
-  }
-
-  .input-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #888;
-  }
-
-  .register-footer {
-    display: flex;
-    justify-content: space-between;
     width: 100%;
-    align-items: center;
-    color: #fff;
-    margin-bottom: 20px;
-  }
-
-  .language-selector {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 14px;
-    color: #fff;
-  }
-  /* 语言选择器 */
-  .language-selector {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    color: #fff;
-    z-index: 20;
-  }
-  .language-selector .label {
-    margin-right: 6px;
-    color: #fff;
-  }
-  .dropdown-wrapper {
-    position: relative;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 5px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #fff;
-
-    user-select: none;
-  }
-  .lang-dropdown {
-    position: absolute;
-    top: 35px;
-    right: 0;
-    background: #e5e5e5;
-    color: #000;
-    list-style: none;
-    padding: 5px 0;
-    margin: 0;
-    border-radius: 4px;
-    width: 100px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    z-index: 999;
-  }
-  .lang-dropdown li {
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  .lang-dropdown li:hover,
-  .lang-dropdown li.active {
-    background-color: #d3d3d3;
-  }
-
-  .register-form {
-    width: 100%;
-    max-width: 400px;
-    margin: 20px auto;
-  }
-
-  .form-group {
-    width: 100%;
-    position: relative;
-    margin-bottom: 16px;
-    border: 1px solid #181818;
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    background: #edfbff;
-  }
-
-  .form-group input {
-    width: 100%;
-    padding: 12px 12px 12px 40px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-    background: #edfbff;
-    box-sizing: border-box;
-  }
-
-  .input-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #888;
-  }
-
-  .register-btn {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 16px;
-    border: none;
-    border-radius: 25px;
-    background-color: #d6ba82;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
-  }
-
-  .btn-wrapper {
-    display: flex;
-    justify-content: center;
   }
 }
 </style>

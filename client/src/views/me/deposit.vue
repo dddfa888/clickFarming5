@@ -1,16 +1,15 @@
 <template>
-  <div class="company-intro">
-    <HeaderBar :title="t('充值记录')" />
+  <div class="company-intro" ref="scrollContainer" @scroll="handleScroll">
+    <HeaderBar :title="t('充值')" backcolor="#ece9ee" />
     <div class="transaction-list">
       <div v-for="(transaction, index) in transactions" :key="index" class="transaction-item">
         <div class="transaction-info">
-          <div class="transaction-time">{{ t("充值金额") }}:${{ transaction.amount }}</div>
-          <div class="transaction-amount" :class="{ negative: transaction.amount < 0 }">
-            {{ t("订单号") }}:
-            {{ transaction.uuid }}
+          <div class="transaction-time">
+            <span>{{ t("充值金额") }}:</span>
+            <span>{{ transaction.amount }}</span>
           </div>
-          <div class="transaction-balance">
-            {{ t("充值状态") }}:
+          <div class="transaction-amount" :class="{ negative: transaction.amount < 0 }">
+            2025-01-01 00:00:00
             <span :style="{ color: transaction.status === 1 ? 'green' : 'red'}">
               {{
               transaction.status === 1
@@ -21,78 +20,89 @@
               }}
             </span>
           </div>
+          <div class="transaction-balance">{{ t("充值说明") }}:后台管理操作</div>
         </div>
       </div>
-      <div>
-        <div v-if="transactions.length === 0" class="no-transaction">
-          <div class="no-transaction-text">{{ t("还没有数据") }}</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- 分页器 -->
-    <div v-if="transactions.length!=0" class="pagination-wrapper">
-      <div class="pagination">
-        <span
-          class="pagination-info"
-        >{{ t('paginationSummary', { total: totalOrders, size: pageSize }) }}</span>
-        <div class="page-buttons">
-          <button class="pagination-button" @click="previousPage" :disabled="currentPage === 1">«</button>
-          <span class="page-number">{{ currentPage }} / {{ totalPages }}</span>
-          <button
-            class="pagination-button"
-            @click="nextPage"
-            :disabled="currentPage === totalPages"
-          >»</button>
-        </div>
+      <!-- 没有数据提示 -->
+      <div v-if="transactions.length === 0" class="no-transaction">
+        <div class="no-transaction-text">{{ t("还没有数据") }}</div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
-import HeaderBar from "../../components/HeaderBar.vue";
-import { getDepositRecord } from "../../api/index.js";
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
-const transactions = ref([]);
 
+<script setup>
+import { ref, computed, onMounted, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import HeaderBar from "../../components/HeaderBar.vue";
+import { getWithdrawRecord } from "../../api/index.js";
+import { useInfoStore } from "../../store/useInfoStore";
+const { t } = useI18n();
+
+const transactions = ref([]);
+const loading = ref(false);
+const noMore = ref(false);
+const currentPage = ref(1);
+const pageSize = 20;
+const pageSizeApi = ref(20);
+const infoStore = useInfoStore();
+
+const scrollContainer = ref(null);
+
+// 格式化金额
 const formatAmount = amount => {
   return amount.toFixed(2).replace(".", ",") + " $";
 };
 
-getDepositRecord().then(res => {
-  console.log(res.rows);
-  transactions.value = res.rows;
-  console.log(transactions.value, 21);
-});
+// 获取充值记录
+const fetchTransactions = async () => {
+  if (loading.value || noMore.value) return;
+  loading.value = true;
 
-// 分页
-const currentPage = ref(1);
-const pageSize = 20;
+  try {
+    const res = await getWithdrawRecord({
+      userId: infoStore.getUserinfo.uid,
+      type: 1,
+      pageSize: pageSizeApi.value,
+      pageNum: currentPage.value
+    });
 
-// 不再用 filteredOrders，因为数据直接由接口返回
-const totalPages = computed(() =>
-  Math.ceil(transactions.value.length / pageSize)
-);
-const paginatedOrders = computed(() => {
-  const start = (currentPage.value - 1) * pageSize;
-  return transactions.value.slice(start, start + pageSize);
-});
-const totalOrders = computed(() => transactions.value.length);
+    if (res.rows.length < pageSize) {
+      noMore.value = true;
+    }
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
+    transactions.value = [...transactions.value, ...res.rows];
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
 };
-const previousPage = () => {
-  if (currentPage.value > 1) currentPage.value--;
+
+// 滚动加载下一页
+const handleScroll = () => {
+  const container = scrollContainer.value;
+  if (
+    container.scrollTop + container.clientHeight >=
+    container.scrollHeight - 10
+  ) {
+    if (!loading.value && !noMore.value) {
+      currentPage.value++;
+      fetchTransactions();
+    }
+  }
 };
+
+onMounted(() => {
+  fetchTransactions();
+});
 </script>
 
 <style scoped>
 .company-intro {
-  background-color: #1e201f;
+  background-color: #ece9ee;
   height: 100vh;
   overflow-y: auto;
 }
@@ -122,14 +132,12 @@ const previousPage = () => {
 .transaction-time {
   grid-column: 1;
   grid-row: 1;
-  color: #fff;
   font-size: 14px;
 }
 
 .transaction-amount {
   grid-column: 2;
   grid-row: 1;
-  color: #fff;
   text-align: right;
   font-size: 14px;
 }
@@ -140,7 +148,6 @@ const previousPage = () => {
 .transaction-balance {
   grid-column: 1 / span 2;
   grid-row: 2;
-  color: #fff;
   font-size: 14px;
 }
 
@@ -148,58 +155,22 @@ const previousPage = () => {
   grid-column: 2;
   grid-row: 2;
   text-align: right;
-  color: #fff;
   font-size: 14px;
 }
 
 .no-transaction {
-  color: #fff;
   text-align: center;
 }
 
-.pagination-wrapper {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
+.loading {
+  text-align: center;
   padding: 10px;
-  margin-bottom: 50px;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 480px;
-}
-
-.pagination-info {
-  font-size: 12px;
   color: #888;
 }
 
-.page-buttons {
-  display: flex;
-  align-items: center;
-}
-
-.pagination-button {
-  padding: 5px 10px;
-  font-size: 14px;
-  cursor: pointer;
-  border: 1px solid #ccc;
-  margin: 0 5px;
-  color: #000;
-}
-
-.pagination-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-  color: #fff;
-}
-
-.page-number {
-  font-size: 14px;
+.no-more {
+  text-align: center;
+  padding: 10px;
   color: #888;
 }
 
@@ -265,51 +236,6 @@ const previousPage = () => {
     text-align: right;
     color: #fff;
     font-size: 14px;
-  }
-
-  .pagination-wrapper {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    padding: 10px;
-  }
-
-  .pagination {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 480px;
-  }
-
-  .pagination-info {
-    font-size: 12px;
-    color: #888;
-  }
-
-  .page-buttons {
-    display: flex;
-    align-items: center;
-  }
-
-  .pagination-button {
-    padding: 5px 10px;
-    font-size: 14px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    margin: 0 5px;
-    color: #000;
-  }
-
-  .pagination-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-    color: #fff;
-  }
-
-  .page-number {
-    font-size: 14px;
-    color: #888;
   }
 }
 </style>
