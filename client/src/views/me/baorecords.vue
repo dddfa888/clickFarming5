@@ -320,5 +320,199 @@ const transferOutRecords = [
     font-size: 14px;
   }
 }
+
+@media screen and (min-width: 768px) {
+  .tab-container {
+    margin: 0 auto;
+    max-width: 450px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 标签栏样式 */
+  .tab-bar {
+    display: flex;
+    background-color: #fff;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    margin-top: 50px;
+  }
+
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 5px 0;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+    position: relative;
+    transition: color 0.3s, transform 0.2s;
+  }
+
+  .tab-item.active {
+    color: #000;
+    font-weight: 500;
+  }
+
+  .tab-item:active {
+    transform: scale(0.95);
+  }
+
+  .tab-indicator {
+    position: absolute;
+    bottom: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background-color: #f0c14b;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .tab-item.active .tab-indicator {
+    animation: indicatorPulse 0.3s;
+  }
+
+  /* 内容区域样式 */
+  .tab-content {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .tab-pane {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 记录列表样式 */
+  .record-list {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .record-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background-color 0.2s;
+  }
+
+  .record-item:last-child {
+    border-bottom: none;
+  }
+
+  .record-item:active {
+    background-color: #f9f9f9;
+  }
+
+  .record-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    margin-right: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .income-icon {
+    background-color: #4cd964;
+  }
+
+  .transfer-in-icon {
+    background-color: #5ac8fa;
+  }
+
+  .transfer-out-icon {
+    background-color: #ff9500;
+  }
+
+  .record-info {
+    flex: 1;
+  }
+
+  .record-title {
+    font-size: 16px;
+    color: #000;
+    margin-bottom: 4px;
+  }
+
+  .record-date {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .record-amount {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .income-amount,
+  .transfer-in-amount {
+    color: #4cd964;
+  }
+
+  .transfer-out-amount {
+    color: #ff3b30;
+  }
+
+  /* 过渡动画 */
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .fade-enter {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .fade-leave-to {
+    opacity: 0;
+  }
+
+  /* 无数据样式 */
+  .no-data {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    padding: 20px;
+  }
+
+  .no-data-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 15px;
+    opacity: 0.6;
+  }
+
+  /* 动画 */
+  @keyframes indicatorPulse {
+    0% {
+      width: 12px;
+    }
+    50% {
+      width: 30px;
+    }
+    100% {
+      width: 24px;
+    }
+  }
+}
 </style>
     

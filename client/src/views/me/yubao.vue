@@ -10,41 +10,75 @@
     <div class="asset">
       <div class="total-assets">
         <span class="label">总资产</span>
-        <span class="record">
-          <img src="../../assets/image/eye.svg" alt />
+        <span class="record" @click="eyeClick">
+          <img v-if="!isEyes" src="../../assets/image/eye.svg" alt />
+          <img v-else src="../../assets/image/openeys.svg" alt />
         </span>
       </div>
-      <div class="amount">0.00</div>
-      <div class="yesterday-income">昨日收益 0 元</div>
+      <div class="amount">
+        <span v-if="!isEyes">0.00</span>
+        <span v-else>****</span>
+      </div>
+      <div class="yesterday-income">
+        昨日收益
+        <span v-if="!isEyes">0.00</span>
+        <span v-else>****</span>
+        元
+      </div>
       <div class="other-info">
         <div class="item">
-          <span class="value">0.00</span>
+          <span class="value">
+            <span v-if="!isEyes">0.00</span>
+            <span v-else>****</span>
+          </span>
           <span class="desc">累计收益(元)</span>
         </div>
         <div class="item">
-          <span class="value">5.00</span>
+          <span class="value">
+            <span v-if="!isEyes">5.00</span>
+            <span v-else>****</span>
+          </span>
           <span class="desc">年化率 (%)</span>
         </div>
       </div>
       <div class="buttons">
-        <button class="transfer-in">余额转入</button>
-        <button class="transfer-out">余额转出</button>
+        <button class="transfer-in" @click="showModal = true">余额转入</button>
+        <button class="transfer-out" @click="showModal = true">余额转出</button>
       </div>
     </div>
+    <TransferModal
+      :visible="showModal"
+      :available-balance="98.62"
+      @close="showModal = false"
+      @confirm="handleConfirm"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import HeaderBar from "../../components/HeaderBar.vue";
+import TransferModal from "../../components/TransferModal.vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 
 const { t } = useI18n();
 const router = useRouter();
+const showModal = ref(false);
+const isEyes = ref(false);
+
+const eyeClick = () => {
+  isEyes.value = !isEyes.value;
+};
 
 const toRecord = () => {
   router.push("/baorecords");
+};
+
+const handleConfirm = amount => {
+  console.log("转入金额:", amount);
+  // 处理转入逻辑...
+  showModal.value = false;
 };
 
 const toback = () => {

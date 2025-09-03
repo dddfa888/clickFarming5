@@ -1,5 +1,5 @@
 <template>
-  <div class="orders-page" ref="listRef" @scroll.passive="handleScroll">
+  <div class="orders-page" :ref="listRef" @scroll.passive="handleScroll">
     <HeaderBar :title="t('拼团记录')" backcolor="#e4e2e2" />
 
     <!-- 顶部Tab切换 -->

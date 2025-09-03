@@ -46,10 +46,13 @@
         <div v-for="(item, index) in paginatedOrders" :key="index" class="product-item">
           <div class="product-left">
             <img class="product-image" src="../../assets/image/1.png" alt />
-            <div class="product-name">{{ item.name }}</div>
+            <div class="product-name">
+              <p>{{ item.name }}</p>
+              <p class="product-tag">拼团次数30次商品</p>
+            </div>
           </div>
           <div class="info">
-            <button>极速拼团</button>
+            <button class="btn" @click="handleOrder">极速拼团</button>
           </div>
         </div>
       </div>
@@ -87,90 +90,53 @@
       </div>
     </div>
 
-    <ProductModal v-if="showModal" :id="ordderid" @close="showModal = false" @pay="handlePay" />
+    <ProductModal v-if="showModal" :id="id" @close="showModal = false" @pay="handlePay" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from "vue";
-import { useI18n } from "vue-i18n";
+import { computed, ref, onMounted } from "vue";
 import {
-  getOrderList,
+  createOrder,
   sendDistribution,
   getUserGradeAndBalanceAndDiscount
 } from "../../api/index";
 import ProductModal from "../../components/ProductModal.vue";
+import { showAlert } from "../../utils/notify";
 import { useRouter } from "vue-router";
+// 不再用 filteredOrders，因为数据直接由接口返回
+const totalPages = computed(() => Math.ceil(orders.value.length / pageSize));
+const paginatedOrders = ref([
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 },
+  { id: 1, name: "Order 1", price: 100 }
+]);
 
-const { t } = useI18n();
-const router = useRouter();
-
-// 标签和当前选择
-const tabs = ["全部单", "待处理", "已完成", "冻结中"];
-const activeTab = ref(0);
-const accountBalance = ref();
-const todayCommission = ref();
 const showModal = ref(false);
-const ordderid = ref();
-const orderNum = ref(0);
-const order = ref({});
-const orders = ref([]);
-const productListRef = ref(null);
-
-// tab 对应的接口参数
-const tabStatusMap = {
-  全部单: null,
-  待处理: { processStatus: "Waiting" },
-  已完成: { processStatus: "Success" },
-  冻结中: { processStatus: "Frozen" } // 你可以根据后端真实字段改
-};
-
-const formatPrice = val => Number(val).toFixed(2);
-
-function getAccountBalance() {
-  getUserGradeAndBalanceAndDiscount().then(res => {
-    order.value = res.data;
-    accountBalance.value = res.data.userBalance;
-    todayCommission.value = res.data.profit;
-    orderNum.value = res.data.frozenAmount;
-  });
-}
-
-// 获取订单列表（根据 tab）
-function getOrderlist() {
-  const tabName = tabs[activeTab.value];
-  const params = tabStatusMap[tabName] || {};
-  console.log(params);
-  getOrderList(params).then(res => {
-    console.log(res);
-    orders.value = res.rows;
-    // 数据加载后启动滚动动画
-    nextTick(() => {
-      startScrollAnimation();
-    });
-  });
-}
-
-// 启动滚动动画
-function startScrollAnimation() {
-  if (!productListRef.value) return;
-
-  const productList = productListRef.value;
-  const listHeight = productList.scrollHeight / 2; // 一半高度
-  const containerHeight = productList.clientHeight;
-
-  if (listHeight > containerHeight) {
-    const duration = Math.max(listHeight / 30, 15); // 内容越多滚动越久
-    productList.style.setProperty("--duration", `${duration}s`);
-  } else {
-    productList.style.setProperty("--duration", "0s");
-  }
-}
-
-const Sendbutton = id => {
-  ordderid.value = id;
-  showModal.value = true;
-};
+const id = ref(null);
+const router = useRouter();
+const isProcessing = ref(false);
 
 function debounce(fn, delay) {
   let timer = null;
@@ -182,48 +148,51 @@ function debounce(fn, delay) {
   };
 }
 
+const handleOrder = () => {
+  createOrder().then(res => {
+    if (res.code === 200) {
+      showModal.value = true;
+      console.log(res.orderId);
+      id.value = res.orderId;
+      isProcessing.value = true;
+    } else {
+      isProcessing.value = false;
+      showAlert(res.msg, 4000);
+    }
+  });
+};
+
 const handlePay = debounce(() => {
-  if (!ordderid.value) return;
+  console.log("handlePay");
+  if (!id.value || !isProcessing.value) return;
 
   showModal.value = false;
-  sendDistribution(ordderid.value)
+
+  sendDistribution(id.value)
     .then(res => {
       if (res.code === 200) {
-        showAlert(t("正在分发"), 5000);
+        showAlert("正在分发", 4000);
         setTimeout(() => {
-          showAlert(t("订单支付成功！"), 6000);
-          getAccountBalance();
-          getOrderlist();
-        }, 5000);
+          showAlert("订单支付成功！", 4000);
+          isProcessing.value = false;
+        }, 4000);
+
+        // // 更新数据
+        // return getUserGradeAndBalanceAndDiscount().then(refreshRes => {
+        //   order.value = refreshRes.data;
+        // });
       } else {
-        showAlert(t(res.msg), 4000);
+        console.log(res.msg);
+        showAlert(res.msg, 3000);
+        isProcessing.value = false;
       }
     })
     .catch(() => {
-      showAlert(t("支付请求失败"), 4000);
+      showAlert("支付请求失败", 4000);
+      isProcessing.value = false;
     });
-}, 1000);
-
-// 分页
-const currentPage = ref(1);
-const pageSize = 20;
-
-// 不再用 filteredOrders，因为数据直接由接口返回
-const totalPages = computed(() => Math.ceil(orders.value.length / pageSize));
-const paginatedOrders = ref([
-  { id: 1, name: "Order 1", price: 100 },
-  { id: 1, name: "Order 1", price: 100 },
-  { id: 1, name: "Order 1", price: 100 }
-]);
+}, 2000);
 const totalOrders = computed(() => orders.value.length);
-
-onMounted(() => {
-  getAccountBalance();
-  getOrderlist();
-
-  // 窗口大小变化时重新计算滚动
-  window.addEventListener("resize", startScrollAnimation);
-});
 </script>
 
 
@@ -369,37 +338,26 @@ onMounted(() => {
 .product-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
   max-height: 260px; /* 显示区域高度 */
-  overflow: hidden;
+  overflow: auto;
   position: relative;
-  animation: autoScroll var(--duration, 20s) linear infinite;
-  will-change: transform;
 }
 
-@keyframes autoScroll {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-50%);
-  }
-}
-
-.product-list:hover {
-  animation-play-state: paused;
+.product-list::-webkit-scrollbar {
+  display: none;
 }
 
 .product-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 0;
   border-bottom: 1px solid #f0f0f0;
   font-size: 10px;
+  height: 50px;
 }
 
 .product-left {
+  height: 100%;
   display: flex;
   align-items: center;
 }
@@ -426,6 +384,9 @@ onMounted(() => {
   text-overflow: ellipsis;
   max-width: 150px;
 }
+.product-name p {
+  font-size: 10px;
+}
 
 .product-tag {
   display: inline-block;
@@ -433,6 +394,8 @@ onMounted(() => {
   color: #ff6b6b;
   padding: 0;
   margin: 0;
+  border: 1px solid #ff6b6b;
+  border-radius: 4px;
 }
 
 .product-right {
@@ -611,6 +574,16 @@ onMounted(() => {
   cursor: pointer;
 }
 
+.btn {
+  background-color: #ff6f61;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 5px;
+  font-size: 10px;
+  margin-top: 10px;
+}
+
 /* 修改底部导航激活状态颜色 */
 .nav-item.active .nav-text {
   color: #1e90ff;
@@ -650,6 +623,7 @@ onMounted(() => {
     justify-content: space-between;
     margin-top: -28px;
   }
+
   .orders-page {
     background: #1e201f;
     font-family: sans-serif;

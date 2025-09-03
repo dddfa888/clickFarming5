@@ -3,13 +3,12 @@
     <div class="modal-box">
       <!-- 顶部标题 -->
       <div class="modal-header">
-        <img src="../assets/img/en_ordersucesstitle.png" alt />
+        <p>匹配到淘宝的订单</p>
       </div>
 
       <!-- 时间 & 订单号 -->
       <div class="order-info">
-        <p>{{ t("是时候提取下单了") }}: {{ data.createTime }}</p>
-        <p>{{ t("订单号") }}: {{ data.productId }}</p>
+        <p>{{ t("订单编号") }}: {{ data.productId }}</p>
       </div>
 
       <!-- 商品信息 -->
@@ -25,19 +24,19 @@
       <div class="price-info">
         <div class="row">
           <span>{{ t("订单总数") }}</span>
-          <span>${{ data.totalAmount }}</span>
+          <span>{{ data.totalAmount }}</span>
         </div>
         <div class="row">
-          <span>{{ t("佣金") }}</span>
-          <span>${{ data.profit }}</span>
+          <span>{{ t("返现") }}</span>
+          <span>{{ data.profit }}</span>
         </div>
         <div class="row">
-          <span>{{ t("差额金额") }}</span>
-          <span>$0.00</span>
+          <span>{{ t("合计金额") }}</span>
+          <span style="color: #ff0000">{{ data.totalAmount }}+{{ data.profit }}</span>
         </div>
-        <div class="row highlight">
-          <span>{{ t("预期回报") }}</span>
-          <span>${{ data.refundAmount }}</span>
+        <div class="row">
+          <span>{{ t("订单日期") }}</span>
+          <span>${{ data.createTime }}</span>
         </div>
       </div>
 
@@ -89,10 +88,10 @@ const onPay = () => emit("pay");
 .modal-box {
   width: 90%;
   max-width: 380px;
-  background: #252726;
+  background-color: #fff;
   border-radius: 12px;
   overflow: hidden;
-  color: #333;
+  color: #000;
   font-size: 14px;
 }
 
@@ -114,7 +113,7 @@ const onPay = () => emit("pay");
 .order-info {
   padding: 10px 16px;
   font-size: 12px;
-  color: #fff;
+  color: #000;
 }
 
 /* 商品 */
@@ -138,7 +137,7 @@ const onPay = () => emit("pay");
 .product-desc .product-name {
   font-weight: bold;
   margin-bottom: 4px;
-  color: #424242;
+  color: #000;
 }
 
 /* 价格信息 */
@@ -150,12 +149,7 @@ const onPay = () => emit("pay");
   display: flex;
   justify-content: space-between;
   margin: 6px 0;
-  color: #fff;
-}
-
-.price-info .highlight {
-  font-size: 16px;
-  color: #f0deb8;
+  color: #000;
 }
 
 /* 底部按钮 */

@@ -68,7 +68,7 @@ locale.value = langStore.locale;
 
 function selectLanguage(lang) {
   selectedLanguage.value = lang;
-  const langCode = langMap[lang] || "vi";
+  const langCode = langMap[lang] || "zh";
   langStore.setLocale(langCode);
   locale.value = langCode;
   showLangList.value = !showLangList.value;

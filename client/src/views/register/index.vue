@@ -195,7 +195,8 @@ const langMap = {
   Español: "es",
   "Việt Nam": "vi",
   Turkey: "tr",
-  हिंदी: "hi"
+  हिंदी: "hi",
+  中文: "zh"
 };
 const languageList = Object.keys(langMap);
 const reverseLangMap = Object.fromEntries(
@@ -208,7 +209,7 @@ locale.value = langStore.locale;
 
 function selectLanguage(lang) {
   selectedLanguage.value = lang;
-  const langCode = langMap[lang] || "ko";
+  const langCode = langMap[lang] || "zh";
   langStore.setLocale(langCode);
   locale.value = langCode;
   showLangList.value = !showLangList.value;
@@ -606,9 +607,350 @@ function onSubmit() {
 }
 
 /* 响应式调整 */
-@media screen and (max-width: 450px) {
+@media screen and (min-width: 768px) {
   .register-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
     width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+  }
+
+  /* 语言选择器 */
+  .language-selector {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #fff;
+    z-index: 20;
+  }
+
+  .language-selector .label {
+    margin-right: 6px;
+    color: #fff;
+  }
+
+  .dropdown-wrapper {
+    position: relative;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #333;
+    user-select: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .flag-icon {
+    width: 20px;
+    height: 15px;
+    margin-right: 5px;
+  }
+
+  .lang-dropdown {
+    position: absolute;
+    top: 35px;
+    right: 0;
+    background: #ffffff;
+    color: #333;
+    list-style: none;
+    padding: 5px 0;
+    margin: 0;
+    border-radius: 4px;
+    width: 120px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+  }
+
+  .lang-dropdown li {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+  }
+
+  .lang-dropdown li:hover,
+  .lang-dropdown li.active {
+    background-color: #f5f5f5;
+  }
+
+  /* 应用Logo和名称 */
+  .app-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 80px;
+    margin-bottom: 40px;
+  }
+
+  .logo-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .logo-icon img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+  }
+
+  .app-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c;
+  }
+
+  /* 注册表单 */
+  .register-form {
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+
+  .form-group {
+    position: relative;
+    margin-bottom: 20px;
+    background-color: #ffff;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    height: 50px;
+  }
+
+  .input-icon {
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .input-icon img {
+    width: 50%;
+  }
+  .user-icon::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/user-icon.png") no-repeat center center /
+      contain;
+    opacity: 0.7;
+  }
+
+  .lock-icon::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/lock-icon.png") no-repeat center center /
+      contain;
+    opacity: 0.7;
+  }
+
+  .phone-icon::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/phone-icon.png") no-repeat center center /
+      contain;
+    opacity: 0.7;
+  }
+
+  .invite-icon::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/invite-icon.png") no-repeat center center /
+      contain;
+    opacity: 0.7;
+  }
+
+  .form-group input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding: 0 10px;
+    font-size: 16px;
+    color: #333;
+    outline: none;
+  }
+
+  .eye-icon {
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .eye-open::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/eye-open.png") no-repeat center center /
+      contain;
+    opacity: 0.9;
+  }
+
+  .eye-closed::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/eye-closed.png") no-repeat center center /
+      contain;
+    opacity: 0.7;
+  }
+
+  /* 手机号输入框 */
+  .phone-group {
+    display: flex;
+    align-items: center;
+    background-color: #ffff;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .area-select {
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 0 5px;
+    font-size: 14px;
+    appearance: none;
+    width: 70px;
+    text-align: center;
+    color: #333;
+  }
+
+  .phone-input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding: 0 10px;
+    font-size: 16px;
+    color: #333;
+    outline: none;
+  }
+
+  /* 用户协议 */
+  .agreement {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .checkbox-container {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+  }
+
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+  }
+
+  .checkbox-container input:checked ~ .checkmark {
+    background-color: #2196f3;
+  }
+
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+
+  .checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+  }
+
+  .checkbox-container .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .agreement a {
+    color: #2196f3;
+    text-decoration: none;
+  }
+
+  /* 注册按钮 */
+  .register-btn {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .register-btn button {
+    width: 100%;
+    height: 50px;
+    background-color: #ffff;
+    color: #f1c40f;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  /* 登录链接 */
+  .login-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .login-link a {
+    color: #f1c40f;
+    text-decoration: none;
+    margin-left: 5px;
+    cursor: pointer;
   }
 }
 </style>

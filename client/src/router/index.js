@@ -18,6 +18,7 @@ const routes = [
    {path: '/backcard', name: 'backcard', component: () => import('../views/me/backcard.vue') },
    {path: '/reflect', name: 'reflect', component: () => import('../views/me/reflect.vue') },
    {path: '/setpaypassword', name: 'setpaypassword', component: () => import('../views/me/SetPayPassword.vue') },
+   {path: '/binding', name: 'binding', component: () => import('../views/me/binding.vue') },
   {
     path: '/income',
     name: 'income',

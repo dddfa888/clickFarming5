@@ -76,20 +76,14 @@
         </button>
       </div>
     </div>
-
-    <!-- 底部导航栏 -->
-    <div class="bottom-nav">
-      <button class="nav-btn" @click="goToHome">首页</button>
-      <button class="nav-btn" @click="goToMessage">信息</button>
-      <button class="nav-btn" @click="goToPinGoods">拼好货</button>
-      <button class="nav-btn active">网页版</button>
-      <button class="nav-btn" @click="goToMy">我的</button>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 // 密码相关
 const passwordLength = ref(6);
@@ -144,7 +138,7 @@ const goBack = () => {
     showError.value = false;
   } else {
     // 否则返回上一页
-    console.log("返回上一页");
+    router.back();
     // 可结合路由进行页面跳转，比如使用 router.back()
   }
 };

@@ -35,7 +35,7 @@
           <div class="input-icon">
             <img src="../../assets/image/user.svg" alt />
           </div>
-          <input type="text" v-model="form.loginAccount" :placeholder="t('输入用户名')" />
+          <input type="text" v-model="form.loginAccount" placeholder="输入用户名" />
         </div>
 
         <!-- 密码输入框 -->
@@ -46,7 +46,7 @@
           <input
             :type="showPassword ? 'text' : 'password'"
             v-model="form.loginPassword"
-            :placeholder="t('输入密码')"
+            placeholder="输入密码"
           />
           <div class="eye-icon" @click="togglePasswordVisibility">
             <i :class="showPassword ? 'eye-open' : 'eye-closed'"></i>
@@ -55,13 +55,13 @@
 
         <!-- 登录链接 -->
         <div class="login-link">
-          <span>{{ t("没有账号？") }}</span>
-          <a @click="router.push('/register')">{{ t("立即注册") }}</a>
+          <span>{{ "没有账号？" }}</span>
+          <a @click="router.push('/register')">{{ "立即注册" }}</a>
         </div>
 
         <!-- 登录按钮 -->
         <div class="login-btn">
-          <button @click.prevent="onSubmit" type="submit">{{ t("登录") }}</button>
+          <button @click.prevent="onSubmit" type="submit">{{ "登录" }}</button>
         </div>
       </form>
     </div>
@@ -117,7 +117,8 @@ const langMap = {
   Español: "es",
   "Việt Nam": "vi",
   Turkey: "tr",
-  हिंदी: "hi"
+  हिंदी: "hi",
+  中文: "zh"
 };
 const languageList = Object.keys(langMap);
 const reverseLangMap = Object.fromEntries(
@@ -144,13 +145,13 @@ const infoStore = useInfoStore();
 function onSubmit(values) {
   // 验证用户是否同意协议
   if (!agreedToTerms.value) {
-    showAlert(t("请先阅读并同意用户协议和隐私协议"), 2000);
+    showAlert("请先阅读并同意用户协议和隐私协议", 2000);
     return;
   }
 
   login(form).then(res => {
     if (res.code === 200) {
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
       localStorage.setItem("token", res.data.token);
       infoStore.setUserinfo(res.data.date);
       if (window._MEIQIA) {
@@ -161,7 +162,7 @@ function onSubmit(values) {
       }
       router.push("/");
     } else {
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     }
   });
 }
@@ -558,112 +559,268 @@ function onSubmit(values) {
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    width: 450px;
-    padding: 20px;
+    width: 100%;
+    max-width: 450px;
     margin: 0 auto;
+    padding: 0;
     box-sizing: border-box;
-    background: url("../../assets/img/login-bg.png") no-repeat center center /
-      cover;
+    background-color: #f5f5f5;
+  }
+
+  /* 状态栏样式 */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 5px 15px;
+    background-color: #ffffff;
+    height: 24px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+  }
+
+  .status-icons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .camera-hole {
+    width: 8px;
+    height: 8px;
+    background-color: #000;
+    border-radius: 50%;
+  }
+
+  .right-icons {
+    display: flex;
+    gap: 5px;
+  }
+
+  .icon-signal::before {
+    content: "📶";
+    font-size: 12px;
+  }
+
+  .icon-wifi::before {
+    content: "📡";
+    font-size: 12px;
+  }
+
+  .icon-battery::before {
+    content: "🔋";
+    font-size: 12px;
+  }
+
+  /* 应用Logo和名称 */
+  .app-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 80px;
+    margin-bottom: 40px;
+  }
+
+  .logo-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .logo-icon img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+  }
+
+  .app-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c;
   }
 
   /* 登录表单 */
   .login-form {
     width: 100%;
-    max-width: 500px;
-    /* background: rgba(255, 255, 255, 0.08); */
-    border-radius: 10px;
-    padding: 10px;
+    padding: 0 20px;
     box-sizing: border-box;
-    margin-top: 20px;
   }
 
   .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 16px;
-    border-radius: 30px;
-    width: 100%;
-    border: 1px solid #181818;
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.1);
     position: relative;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    background-color: #ffff;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    height: 50px;
+  }
+
+  .input-icon {
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .input-icon img {
+    width: 50%;
+  }
+
+  .user-icon::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/user-icon.png") no-repeat center center /
+      contain;
+    opacity: 0.7;
+  }
+
+  .lock-icon::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/lock-icon.png") no-repeat center center /
+      contain;
+    opacity: 0.7;
   }
 
   .form-group input {
-    padding: 14px 16px;
-    border-radius: 5px; /* 完全圆形输入框 */
-    color: rgb(133, 133, 133);
+    flex: 1;
+    height: 100%;
     border: none;
-    font-size: 14px;
+    background: transparent;
+    padding: 0 10px;
+    font-size: 16px;
+    color: #333;
     outline: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    background-color: #edfbff;
   }
 
-  .login-btn {
+  .eye-icon {
+    width: 50px;
     display: flex;
     justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .eye-open::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/eye-open.png") no-repeat center center /
+      contain;
+    opacity: 0.9;
+  }
+
+  .eye-closed::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("../../assets/img/eye-closed.png") no-repeat center center /
+      contain;
+    opacity: 0.7;
+  }
+
+  /* 登录按钮 */
+  .login-btn {
+    margin-top: 30px;
+    margin-bottom: 20px;
   }
 
   .login-btn button {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 16px;
+    height: 50px;
+    background-color: #ffff;
     border: none;
-    border-radius: 25px;
-    background-color: #d6ba82;
-    color: white;
-    font-size: 16px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+    color: #f1c40f;
   }
 
-  .login-footer {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 500px;
-    align-items: center;
-    color: #fff;
-  }
-  /* 语言选择器 */
-  .language-selector {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+  /* 用户协议 */
+  .agreement {
     display: flex;
     align-items: center;
+    margin-top: 20px;
     font-size: 14px;
-    color: #fff;
-    z-index: 20;
   }
-  .language-selector .label {
-    margin-right: 6px;
-    color: #fff;
-  }
-  .dropdown-wrapper {
+
+  .checkbox-container {
     position: relative;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 5px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #fff;
-    user-select: none;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
   }
-  .lang-dropdown {
+
+  .checkbox-container input {
     position: absolute;
-    top: 35px;
-    right: 0;
-    background: #0c0c0c;
-    color: #fff;
-    list-style: none;
-    padding: 5px 0;
-    margin: 0;
-    border-radius: 4px;
-    width: 100px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    z-index: 999;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
   }
+
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+  }
+
+  .checkbox-container input:checked ~ .checkmark {
+    background-color: #2196f3;
+  }
+
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+
+  .checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+  }
+
+  .checkbox-container .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .agreement-text {
+    color: #666;
+  }
+
+  .agreement-text a {
+    color: #2196f3;
+    text-decoration: none;
+  }
+
   .lang-dropdown li {
     padding: 8px 12px;
     cursor: pointer;
@@ -675,6 +832,62 @@ function onSubmit(values) {
   .lang-dropdown li.active {
     background-color: #d3d3d3;
     color: #000;
+  }
+
+  /* 样式 */
+  .flag-icon {
+    width: 18px;
+    height: 12px;
+    margin-right: 6px;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+  .lang-dropdown li {
+    display: flex;
+    align-items: center;
+  }
+  .dropdown-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  /* 语言选择器 - 移动端 */
+  .language-selector {
+    position: absolute;
+    top: 30px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    z-index: 20;
+  }
+  .language-selector .label {
+    margin-right: 6px;
+    color: #333;
+  }
+  .dropdown-wrapper {
+    position: relative;
+    background: rgba(245, 245, 245, 0.9);
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #333;
+    user-select: none;
+  }
+  .lang-dropdown {
+    position: absolute;
+    top: 35px;
+    right: 0;
+    background: #ffffff;
+    color: #333;
+    list-style: none;
+    padding: 5px 0;
+    margin: 0;
+    border-radius: 4px;
+    width: 120px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 999;
   }
 
   .icon {
@@ -708,21 +921,18 @@ function onSubmit(values) {
     height: 50px;
   }
 
-  /* 样式 */
-  .flag-icon {
-    width: 18px;
-    height: 12px;
-    margin-right: 6px;
-    object-fit: cover;
-    border-radius: 2px;
+  .login-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
   }
-  .lang-dropdown li {
-    display: flex;
-    align-items: center;
-  }
-  .dropdown-wrapper {
-    display: flex;
-    align-items: center;
+
+  .login-link a {
+    color: #f1c40f;
+    text-decoration: none;
+    margin-left: 5px;
+    cursor: pointer;
   }
 }
 </style>

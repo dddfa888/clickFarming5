@@ -135,7 +135,7 @@ const onCenterClick = () => {
     right: 0;
     width: 450px;
     height: 60px;
-    background-color: #1d1d1f;
+    background-color: #e4e2e2;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -150,12 +150,12 @@ const onCenterClick = () => {
     font-size: 12px;
     flex-direction: column;
     align-items: center;
-    color: #ccc;
+    color: #000;
     cursor: pointer;
   }
 
   .tabbar-item.active {
-    color: #dcb671;
+    color: #1296db;
     font-weight: bold;
   }
 

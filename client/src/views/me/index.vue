@@ -398,4 +398,237 @@ onMounted(() => {
 .nav-item .label {
   font-size: 12px;
 }
+
+@media screen and (min-width: 768px) {
+  .personal-center {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #eeeeee;
+    position: relative;
+    margin: 0 auto;
+    max-width: 450px;
+  }
+
+  .header {
+    padding: 16px;
+  }
+
+  /* 头部信息样式 */
+  .header-info {
+    display: flex;
+    align-items: center;
+    padding: 20px 0;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+    border: 2px solid #eee;
+    align-self: center;
+  }
+
+  .text-info {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .user-base {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .nickname {
+    font-weight: bold;
+    font-size: 18px;
+    color: #333;
+  }
+
+  .credit,
+  .member {
+    font-size: 14px;
+    color: #666;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background-color: #f5f5f5;
+  }
+
+  .account,
+  .invite-code {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  .account::before,
+  .invite-code::before {
+    content: "•";
+    margin-right: 6px;
+    color: #ccc;
+    font-size: 8px;
+  }
+
+  .signature {
+    font-size: 15px;
+    color: #333;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  /* 资产卡片样式 */
+  .asset-card {
+    background-color: #fff; /* 蓝色背景 */
+    color: #000;
+    border-radius: 10px;
+    margin: 0 16px 16px;
+  }
+  .total-asset {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 让图标和文字两端对齐 */
+    margin-bottom: 8px;
+    background-color: #2563eb;
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+  }
+  .icon img {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    padding: 2px;
+  }
+  .label {
+    font-size: 16px;
+  }
+  .amount {
+    font-size: 30px;
+    color: #ffc107;
+  }
+  .grid-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .profit {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+    padding: 20px;
+  }
+
+  .profit .item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+  }
+  .withdraw,
+  .recharge {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+  }
+  .withdraw {
+    background-color: #2563eb;
+    color: #fff;
+  }
+  .recharge {
+    background-color: #ef4444;
+  }
+
+  /* 功能列表样式 */
+  .function-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 16px 80px; /* 底部留出导航栏空间 */
+    background-color: #eee;
+    overflow: hidden;
+  }
+
+  .function-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-radius: 12px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .function-item:hover {
+    background-color: #f9f9f9;
+  }
+
+  .function-item .label {
+    flex: 1;
+    margin: 0 12px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .arrow svg {
+    color: #ccc;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* 底部导航样式 */
+  .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 0 4px;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #999;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    width: 20%;
+  }
+
+  .nav-item.active {
+    color: #2563eb;
+  }
+
+  .nav-item .icon svg {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 4px;
+  }
+
+  .nav-item .label {
+    font-size: 12px;
+  }
+}
 </style>

@@ -1,8 +1,8 @@
 <template>
   <div class="profit-rank-page">
     <!-- 头部区域 -->
+    <HeaderBar title="收益榜单" backcolor="transparent" headercolor="#fff" />
     <div class="header-section">
-      <HeaderBar title="收益榜单" backcolor="transparent" headercolor="#fff" />
       <p class="desc">当前收益榜随机展示100人，数据动态更新</p>
     </div>
 
@@ -428,5 +428,288 @@ onMounted(() => {
 .nav-item .label {
   font-size: 12px;
   margin-top: 3px;
+}
+
+@media screen and (min-width: 768px) {
+  .profit-rank-page {
+    max-width: 450px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #165dff;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    padding-bottom: 60px; /* 为底部导航留出空间 */
+  }
+
+  /* 头部样式 */
+  .header-section {
+    width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #165dff;
+    position: fixed;
+  }
+
+  .back-btn,
+  .refresh-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+  }
+
+  .back-btn:hover,
+  .refresh-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .back-btn {
+    position: absolute;
+    left: 16px;
+    top: 20px;
+  }
+
+  .refresh-btn {
+    position: absolute;
+    right: 16px;
+    top: 20px;
+  }
+
+  .title {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 0 0 8px;
+  }
+
+  .desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 40px 0 0;
+  }
+
+  /* TOP3 样式 */
+  .top-three-section {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    margin-top: 110px;
+    max-width: 450px;
+    position: fixed;
+    background: #165dff;
+  }
+
+  .top-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90px;
+    border-radius: 10px;
+    position: relative;
+    transition: transform 0.3s;
+  }
+
+  .top-item:hover {
+    transform: translateY(-5px);
+  }
+
+  .medal {
+    position: absolute;
+    top: -15px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .medal svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .top-item:nth-child(1) .medal svg {
+    color: #ffd700;
+  }
+
+  .top-item:nth-child(2) .medal svg {
+    color: #e6e6fa;
+  }
+
+  .top-item:nth-child(3) .medal svg {
+    color: #cd7f32;
+  }
+
+  .rank {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 25px;
+    margin-bottom: 5px;
+  }
+
+  .top-item .name {
+    font-size: 14px;
+    color: #333;
+    margin-top: 80px;
+    margin-bottom: 8px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  .profit {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  .avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 榜单列表样式 */
+  .rank-list-section {
+    background-color: #fff;
+    border-radius: 16px 16px;
+    margin: 340px 16px 0;
+    overflow: auto;
+    flex-grow: 1;
+  }
+
+  .list-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background-color 0.2s;
+  }
+
+  .list-item:last-child {
+    border-bottom: none;
+  }
+
+  .list-item:hover {
+    background-color: #f9f9f9;
+  }
+
+  .list-item .rank {
+    font-size: 16px;
+    color: #666;
+    width: 36px;
+    text-align: center;
+    font-weight: 500;
+    margin-top: 0;
+  }
+
+  .list-item .rank.highlight {
+    color: #ff4d4f;
+    font-weight: bold;
+  }
+
+  .list-item .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 0 12px;
+  }
+
+  .list-item .name {
+    flex: 1;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 0;
+  }
+
+  .list-item .profit {
+    font-size: 16px;
+    color: #ff4d4f;
+    font-weight: bold;
+    margin-bottom: 0;
+  }
+
+  /* 底部样式 */
+  .bottom-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .load-more-btn {
+    background-color: #fff;
+    color: #165dff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.2);
+    transition: all 0.2s;
+  }
+
+  .load-more-btn:hover {
+    background-color: #f5f5f5;
+    transform: translateY(-2px);
+  }
+
+  .nav-bar {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    background-color: #fff;
+    padding: 8px 0;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #999;
+    cursor: pointer;
+    flex: 1;
+    transition: color 0.2s;
+  }
+
+  .nav-item.active {
+    color: #165dff;
+  }
+
+  .nav-item svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .nav-item .label {
+    font-size: 12px;
+    margin-top: 3px;
+  }
 }
 </style>

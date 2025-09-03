@@ -353,6 +353,7 @@ watch(activeTabIndex, (newValue, oldValue) => {
 
 .nav-tabs {
   display: flex;
+  justify-content: space-around;
 }
 
 .nav-tab {
@@ -738,5 +739,452 @@ watch(activeTabIndex, (newValue, oldValue) => {
 
 .icon-battery::before {
   content: "🔋";
+}
+
+@media screen and (min-width: 768px) {
+  .ecommerce-container {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    background-color: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    color: #333;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+  }
+
+  /* 顶部状态栏 */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+    background-color: #ff4e44;
+    color: white;
+    height: 24px;
+  }
+
+  .time {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  .status-icons {
+    display: flex;
+    align-items: center;
+  }
+
+  .camera-hole {
+    width: 8px;
+    height: 8px;
+    background-color: #000;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .right-icons {
+    display: flex;
+    gap: 5px;
+  }
+
+  /* 顶部导航栏 */
+  .top-nav {
+    background-color: #ff4e44;
+    padding: 10px 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .nav-tabs {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .nav-tab {
+    padding: 5px 10px;
+    color: white;
+    font-size: 14px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .nav-tab.active {
+    font-weight: bold;
+  }
+
+  .nav-tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background-color: white;
+  }
+
+  .nav-tab-more {
+    padding: 5px 10px;
+    color: white;
+  }
+
+  .nav-tab-more img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .member-banner {
+    text-align: center;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .member-banner img {
+    width: 100%;
+  }
+
+  .banner-content {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .banner-left {
+    flex: 2;
+  }
+
+  .banner-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .banner-subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+  }
+
+  .banner-desc {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+  }
+
+  .banner-button {
+    display: inline-block;
+    background-color: #ff4e44;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .banner-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .shopping-basket {
+    width: 60px;
+    height: 60px;
+    background-color: #e6a8d3;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+
+  .discount {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #ff4e44;
+    color: white;
+    font-size: 12px;
+    padding: 2px 5px;
+    border-radius: 10px;
+  }
+
+  /* 应用图标区 */
+  .app-icons {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 10px;
+    background-color: white;
+    margin: 10px;
+    border-radius: 10px;
+  }
+
+  .app-icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20%;
+  }
+
+  .app-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+
+  .app-icon img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .app-name {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .taobao {
+    background-color: #ff6a00;
+  }
+
+  .pinduoduo {
+    background-color: #e02e24;
+  }
+
+  .vip {
+    background-color: #7b00ff;
+  }
+
+  .jd {
+    background-color: #d71c1c;
+  }
+
+  .tmall {
+    background-color: #ff0036;
+  }
+
+  /* 收益排行 */
+  .earnings-ranking {
+    margin: 10px;
+    background-color: white;
+    border-radius: 10px;
+    display: flex;
+  }
+
+  .ranking-title {
+    width: 20%;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .ranking-title img {
+    width: 100%;
+  }
+
+  .ranking-list {
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .ranking-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 10px;
+  }
+
+  .user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .user-name {
+    flex: 1;
+    font-size: 14px;
+  }
+
+  .user-earnings {
+    color: #ff4e44;
+    font-size: 14px;
+    margin-right: 10px;
+  }
+
+  .earnings-date {
+    color: #999;
+    font-size: 12px;
+    margin-right: 10px;
+  }
+
+  .arrow-right {
+    color: #ccc;
+  }
+
+  .arrow-right img {
+    width: 8px;
+  }
+
+  /* 商品展示区 */
+  .product-showcase {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 60px;
+  }
+
+  .product-item {
+    width: calc(50% - 5px);
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    padding-bottom: 10px;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-brand {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 10px;
+    text-align: right;
+  }
+
+  .product-tag {
+    display: inline-block;
+    background-color: #ff4e44;
+    color: white;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin: 0 10px;
+  }
+
+  .product-delivery {
+    font-size: 12px;
+    color: #666;
+    padding: 5px 10px;
+  }
+
+  .product-name {
+    font-size: 14px;
+    padding: 0 10px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-price {
+    font-size: 16px;
+    color: #ff4e44;
+    font-weight: bold;
+    padding: 0 10px;
+  }
+
+  .product-market-price {
+    font-size: 12px;
+    color: #999;
+    padding: 0 10px;
+  }
+
+  /* 底部导航栏 */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    background-color: white;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+    max-width: 450px;
+    margin: 0 auto;
+  }
+
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    color: #999;
+  }
+
+  .bottom-nav-item.active {
+    color: #ff4e44;
+  }
+
+  .bottom-nav-item i {
+    font-size: 20px;
+    margin-bottom: 3px;
+  }
+
+  /* 图标样式 */
+  .icon-home::before {
+    content: "🏠";
+  }
+
+  .icon-message::before {
+    content: "💬";
+  }
+
+  .icon-shopping::before {
+    content: "🛒";
+  }
+
+  .icon-web::before {
+    content: "🌐";
+  }
+
+  .icon-user::before {
+    content: "👤";
+  }
+
+  .icon-more::before {
+    content: "⋮";
+  }
+
+  .icon-arrow-right::before {
+    content: ">";
+  }
+
+  .icon-signal::before {
+    content: "📶";
+  }
+
+  .icon-wifi::before {
+    content: "📡";
+  }
+
+  .icon-battery::before {
+    content: "🔋";
+  }
 }
 </style>

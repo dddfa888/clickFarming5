@@ -176,11 +176,11 @@ onMounted(() => {
 
 @media screen and (min-width: 768px) {
   .company-intro {
-    background-color: #1e201f;
+    background-color: #ece9ee;
     height: 100vh;
+    overflow-y: auto;
     width: 450px;
     margin: 0 auto;
-    overflow-y: auto;
   }
 
   .transaction-list {
@@ -208,14 +208,12 @@ onMounted(() => {
   .transaction-time {
     grid-column: 1;
     grid-row: 1;
-    color: #fff;
     font-size: 14px;
   }
 
   .transaction-amount {
     grid-column: 2;
     grid-row: 1;
-    color: #fff;
     text-align: right;
     font-size: 14px;
   }
@@ -226,7 +224,6 @@ onMounted(() => {
   .transaction-balance {
     grid-column: 1 / span 2;
     grid-row: 2;
-    color: #fff;
     font-size: 14px;
   }
 
@@ -234,8 +231,23 @@ onMounted(() => {
     grid-column: 2;
     grid-row: 2;
     text-align: right;
-    color: #fff;
     font-size: 14px;
+  }
+
+  .no-transaction {
+    text-align: center;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 10px;
+    color: #888;
+  }
+
+  .no-more {
+    text-align: center;
+    padding: 10px;
+    color: #888;
   }
 }
 </style>
