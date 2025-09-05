@@ -1,7 +1,7 @@
 <template>
   <div class="bank-card-container">
     <!-- 头部区域 -->
-    <HeaderBar :title="t('收款银行卡')" backcolor="#e6f2ff" />
+    <HeaderBar title="收款银行卡" backcolor="#e6f2ff" />
 
     <!-- 银行卡信息区域 -->
     <div style="margin-top: 50px" v-if="userInfo.bankAccountNumber">

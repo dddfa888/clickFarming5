@@ -11,7 +11,14 @@ import { computed } from "vue";
 import TabBar from "./components/TabBar.vue";
 
 const route = useRoute();
-const tabbarPaths = ["/", "/warehouse", "/cskh", "/me", "/record"];
+const tabbarPaths = [
+  "/",
+  "/warehouse",
+  "/cskh",
+  "/me",
+  "/record",
+  "/information"
+];
 
 const showTabBar = computed(() => tabbarPaths.includes(route.path));
 </script>

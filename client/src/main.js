@@ -20,3 +20,13 @@ app.use(router)
 app.use(i18n)
 app.use(Vant)
 app.mount('#app')
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    window.scrollTo(0, 0)
+  }, 100)
+})
+
+router.afterEach(() => {
+  window.scrollTo(0, 0)
+})

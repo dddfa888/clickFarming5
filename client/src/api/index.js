@@ -351,4 +351,12 @@ export function getYuebaoRecord(params) {
     })
 }
 
+// 会员中心
+export function getMemberCenter() {
+    return request({
+        url: `/api/grade/list`,
+        method: 'get',
+    })
+}
+
 

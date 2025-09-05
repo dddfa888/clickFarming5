@@ -2,7 +2,7 @@
   <div class="setting-container">
     <!-- 头部区域 -->
 
-    <HeaderBar :title="t('设置')" backcolor="#ece9ee" />
+    <HeaderBar title="设置" backcolor="#ece9ee" />
     <div class="header">
       <span class="back">&lt;</span>
       <span class="title"></span>

@@ -1,7 +1,7 @@
 <template>
   <div class="withdraw-container">
     <!-- 头部区域 -->
-    <HeaderBar :title="t('提现')" backcolor="#fff" />
+    <HeaderBar title="提现" backcolor="#fff" />
     <!-- 选择提现方式区域 -->
     <div class="withdraw-method" v-if="userInfo.bankName">
       <div class="bank-card">
@@ -331,6 +331,12 @@ input {
     background-color: #fff;
     padding: 10px;
     border-radius: 8px;
+  }
+
+  .bank-card img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
   }
   .unionpay-icon {
     width: 30px;

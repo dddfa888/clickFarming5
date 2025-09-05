@@ -1,6 +1,6 @@
 <template>
-  <div class="orders-page" :ref="listRef" @scroll.passive="handleScroll">
-    <HeaderBar :title="t('拼团记录')" backcolor="#e4e2e2" />
+  <div class="orders-page" ref="listRef" @scroll.passive="handleScroll()">
+    <HeaderBar title="拼团记录" backcolor="#e4e2e2" />
 
     <!-- 顶部Tab切换 -->
     <div class="tabs">
@@ -9,20 +9,20 @@
         :key="tab"
         :class="['tab', { active: activeTab === index }]"
         @click="activeTab = index"
-      >{{ $t(tab) }}</div>
+      >{{ tab }}</div>
     </div>
 
     <!-- 内容区 -->
     <div class="no-order" v-if="orders.length === 0">
-      <p>{{ $t("该页面没有记录哦") }}</p>
+      <p>该页面没有记录哦</p>
     </div>
 
     <div v-else class="orders-list">
       <div v-for="(item, index) in orders" :key="index" class="history-item">
         <div class="item-header">
           <div class="time-code">
-            <span class="code">{{ $t("订单号") }}: {{ item.id }}</span>
-            <span style="color:red;">{{ $t("已完成") }}</span>
+            <span class="code">订单号: {{ item.id }}</span>
+            <span style="color:red;">已完成</span>
           </div>
         </div>
 
@@ -41,21 +41,19 @@
 
         <div class="calculation">
           <div class="calc-row">
-            <span>{{ t("订单总额") }}:</span>
-            <span class="amount">${{ formatPrice(item.totalAmount) }}</span>
+            <span>订单总额:</span>
+            <span class="amount">{{ formatPrice(item.totalAmount) }}</span>
           </div>
           <div class="calc-row">
-            <span>{{ t("返现") }}:</span>
-            <span class="amount">${{ formatPrice(item.profit) }}</span>
+            <span>返现:</span>
+            <span class="amount">{{ formatPrice(item.profit) }}</span>
           </div>
           <div class="calc-row">
-            <span>{{ t("合计金额") }}:</span>
-            <span
-              class="amount"
-            >${{ formatPrice(item.totalAmount) }} +{{ formatPrice(item.profit) }}</span>
+            <span>合计金额:</span>
+            <span class="amount">{{ formatPrice(item.totalAmount) }} +{{ formatPrice(item.profit) }}</span>
           </div>
           <div class="calc-row">
-            <span>{{ t("订单日期") }}:</span>
+            <span>订单日期:</span>
             <span class="amount">{{ item.createTime}}</span>
           </div>
         </div>
@@ -86,6 +84,7 @@ import ProductModal from "../../components/ProductModal.vue";
 import { showAlert } from "../../utils/notify";
 
 const { t } = useI18n();
+const listRef = ref(null);
 
 // 标签和当前选择
 const tabs = ["全部单", "待处理", "已完成", "冻结中"];
@@ -186,17 +185,17 @@ const handlePay = debounce(() => {
   sendDistribution(ordderid.value)
     .then(res => {
       if (res.code === 200) {
-        showAlert(t("正在分发"), 5000);
+        showAlert("正在分发", 5000);
         setTimeout(() => {
-          showAlert(t("订单支付成功！"), 6000);
+          showAlert("订单支付成功！", 6000);
           getOrderlist();
         }, 5000);
       } else {
-        showAlert(t(res.msg), 4000);
+        showAlert(res.msg, 4000);
       }
     })
     .catch(() => {
-      showAlert(t("支付请求失败"), 4000);
+      showAlert("支付请求失败", 4000);
     });
 }, 1000);
 </script>

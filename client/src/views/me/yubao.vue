@@ -3,8 +3,8 @@
     <!-- 头部区域 -->
     <div style="background-color:#ece9ee;" class="header-bar">
       <van-icon name="arrow-left" class="back-icon" @click="toback" />
-      <span class="title">{{ t('余额宝') }}</span>
-      <span class="right-placeholder" @click="toRecord">{{ t('余额宝记录') }}</span>
+      <span class="title">余额宝</span>
+      <span class="right-placeholder" @click="toRecord">余额宝记录</span>
     </div>
     <!-- 资产信息区域 -->
     <div class="asset">

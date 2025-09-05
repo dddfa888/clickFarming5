@@ -69,7 +69,12 @@
 
     <!-- 商品展示区 -->
     <div class="product-showcase">
-      <div v-for="(product, index) in currentProducts" :key="index" class="product-item">
+      <div
+        v-for="(product, index) in currentProducts"
+        :key="index"
+        class="product-item"
+        @click="router.push('warehouse')"
+      >
         <div class="product-image">
           <img :src="product.imageUrl" :alt="product.name" />
         </div>
@@ -458,7 +463,7 @@ watch(activeTabIndex, (newValue, oldValue) => {
   flex-wrap: wrap;
   gap: 10px;
   padding: 10px;
-  margin-bottom: 60px;
+  margin-bottom: 80px;
 }
 
 .product-item {

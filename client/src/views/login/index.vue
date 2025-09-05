@@ -143,23 +143,11 @@ function toggleLangList() {
 
 const infoStore = useInfoStore();
 function onSubmit(values) {
-  // 验证用户是否同意协议
-  if (!agreedToTerms.value) {
-    showAlert("请先阅读并同意用户协议和隐私协议", 2000);
-    return;
-  }
-
   login(form).then(res => {
     if (res.code === 200) {
       showAlert(res.msg, 2000);
       localStorage.setItem("token", res.data.token);
       infoStore.setUserinfo(res.data.date);
-      if (window._MEIQIA) {
-        window._MEIQIA("client", {
-          name: res.data.loginAccount, // 假设后端返回了用户名
-          tel: res.data.phoneNumber // 假设后端返回了手机号
-        });
-      }
       router.push("/");
     } else {
       showAlert(res.msg, 2000);

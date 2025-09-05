@@ -25,7 +25,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'https://cfh5.ssvipmall.org/api/', // 注意：这里 target 包含了 /api
+        target: 'https://cf5api.dadwqwqee.shop/api/', // 注意：这里 target 包含了 /api
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, '') // 去掉本地请求的 /api，避免变成 /api/api
       }

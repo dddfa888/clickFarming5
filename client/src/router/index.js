@@ -19,6 +19,7 @@ const routes = [
    {path: '/reflect', name: 'reflect', component: () => import('../views/me/reflect.vue') },
    {path: '/setpaypassword', name: 'setpaypassword', component: () => import('../views/me/SetPayPassword.vue') },
    {path: '/binding', name: 'binding', component: () => import('../views/me/binding.vue') },
+   {path: '/information', name: 'information', component: () => import('../views/information/index.vue') },
   {
     path: '/income',
     name: 'income',

@@ -199,7 +199,7 @@ onUnmounted(() => {
   background: #f5f5f5;
   font-family: sans-serif;
   overflow: auto;
-  padding-bottom: 70px; /* 为底部导航留出空间 */
+  padding-bottom: 90px; /* 为底部导航留出空间 */
   color: #333;
   height: 100vh;
   position: relative;
@@ -596,7 +596,7 @@ onUnmounted(() => {
     background: #f5f5f5;
     font-family: sans-serif;
     overflow: auto;
-    padding-bottom: 70px; /* 为底部导航留出空间 */
+    padding-bottom: 40px; /* 为底部导航留出空间 */
     color: #333;
     height: 100vh;
     max-width: 450px;

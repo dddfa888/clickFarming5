@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <HeaderBar :title="$t('团队记录')" backcolor="#ece9ee" />
+    <HeaderBar title="团队记录" backcolor="#ece9ee" />
     <!-- 顶部蓝色信息卡片区域 -->
     <div class="blue-card">
       <div class="main-stats">

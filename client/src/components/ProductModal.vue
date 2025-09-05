@@ -23,27 +23,27 @@
       <!-- 价格明细 -->
       <div class="price-info">
         <div class="row">
-          <span>{{ "订单总数" }}</span>
+          <span>订单总数</span>
           <span>{{ data.totalAmount }}</span>
         </div>
         <div class="row">
-          <span>{{ "返现" }}</span>
+          <span>返现</span>
           <span>{{ data.profit }}</span>
         </div>
         <div class="row">
-          <span>{{ "合计金额" }}</span>
+          <span>合计金额</span>
           <span style="color: #ff0000">{{ data.totalAmount }}+{{ data.profit }}</span>
         </div>
         <div class="row">
-          <span>{{ "订单日期" }}</span>
-          <span>${{ data.createTime }}</span>
+          <span>订单日期</span>
+          <span>{{ data.createTime }}</span>
         </div>
       </div>
 
       <!-- 底部按钮 -->
       <div class="actions">
-        <button class="btn btn-cancel" @click="close">{{ "取消" }}</button>
-        <button class="btn btn-pay" @click="onPay">{{ "提交订单" }}</button>
+        <button class="btn btn-cancel" @click="close">取消</button>
+        <button class="btn btn-pay" @click="onPay">提交订单</button>
       </div>
     </div>
   </div>

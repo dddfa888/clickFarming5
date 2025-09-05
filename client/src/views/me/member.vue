@@ -2,108 +2,31 @@
   <div class="member-center-container">
     <!-- 头部区域 -->
 
-    <HeaderBar :title="t('会员中心')" backcolor="#e6f2ff" />
+    <HeaderBar title="会员中心" backcolor="#e6f2ff" />
 
     <!-- 会员卡片列表 -->
     <div class="member-cards">
-      <!-- 白银会员卡片 -->
-      <div class="member-card silver">
-        <div class="card-top">
-          <div class="member-info">
-            <div class="member-level">白银会员</div>
-            <div class="commission-rate">0.20%佣金比例</div>
-          </div>
-          <div class="price">¥0元</div>
-        </div>
-        <div class="card-bottom">
-          <div class="item">
-            <div class="label">提现次数</div>
-            <div class="value">3次/天</div>
-          </div>
-          <div class="item">
-            <div class="label">提现额度</div>
-            <div class="value">60000.00</div>
-          </div>
-          <div class="item">
-            <div class="label">拼团次数</div>
-            <div class="value">30</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 黄金会员卡片 -->
-      <div class="member-card gold">
-        <div class="card-top">
-          <div class="member-info">
-            <div class="member-level">黄金会员</div>
-            <div class="commission-rate">0.20%佣金比例</div>
-          </div>
-          <div class="price">¥10000元</div>
-        </div>
-
-        <div class="card-bottom">
-          <div class="item">
-            <div class="label">提现次数</div>
-            <div class="value">3次/天</div>
-          </div>
-          <div class="item">
-            <div class="label">提现额度</div>
-            <div class="value">150000.00</div>
-          </div>
-          <div class="item">
-            <div class="label">拼团次数</div>
-            <div class="value">70</div>
-          </div>
-        </div>
-      </div>
-
       <!-- 铂金会员卡片 -->
-      <div class="member-card platinum">
+      <div class="member-card" v-for="item in memberCenter" :key="item.id" :class="item.level">
         <div class="card-top">
           <div class="member-info">
-            <div class="member-level">铂金会员</div>
-            <div class="commission-rate">0.30%佣金比例</div>
+            <div class="member-level">{{ item.gradeName }}</div>
+            <div class="commission-rate">{{item.maxBonus}}%佣金比例</div>
           </div>
-          <div class="price">¥68888元</div>
-        </div>
-
-        <div class="card-bottom">
-          <div class="item">
-            <div class="label">提现次数</div>
-            <div class="value">5次/天</div>
-          </div>
-          <div class="item">
-            <div class="label">提现额度</div>
-            <div class="value">500000.00</div>
-          </div>
-          <div class="item">
-            <div class="label">拼团次数</div>
-            <div class="value">120</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 铂金会员卡片 -->
-      <div class="member-card ">
-        <div class="card-top">
-          <div class="member-info">
-            <div class="member-level">铂金会员</div>
-            <div class="commission-rate">0.30%佣金比例</div>
-          </div>
-          <div class="price">¥68888元</div>
+          <div class="price">¥{{item.withdrawAmount}}元</div>
         </div>
         <div class="card-bottom">
           <div class="item">
             <div class="label">提现次数</div>
-            <div class="value">5次/天</div>
+            <div class="value">{{item.withdrawTimes}}次/天</div>
           </div>
           <div class="item">
             <div class="label">提现额度</div>
-            <div class="value">500000.00</div>
+            <div class="value">{{ item.amountRange }}</div>
           </div>
           <div class="item">
             <div class="label">拼团次数</div>
-            <div class="value">120</div>
+            <div class="value">{{ item.buyProdNum }}</div>
           </div>
         </div>
       </div>
@@ -113,11 +36,21 @@
 
 <script setup>
 import HeaderBar from "../../components/HeaderBar.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
+import { getMemberCenter } from "../../api/index";
 
 const title = ref("会员中心");
 const { t } = useI18n();
+const memberCenter = ref([]);
+
+onMounted(() => {
+  getMemberCenter().then(res => {
+    console.log(res);
+    memberCenter.value = res.rows;
+  });
+});
 </script>
 
 <style scoped>
@@ -163,6 +96,7 @@ const { t } = useI18n();
   position: relative;
   width: 90%;
   height: auto;
+  background-color: #efefef;
 }
 
 .silver {

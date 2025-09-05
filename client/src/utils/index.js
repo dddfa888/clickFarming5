@@ -12,8 +12,8 @@ const request = axios.create({
   baseURL:
     import.meta.env.MODE === "development"
       ? "/api"
-      : "https://cf4api.dadwqwqee.shop/",
-  baseURL: baseURL,
+      : "https://cf5api.dadwqwqee.shop/",
+  // baseURL: baseURL,
   timeout: 10000,
 });
 

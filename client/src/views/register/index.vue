@@ -117,13 +117,13 @@
 
         <!-- 登录链接 -->
         <div class="login-link">
-          <span>{{ "已有账号？" }}</span>
-          <a @click="router.push('/login')">{{ "立即登录" }}</a>
+          <span>已有账号？</span>
+          <a @click="router.push('/login')">立即登录</a>
         </div>
 
         <!-- 注册按钮 -->
         <div class="register-btn">
-          <button @click.prevent="onSubmit" type="submit">{{ "注册" }}</button>
+          <button @click.prevent="onSubmit" type="submit">注册</button>
         </div>
       </form>
     </div>
@@ -221,15 +221,9 @@ function toggleLangList() {
 
 // 表单提交
 function onSubmit() {
-  // 验证用户是否同意协议
-  if (!agreedToTerms.value) {
-    showAlert(t("请先阅读并同意用户协议和隐私协议"), 2000);
-    return;
-  }
-
   // 验证密码是否一致
   if (form.loginPassword !== form.fundPassword) {
-    showAlert(t("两次输入的密码不一致"), 2000);
+    showAlert("两次输入的密码不一致", 2000);
     return;
   }
 
@@ -240,7 +234,7 @@ function onSubmit() {
     !form.loginPassword ||
     !form.fundPassword
   ) {
-    showAlert(t("请填写完整信息"), 2000);
+    showAlert("请填写完整信息", 2000);
     return;
   }
 
@@ -251,10 +245,10 @@ function onSubmit() {
 
   register(payload).then(res => {
     if (res.code === 200) {
-      showAlert(t("注册成功"), 2000);
+      showAlert("注册成功", 2000);
       router.push("/login");
     } else {
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     }
   });
 }

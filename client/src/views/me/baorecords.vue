@@ -1,7 +1,7 @@
 <template>
   <div class="tab-container">
     <!-- 头部区域 -->
-    <HeaderBar :title="t('余额宝记录')" :backcolor="'#f0e68c'" @back="handleBack" />
+    <HeaderBar title="余额宝记录" :backcolor="'#f0e68c'" @back="handleBack" />
 
     <!-- 标签栏区域 -->
     <div class="tab-bar">

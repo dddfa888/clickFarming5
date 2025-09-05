@@ -103,4 +103,69 @@ defineExpose({
   border-radius: 4px;
   cursor: pointer;
 }
+
+@media screen and (min-width: 768px) {
+  /* 遮罩层样式 */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+
+  /* 弹框内容样式 */
+  .popup-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+  }
+
+  /* 弹框文本样式 */
+  .popup-text {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  /* 弹框子文本样式 */
+  .popup-subtext {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  /* 按钮容器样式 */
+  .popup-buttons {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  /* 联系按钮样式 */
+  .contact-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  /* 取消按钮样式 */
+  .cancel-btn {
+    background-color: #ccc;
+    color: #333;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
 </style>

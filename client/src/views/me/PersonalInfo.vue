@@ -1,11 +1,11 @@
 <template>
   <div class="personal-info">
-    <HeaderBar :title="t('编辑信息')" backcolor="#ece9ee" />
+    <HeaderBar title="编辑信息" backcolor="#ece9ee" />
     <ul class="info-list">
       <!-- 头像 -->
       <li class="list-item">
         <div class="left">
-          <span class="item-text">{{ $t("头像") }}</span>
+          <span class="item-text">头像</span>
         </div>
         <div class="right">
           <img class="arrow-avatar" :src="avatarimg" alt @click="triggerUpload" />
@@ -24,7 +24,7 @@
       <!-- 昵称 -->
       <li class="list-item" @click="showNicknameDialog = true">
         <div class="left">
-          <span class="item-text">{{ $t("昵称") }}</span>
+          <span class="item-text">昵称</span>
         </div>
         <div class="right">
           <span class="item-value">{{ loginAccount }}</span>
@@ -35,10 +35,10 @@
       <!-- 性别 -->
       <li class="list-item" @click="showGenderDialog = true">
         <div class="left">
-          <span class="item-text">{{ $t("性别") }}</span>
+          <span class="item-text">性别</span>
         </div>
         <div class="right">
-          <span class="item-value">{{ sex== 0 ? t("女") : sex === 1 ? t("男") : t("保密") }}</span>
+          <span class="item-value">{{ sex== 0 ? "女": sex === 1 ? "男" : "保密" }}</span>
           <img class="arrow-icon" src="../../assets/img/right.png" alt />
         </div>
       </li>
@@ -46,7 +46,7 @@
       <!-- 签名 -->
       <li class="list-item" @click="showSignatureDialog = true">
         <div class="left">
-          <span class="item-text">{{ $t("签名") }}</span>
+          <span class="item-text">签名</span>
         </div>
         <div class="right">
           <img class="arrow-icon" src="../../assets/img/right.png" alt />
@@ -57,11 +57,11 @@
     <!-- 修改昵称弹框 -->
     <div v-if="showNicknameDialog" class="dialog-mask">
       <div class="dialog">
-        <h3>{{ t("修改昵称") }}</h3>
-        <input v-model="newNickname" class="dialog-input" :placeholder="t('请输入新昵称')" />
+        <h3>修改昵称</h3>
+        <input v-model="newNickname" class="dialog-input" placeholder="请输入新昵称" />
         <div class="dialog-actions">
-          <button @click="showNicknameDialog = false">{{ t("取消") }}</button>
-          <button @click="confirmNickname">{{ t("确定") }}</button>
+          <button @click="showNicknameDialog = false">取消</button>
+          <button @click="confirmNickname">确定</button>
         </div>
       </div>
     </div>
@@ -69,24 +69,24 @@
     <!-- 修改性别弹框 -->
     <div v-if="showGenderDialog" class="dialog-mask">
       <div class="dialog">
-        <h3>{{ t("选择性别") }}</h3>
+        <h3>选择性别</h3>
         <div class="gender-options">
           <label>
             <input type="radio" value="0" v-model="newGender" />
-            {{ t("女") }}
+            女
           </label>
           <label>
             <input type="radio" value="1" v-model="newGender" />
-            {{ t("男") }}
+            男
           </label>
           <label>
             <input type="radio" value="2" v-model="newGender" />
-            {{ t("保密") }}
+            保密
           </label>
         </div>
         <div class="dialog-actions">
-          <button @click="showGenderDialog = false">{{ t("取消") }}</button>
-          <button @click="confirmGender">{{ t("确定") }}</button>
+          <button @click="showGenderDialog = false">取消</button>
+          <button @click="confirmGender">确定</button>
         </div>
       </div>
     </div>
@@ -94,11 +94,11 @@
     <!-- 修改签名弹框 -->
     <div v-if="showSignatureDialog" class="dialog-mask">
       <div class="dialog">
-        <h3>{{ t("修改签名") }}</h3>
-        <input v-model="newSignature" class="dialog-input" :placeholder="t('请输入新签名')" />
+        <h3>修改签名</h3>
+        <input v-model="newSignature" class="dialog-input" placeholder="请输入新签名" />
         <div class="dialog-actions">
-          <button @click="showSignatureDialog = false">{{ t("取消") }}</button>
-          <button @click="confirmSignature">{{ t("确定") }}</button>
+          <button @click="showSignatureDialog = false">取消</button>
+          <button @click="confirmSignature">确定</button>
         </div>
       </div>
     </div>
@@ -157,9 +157,9 @@ const handleFileChange = async e => {
     if (res.code === 200) {
       avatarimg.value = res.data;
       userinfo();
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     } else {
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     }
   } catch (error) {
     console.error("上传异常:", error);
@@ -175,10 +175,10 @@ const confirmNickname = async () => {
       loginAccount.value = newNickname.value;
       showNicknameDialog.value = false;
       userinfo();
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     } else {
       showNicknameDialog.value = false;
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     }
   } catch (err) {
     console.error("修改昵称失败:", err);
@@ -193,10 +193,10 @@ const confirmGender = async () => {
       gender.value = newGender.value;
       showGenderDialog.value = false;
       userinfo();
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     } else {
       showGenderDialog.value = false;
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     }
   } catch (err) {
     console.error("修改性别失败:", err);
@@ -211,10 +211,10 @@ const confirmSignature = async () => {
     if (res.code === 200) {
       showSignatureDialog.value = false;
       userinfo();
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     } else {
       showSignatureDialog.value = false;
-      showAlert(t(res.msg), 2000);
+      showAlert(res.msg, 2000);
     }
   } catch (err) {
     console.error("修改签名失败:", err);

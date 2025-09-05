@@ -7,7 +7,7 @@
     </div>
 
     <!-- TOP3 展示区域 - 调整排序，中间是冠军 -->
-    <div class="top-three-section">
+    <div v-if="topThreeData.length >= 3" class="top-three-section">
       <!-- 第二名在左侧 -->
       <div
         class="top-item second-place"
@@ -71,7 +71,7 @@
           @click="handleItemClick(item)"
         >
           <div class="rank">{{ item.rank }}</div>
-          <img :src="item.headImg" class="avatar" />
+          <img :src="item.headImg || defaultAvatar" class="avatar" />
           <div class="name">{{ item.userName }}</div>
           <div class="profit">{{ item.totalAmount }}</div>
         </div>
@@ -98,7 +98,7 @@ const topThreeData = ref([
 ]);
 
 // 模拟榜单列表数据
-const rankListData = ref([]);
+const rankListData = ref([{ headImg: "", userName: "", totalAmount: 0 }]);
 
 // 导航数据
 

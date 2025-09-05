@@ -10,7 +10,10 @@
             <span class="credit">信用分: {{ userInfo.creditScore }}</span>
             <span class="member">{{ userInfo.levelName }}</span>
           </div>
-          <div class="invite-code">邀请码: {{ userInfo.invitationCode }}</div>
+          <div class="invite-code" @click="copyInvitationCode">
+            邀请码: {{ userInfo.invitationCode }}
+            <img src="../../assets/image/copy.svg" alt />
+          </div>
         </div>
         <img src="../../assets/img/right.png" alt @click="router.push('/personal')" />
       </div>
@@ -99,6 +102,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Popup from "../../components/Popup.vue";
 import { getUserInfo, getTotalAssets } from "../../api/index";
+import { showAlert } from "../../utils/notify";
 
 const router = useRouter();
 const popupRef = ref(null);
@@ -139,11 +143,22 @@ const functionItems = ref([
     path: "/backcard"
   },
   {
+    label: "订单记录",
+    iconPath: getImageUrl("jl.svg"),
+    path: "/record"
+  },
+  {
     label: "设置",
     iconPath: getImageUrl("sz.svg"),
     path: "/setup"
   }
 ]);
+
+const copyInvitationCode = () => {
+  const invitationCode = userInfo.value.invitationCode;
+  navigator.clipboard.writeText(invitationCode);
+  showAlert("复制成功", 2000);
+};
 
 // 当前激活的导航项
 const activeNav = ref(4);
@@ -233,6 +248,16 @@ onMounted(() => {
   margin-bottom: 4px;
   display: flex;
   align-items: center;
+}
+.invite-code {
+  display: flex;
+  align-items: center;
+}
+
+.invite-code img {
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
 }
 
 .account::before,
@@ -326,7 +351,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 0 16px 80px; /* 底部留出导航栏空间 */
+  margin: 0 16px 100px; /* 底部留出导航栏空间 */
   background-color: #eee;
   overflow: hidden;
 }
@@ -473,6 +498,17 @@ onMounted(() => {
     margin-right: 6px;
     color: #ccc;
     font-size: 8px;
+  }
+
+  .invite-code {
+    display: flex;
+    align-items: center;
+  }
+
+  .invite-code img {
+    width: 20px;
+    height: 20px;
+    margin-left: 4px;
   }
 
   .signature {

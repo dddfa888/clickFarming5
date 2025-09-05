@@ -1,11 +1,11 @@
 <template>
   <div class="company-intro" ref="scrollContainer" @scroll="handleScroll">
-    <HeaderBar :title="t('充值')" backcolor="#ece9ee" />
+    <HeaderBar title="充值" backcolor="#ece9ee" />
     <div class="transaction-list">
       <div v-for="(transaction, index) in transactions" :key="index" class="transaction-item">
         <div class="transaction-info">
           <div class="transaction-time">
-            <span>{{ t("充值金额") }}:</span>
+            <span>充值金额:</span>
             <span>{{ transaction.amount }}</span>
           </div>
           <div class="transaction-amount" :class="{ negative: transaction.amount < 0 }">
@@ -20,13 +20,13 @@
               }}
             </span>
           </div>
-          <div class="transaction-balance">{{ t("充值说明") }}:后台管理操作</div>
+          <div class="transaction-balance">充值说明:后台管理操作</div>
         </div>
       </div>
 
       <!-- 没有数据提示 -->
       <div v-if="transactions.length === 0" class="no-transaction">
-        <div class="no-transaction-text">{{ t("还没有数据") }}</div>
+        <div class="no-transaction-text">还没有数据</div>
       </div>
     </div>
   </div>
