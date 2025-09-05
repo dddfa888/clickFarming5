@@ -97,7 +97,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 15px;
-  background-color: #fff;
+  background-color: #f5f5f5;
   border-bottom: 1px solid #eee;
 }
 
@@ -116,7 +116,7 @@
 
 .search-container {
   padding: 10px 15px;
-  background-color: #fff;
+  background-color: #f5f5f5;
 }
 
 .search-input {
@@ -130,7 +130,7 @@
 .chat-list {
   flex: 1;
   overflow-y: auto;
-  background-color: #fff;
+  background-color: #f5f5f5;
 }
 
 .chat-item {
@@ -196,7 +196,7 @@
   justify-content: space-around;
   align-items: center;
   padding: 10px 0;
-  background-color: #fff;
+  background-color: #f5f5f5;
   border-top: 1px solid #eee;
 }
 
@@ -235,7 +235,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 15px;
-    background-color: #fff;
+    background-color: #f5f5f5;
     border-bottom: 1px solid #eee;
   }
 
@@ -268,7 +268,7 @@
   .chat-list {
     flex: 1;
     overflow-y: auto;
-    background-color: #fff;
+    background-color: #f5f5f5;
   }
 
   .chat-item {
