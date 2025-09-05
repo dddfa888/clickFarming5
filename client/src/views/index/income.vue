@@ -19,7 +19,7 @@
         }"
       >
         <div class="medal">
-          <img :src="topThreeData[1].headImg" alt="用户头像" class="avatar" />
+          <img :src="topThreeData[1].headImg || defaultAvatar" alt="用户头像" class="avatar" />
         </div>
         <div class="name">{{ topThreeData[1].userName }}</div>
         <div class="profit">¥{{ topThreeData[1].totalAmount }}</div>
@@ -37,7 +37,7 @@
         }"
       >
         <div class="medal">
-          <img :src="topThreeData[0].headImg" alt="用户头像" class="avatar" />
+          <img :src="topThreeData[0].headImg || defaultAvatar" alt="用户头像" class="avatar" />
         </div>
         <div class="name">{{ topThreeData[0].userName }}</div>
         <div class="profit">¥{{ topThreeData[0].totalAmount }}</div>
@@ -54,7 +54,7 @@
         }"
       >
         <div class="medal">
-          <img :src="topThreeData[2].headImg" alt="用户头像" class="avatar" />
+          <img :src="topThreeData[2].headImg || defaultAvatar" alt="用户头像" class="avatar" />
         </div>
         <div class="name">{{ topThreeData[2].userName }}</div>
         <div class="profit">¥{{ topThreeData[2].totalAmount }}</div>
@@ -63,17 +63,20 @@
 
     <!-- 榜单列表区域 -->
     <div class="rank-list-section">
-      <div
-        v-for="(item, index) in rankListData"
-        :key="index"
-        class="list-item"
-        @click="handleItemClick(item)"
-      >
-        <div class="rank" :class="{ highlight: item.highlight }">{{ item.rank }}</div>
-        <img :src="item.headImg" alt="用户头像" class="avatar" />
-        <div class="name">{{ item.userName }}</div>
-        <div class="profit">{{ item.totalAmount }}</div>
-      </div>
+      <template v-if="rankListData.length > 0">
+        <div
+          v-for="(item, index) in rankListData"
+          :key="index"
+          class="list-item"
+          @click="handleItemClick(item)"
+        >
+          <div class="rank">{{ item.rank }}</div>
+          <img :src="item.headImg" class="avatar" />
+          <div class="name">{{ item.userName }}</div>
+          <div class="profit">{{ item.totalAmount }}</div>
+        </div>
+      </template>
+      <div v-else class="empty-tip">今日暂无收益榜单</div>
     </div>
   </div>
 </template>
@@ -85,6 +88,7 @@ import back1 from "../../assets/image/back1.png";
 import back2 from "../../assets/image/back2.png";
 import back3 from "../../assets/image/back3.png";
 import { getRankList } from "../../api/index.js";
+import defaultAvatar from "../../assets/image/logo.png";
 
 // 模拟TOP3数据 - 添加了backgroundImage属性
 const topThreeData = ref([
@@ -97,29 +101,6 @@ const topThreeData = ref([
 const rankListData = ref([]);
 
 // 导航数据
-const navItems = ref([
-  { label: "首页", iconPath: "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" },
-  {
-    label: "信息",
-    iconPath:
-      "M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"
-  },
-  {
-    label: "拼好货",
-    iconPath:
-      "M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 4h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.94-2H1v2zm16 14c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"
-  },
-  {
-    label: "网页版",
-    iconPath:
-      "M19 3H5c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 14h-2V9h-2V7h4v10z"
-  },
-  {
-    label: "我的",
-    iconPath:
-      "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"
-  }
-]);
 
 // 当前激活的导航项
 const activeNav = ref(4); // 默认激活"我的"
@@ -163,13 +144,14 @@ onMounted(() => {
 
 /* 头部样式 */
 .header-section {
-  width: 100%;
+  width: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: #165dff;
-  padding: 20px 16px 30px;
   position: fixed;
+  top: 10px;
+  left: 5%;
 }
 
 .back-btn,
@@ -430,6 +412,12 @@ onMounted(() => {
   margin-top: 3px;
 }
 
+.empty-tip {
+  text-align: center;
+  color: #999;
+  padding: 40px 0;
+}
+
 @media screen and (min-width: 768px) {
   .profit-rank-page {
     max-width: 450px;
@@ -451,9 +439,12 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     background: #165dff;
-    position: fixed;
+    position: fixed; /* ✅ 改成 fixed */
+    left: 50%;
+    transform: translateX(-50%); /* ✅ 居中 */
+    top: 50px;
+    z-index: 1000; /* ✅ 确保在上层 */
   }
-
   .back-btn,
   .refresh-btn {
     background: transparent;
@@ -495,7 +486,7 @@ onMounted(() => {
   .desc {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.8);
-    margin: 40px 0 0;
+    margin: 0 0 0;
   }
 
   /* TOP3 样式 */
@@ -503,8 +494,9 @@ onMounted(() => {
     display: flex;
     justify-content: space-around;
     align-items: flex-end;
-    margin-top: 110px;
+    margin-top: 230px;
     max-width: 450px;
+    height: 150px;
     position: fixed;
     background: #165dff;
   }
@@ -591,7 +583,7 @@ onMounted(() => {
   .rank-list-section {
     background-color: #fff;
     border-radius: 16px 16px;
-    margin: 340px 16px 0;
+    margin: 400px 16px 0;
     overflow: auto;
     flex-grow: 1;
   }
@@ -710,6 +702,12 @@ onMounted(() => {
   .nav-item .label {
     font-size: 12px;
     margin-top: 3px;
+  }
+
+  .empty-tip {
+    text-align: center;
+    color: #999;
+    padding: 40px 0;
   }
 }
 </style>

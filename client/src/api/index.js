@@ -300,4 +300,55 @@ export function getTeamList(params) {
     })
 }
 
+// 修改银行信息
+export function updateBankInfo(data) {
+    return request({
+        url: '/api/user/updateUserBank',
+        method: 'post',
+        data
+    })
+}
+
+// 下单数据
+export function getOrderByUser() {
+    return request({
+        url: '/api/user/listInformation',
+        method: 'get',
+        
+    })
+}
+
+// 余额宝数据
+export function getBalanceData(userId) {
+    return request({
+        url: `/api/yuebao/${userId}`,
+        method: 'get',
+    })
+}
+
+// 转入余额宝
+export function transferToYuebao(userId,amount) {
+    return request({
+        url: `/api/yuebao/deposit/${userId}?amount=${amount}`,
+        method: 'get',
+    })
+}
+
+// 转出余额宝
+export function transferOutYuebao(userId,amount) {
+    return request({
+        url: `/api/yuebao/withdraw/${userId}?amount=${amount}`,
+        method: 'get',
+    })
+}
+
+// 余额宝记录
+export function getYuebaoRecord(params) {
+    return request({
+        url: `/api/yuebao/transaction/history/${params.userId}`,
+        method: 'get',
+        params
+    })
+}
+
 

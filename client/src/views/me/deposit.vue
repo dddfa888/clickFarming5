@@ -13,10 +13,10 @@
             <span :style="{ color: transaction.status === 1 ? 'green' : 'red'}">
               {{
               transaction.status === 1
-              ? t("经核准的")
+              ?"成功"
               : transaction.status === 2
-              ? t("稲核失败")
-              : t("待准予")
+              ? "失败"
+              : "处理中"
               }}
             </span>
           </div>

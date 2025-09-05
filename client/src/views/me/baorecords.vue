@@ -28,8 +28,7 @@
               <div class="record-item" v-for="item in incomeRecords" :key="item.id">
                 <div class="record-icon income-icon">+</div>
                 <div class="record-info">
-                  <div class="record-title">{{ item.title }}</div>
-                  <div class="record-date">{{ item.date }}</div>
+                  <div class="record-date" style="font-size: 12px;">{{ item.transactionTime }}</div>
                 </div>
                 <div class="record-amount income-amount">+{{ item.amount }}元</div>
               </div>
@@ -42,8 +41,7 @@
               <div class="record-item" v-for="item in transferInRecords" :key="item.id">
                 <div class="record-icon transfer-in-icon">↓</div>
                 <div class="record-info">
-                  <div class="record-title">{{ item.title }}</div>
-                  <div class="record-date">{{ item.date }}</div>
+                  <div class="record-date" style="font-size: 12px;">{{ item.transactionTime }}</div>
                 </div>
                 <div class="record-amount transfer-in-amount">+{{ item.amount }}元</div>
               </div>
@@ -56,8 +54,7 @@
               <div class="record-item" v-for="item in transferOutRecords" :key="item.id">
                 <div class="record-icon transfer-out-icon">↑</div>
                 <div class="record-info">
-                  <div class="record-title">{{ item.title }}</div>
-                  <div class="record-date">{{ item.date }}</div>
+                  <div class="record-date">{{ item.transactionTime }}</div>
                 </div>
                 <div class="record-amount transfer-out-amount">-{{ item.amount }}元</div>
               </div>
@@ -71,14 +68,17 @@
     
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
 import HeaderBar from "../../components/HeaderBar.vue";
 import { useI18n } from "vue-i18n";
+import { getYuebaoRecord } from "../../api/index";
+import { useInfoStore } from "../../store/useInfoStore";
 
 const { t } = useI18n();
+const infoStore = useInfoStore();
 
 // 定义标签
-const tabs = [t("收益"), t("余额转入"), t("转出到余额")];
+const tabs = ["收益", "余额转入", "转出到余额"];
 // 当前激活的标签索引
 const activeTab = ref(0);
 
@@ -95,25 +95,45 @@ const handleBack = () => {
 };
 
 // 模拟数据 - 收益记录
-const incomeRecords = [
-  { id: 1, title: t("余额宝收益"), date: t("今天 03:00"), amount: "0.45" },
-  { id: 2, title: t("余额宝收益"), date: t("昨天 03:00"), amount: "0.32" },
-  { id: 3, title: t("余额宝收益"), date: "08-28 03:00", amount: "0.51" },
-  { id: 4, title: t("余额宝收益"), date: "08-27 03:00", amount: "0.48" }
-];
+const incomeRecords = ref([]);
 
 // 模拟数据 - 转入记录
-const transferInRecords = [
-  { id: 1, title: t("银行卡转入"), date: "08-25 14:30", amount: "1000.00" },
-  { id: 2, title: t("余额转入"), date: "08-20 09:15", amount: "500.00" },
-  { id: 3, title: t("银行卡转入"), date: "08-15 16:45", amount: "2000.00" }
-];
+const transferInRecords = ref([]);
 
 // 模拟数据 - 转出记录
-const transferOutRecords = [
-  { id: 1, title: t("转出到银行卡"), date: "08-22 11:20", amount: "300.00" },
-  { id: 2, title: t("转出到余额"), date: "08-18 15:10", amount: "200.00" }
-];
+const transferOutRecords = ref([]);
+
+watch(activeTab, (newVal, oldVal) => {
+  getYuebaoRecord({
+    type: newVal,
+    userId: infoStore.getUserinfo.uid
+  }).then(res => {
+    console.log(res.data);
+    if (newVal === 0) {
+      incomeRecords.value = res.data;
+    } else if (newVal === 1) {
+      transferInRecords.value = res.data;
+    } else if (newVal === 2) {
+      transferOutRecords.value = res.data;
+    }
+  });
+});
+
+onMounted(() => {
+  getYuebaoRecord({
+    type: activeTab.value,
+    userId: infoStore.getUserinfo.uid
+  }).then(res => {
+    console.log(res.data);
+    if (activeTab.value === 0) {
+      incomeRecords.value = res.data;
+    } else if (activeTab.value === 1) {
+      transferInRecords.value = res.data;
+    } else if (activeTab.value === 2) {
+      transferOutRecords.value = res.data;
+    }
+  });
+});
 </script>
 
 <style scoped>

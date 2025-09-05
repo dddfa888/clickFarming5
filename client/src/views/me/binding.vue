@@ -4,15 +4,15 @@
     <!-- 表单容器 -->
     <div class="form-container">
       <div class="input-box" style="margin-top: 60px;" @click="showBankModal = true">
-        <input type="text" v-model="form.bank" placeholder="卡类型  请选择卡类型" readonly />
+        <input type="text" v-model="form.bankName" placeholder="卡类型  请选择卡类型" readonly />
       </div>
       <div class="input-box">
-        <input type="text" v-model="form.cardNo" placeholder="账号  输入银行卡卡号" />
+        <input type="text" v-model="form.bankAccountNumber" placeholder="账号  输入银行卡卡号" />
       </div>
       <div class="input-box">
-        <input type="text" v-model="form.name" placeholder="姓名  请输入姓名" />
+        <input type="text" v-model="form.bankAccountName" placeholder="姓名  请输入姓名" />
       </div>
-      <button class="submit-btn">完成添加</button>
+      <button class="submit-btn" @click="submitForm">完成添加</button>
     </div>
 
     <!-- 银行选择弹框 -->
@@ -46,11 +46,13 @@
 <script setup>
 import { ref, computed } from "vue";
 import HeaderBar from "../../components/HeaderBar.vue";
+import { updateBankInfo } from "../../api/index";
+import { showAlert } from "../../utils/notify";
 
 const form = ref({
-  bank: "",
-  cardNo: "",
-  name: ""
+  bankName: "",
+  bankAccountNumber: "",
+  bankAccountName: ""
 });
 
 const showBankModal = ref(false);
@@ -95,6 +97,21 @@ const banks = ref([
   "中国农业发展银行"
 ]);
 
+const submitForm = () => {
+  updateBankInfo(form.value)
+    .then(res => {
+      showAlert(res.msg);
+      if (res.code === 200) {
+        form.value.bankName = "";
+        form.value.bankAccountNumber = "";
+        form.value.bankAccountName = "";
+      }
+    })
+    .catch(err => {
+      showAlert(res.msg);
+    });
+};
+
 // 搜索过滤
 const filteredBanks = computed(() => {
   if (!searchText.value) return banks.value;
@@ -103,7 +120,7 @@ const filteredBanks = computed(() => {
 
 // 选择银行并回填
 const selectBank = bank => {
-  form.value.bank = bank;
+  form.value.bankName = bank;
   showBankModal.value = false;
 };
 </script>
@@ -153,6 +170,7 @@ const selectBank = bank => {
   background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
+  z-index: 999;
   align-items: flex-end;
 }
 
@@ -256,15 +274,18 @@ const selectBank = bank => {
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 999;
     background: rgba(0, 0, 0, 0.4);
     display: flex;
+    width: 450px;
+    margin: 0 auto;
     justify-content: center;
     align-items: flex-end;
   }
 
   .modal-container {
     background: #fff;
-    width: 100%;
+    width: 450px;
     max-height: 70%;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;

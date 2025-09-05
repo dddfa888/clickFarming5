@@ -92,7 +92,7 @@
     </div>
 
     <!-- 修改签名弹框 -->
-    <div v-if="showSignatureDialog" class="dialog-mask" >
+    <div v-if="showSignatureDialog" class="dialog-mask">
       <div class="dialog">
         <h3>{{ t("修改签名") }}</h3>
         <input v-model="newSignature" class="dialog-input" :placeholder="t('请输入新签名')" />
@@ -507,6 +507,123 @@ function userinfo() {
     height: 48px;
     border-radius: 50%;
     margin-right: 10px;
+  }
+
+  /* 弹框样式 */
+  .dialog-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .dialog {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 280px;
+  }
+
+  .dialog h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+  }
+
+  .dialog-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .dialog-actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .dialog-actions button:first-child {
+    background: #ddd;
+  }
+
+  .dialog-actions button:last-child {
+    background: #4caf50;
+    color: #fff;
+  }
+
+  /* 弹框样式 */
+  .dialog-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .dialog {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 280px;
+  }
+
+  .dialog h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+  }
+
+  .dialog-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .dialog-actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .dialog-actions button:first-child {
+    background: #ddd;
+  }
+
+  .dialog-actions button:last-child {
+    background: #4caf50;
+    color: #fff;
+  }
+
+  .gender-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
   }
 }
 </style>

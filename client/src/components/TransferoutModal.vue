@@ -10,7 +10,7 @@
     <div class="modal-container" @click.stop :class="{ 'container-visible': visible }">
       <!-- 弹窗顶部操作区 -->
       <div class="modal-top">
-        <h3 class="modal-title">转入余额宝</h3>
+        <h3 class="modal-title">转出余额宝</h3>
         <button class="close-btn" @click="$emit('close')">×</button>
       </div>
 
@@ -18,7 +18,7 @@
       <div class="modal-content">
         <!-- 可转入余额信息 -->
         <div class="balance-info">
-          <span>可转入余额</span>
+          <span>可转出余额</span>
           <span class="available-amount">¥{{ availableBalance.toFixed(2) }}</span>
         </div>
 
@@ -40,7 +40,7 @@
 
       <!-- 底部确认按钮 -->
       <div class="modal-footer">
-        <button class="confirm-btn" :disabled="!isAmountValid" @click="handleConfirm">转入余额宝</button>
+        <button class="confirm-btn" :disabled="!isAmountValid" @click="handleConfirm">转出余额宝</button>
       </div>
     </div>
   </div>

@@ -13,10 +13,10 @@
             <span :style="{ color: transaction.status === 1 ? 'green' : 'red'}">
               {{
               transaction.status === 1
-              ? t("经核准的")
+              ?"成功"
               : transaction.status === 2
-              ? t("稲核失败")
-              : t("待准予")
+              ? "失败"
+              : "处理中"
               }}
             </span>
           </div>
@@ -26,7 +26,7 @@
 
       <!-- 没有数据提示 -->
       <div v-if="transactions.length === 0" class="no-transaction">
-        <div class="no-transaction-text">{{ t("还没有数据") }}</div>
+        <div class="no-transaction-text">{{ "还没有数据" }}</div>
       </div>
     </div>
   </div>
@@ -178,11 +178,11 @@ onMounted(() => {
 
 @media screen and (min-width: 768px) {
   .company-intro {
-    background-color: #1e201f;
+    background-color: #ece9ee;
     height: 100vh;
-    width: 450px;
-    margin: 0 auto;
     overflow-y: auto;
+    max-width: 450px;
+    margin: 0 auto;
   }
 
   .transaction-list {
@@ -210,14 +210,12 @@ onMounted(() => {
   .transaction-time {
     grid-column: 1;
     grid-row: 1;
-    color: #fff;
     font-size: 14px;
   }
 
   .transaction-amount {
     grid-column: 2;
     grid-row: 1;
-    color: #fff;
     text-align: right;
     font-size: 14px;
   }
@@ -228,7 +226,6 @@ onMounted(() => {
   .transaction-balance {
     grid-column: 1 / span 2;
     grid-row: 2;
-    color: #fff;
     font-size: 14px;
   }
 
@@ -236,8 +233,23 @@ onMounted(() => {
     grid-column: 2;
     grid-row: 2;
     text-align: right;
-    color: #fff;
     font-size: 14px;
+  }
+
+  .no-transaction {
+    text-align: center;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 10px;
+    color: #888;
+  }
+
+  .no-more {
+    text-align: center;
+    padding: 10px;
+    color: #888;
   }
 }
 </style>

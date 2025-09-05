@@ -4,14 +4,13 @@
     <HeaderBar :title="t('收款银行卡')" backcolor="#e6f2ff" />
 
     <!-- 银行卡信息区域 -->
-    <div style="margin-top: 50px">
-      <!--<div class="bank-card-info">
-        <img src="../../assets/unionpay.png" alt="银联标识" class="unionpay-icon" />
+    <div style="margin-top: 50px" v-if="userInfo.bankAccountNumber">
+      <div class="bank-card-info">
         <div class="bank-info">
-          <div class="bank-name">浙商银行</div>
-          <div class="card-number">8888 **** **** 8844</div>
+          <div class="bank-name">{{ userInfo.bankName }}</div>
+          <div class="card-number">{{ formatBankCard(userInfo.bankAccountNumber) }}</div>
         </div>
-      </div>-->
+      </div>
     </div>
 
     <!-- 绑卡说明区域 -->
@@ -27,13 +26,30 @@
 
 <script setup>
 import HeaderBar from "../../components/HeaderBar.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+import { getUserInfo } from "../../api/index";
 
 const router = useRouter();
+const userInfo = ref({});
 
 const { t } = useI18n();
+onMounted(() => {
+  getUserInfo().then(res => {
+    console.log(res.data);
+    userInfo.value = res.data;
+  });
+});
+
+function formatBankCard(cardNo) {
+  if (!cardNo) return "";
+  const clean = cardNo.replace(/\s+/g, "");
+  if (clean.length <= 6) return clean;
+  const start = clean.slice(0, 4);
+  const end = clean.slice(-4);
+  return `${start} **** **** ${end}`;
+}
 </script>
 
 <style scoped>
@@ -93,6 +109,7 @@ const { t } = useI18n();
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
+  margin-top: 40px;
 }
 .instructions-title {
   font-weight: bold;

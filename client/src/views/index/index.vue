@@ -23,35 +23,16 @@
 
     <!-- 应用图标区 -->
     <div class="app-icons">
-      <div class="app-icon-item">
-        <div class="app-icon taobao">
-          <img src="../../assets/image/tb.png" alt="淘宝" />
+      <div
+        class="app-icon-item"
+        v-for="(item, index) in products"
+        :key="index"
+        @click="router.push('/warehouse')"
+      >
+        <div class="app-icon">
+          <img :src="item.imageUrl" />
         </div>
-        <div class="app-name">淘宝</div>
-      </div>
-      <div class="app-icon-item">
-        <div class="app-icon pinduoduo">
-          <img src="../../assets/image/pdd.png" alt="拼多多" />
-        </div>
-        <div class="app-name">拼多多</div>
-      </div>
-      <div class="app-icon-item">
-        <div class="app-icon vip">
-          <img src="../../assets/image/wph.png" alt="唯品会" />
-        </div>
-        <div class="app-name">唯品会</div>
-      </div>
-      <div class="app-icon-item">
-        <div class="app-icon jd">
-          <img src="../../assets/image/jd.png" alt="京东" />
-        </div>
-        <div class="app-name">京东</div>
-      </div>
-      <div class="app-icon-item">
-        <div class="app-icon tmall">
-          <img src="../../assets/image/tm.png" alt="天猫" />
-        </div>
-        <div class="app-name">天猫</div>
+        <div class="app-name">{{ item.name }}</div>
       </div>
     </div>
 
@@ -99,7 +80,7 @@
           }}
         </div>
         <div class="product-price">¥{{ product.price }}</div>
-        <div class="product-market-price">市场价¥{{ product.marketPrice }}</div>
+        <div class="product-market-price">市场价¥{{ product.price }}</div>
       </div>
     </div>
   </div>
@@ -107,12 +88,25 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import tb from "../../assets/image/tb.png";
+import pdd from "../../assets/image/pdd.png";
+import wph from "../../assets/image/wph.png";
+import jd from "../../assets/image/jd.png";
+import tm from "../../assets/image/tm.png";
 import { useRouter } from "vue-router";
 import { getProductList } from "../../api/index";
 import { useI18n } from "vue-i18n";
 
 const router = useRouter();
 const { t } = useI18n();
+
+const products = ref([
+  { name: "淘宝", imageUrl: tb },
+  { name: "拼多多", imageUrl: pdd },
+  { name: "唯品会", imageUrl: wph },
+  { name: "京东", imageUrl: jd },
+  { name: "天猫", imageUrl: tm }
+]);
 
 // 定义标签页
 const tabs = [
@@ -126,142 +120,6 @@ const tabs = [
 
 // 当前激活的标签页索引
 const activeTabIndex = ref(0);
-
-// 定义不同平台的商品数据
-const allProducts = {
-  all: [
-    {
-      id: 1,
-      name: "Dior迪奥女士太阳镜女...",
-      brand: "DIOR",
-      tag: "热卖",
-      delivery: "1h可退欧洲直邮",
-      price: "2657.00",
-      marketPrice: "2657.00",
-      image: "../../assets/img/banner1.jpg"
-    },
-    {
-      id: 2,
-      name: "能10万水精华水浓萃型...",
-      brand: "DIOR",
-      tag: "热卖",
-      delivery: "Dior迪奥肌活蘊",
-      price: "685.00",
-      marketPrice: "685.00",
-      image: "../../assets/img/banner2.jpg"
-    }
-  ],
-  taobao: [
-    {
-      id: 3,
-      name: "淘宝特惠商品限时抢购...",
-      brand: "淘宝",
-      tag: "特惠",
-      delivery: "24小时发货",
-      price: "199.00",
-      marketPrice: "299.00",
-      image: "../../assets/img/banner3.jpg"
-    },
-    {
-      id: 4,
-      name: "淘宝爆款商品推荐...",
-      brand: "淘宝",
-      tag: "爆款",
-      delivery: "极速发货",
-      price: "99.00",
-      marketPrice: "199.00",
-      image: "../../assets/img/banner.jpg"
-    }
-  ],
-  pinduoduo: [
-    {
-      id: 5,
-      name: "拼多多超值优惠商品...",
-      brand: "拼多多",
-      tag: "拼团",
-      delivery: "48小时发货",
-      price: "59.00",
-      marketPrice: "159.00",
-      image: "../../assets/img/banner2.jpg"
-    },
-    {
-      id: 6,
-      name: "拼多多爆款推荐...",
-      brand: "拼多多",
-      tag: "秒杀",
-      delivery: "拼团优惠",
-      price: "39.00",
-      marketPrice: "99.00",
-      image: "../../assets/img/banner1.jpg"
-    }
-  ],
-  vip: [
-    {
-      id: 7,
-      name: "唯品会品牌折扣商品...",
-      brand: "唯品会",
-      tag: "折扣",
-      delivery: "品牌直发",
-      price: "299.00",
-      marketPrice: "599.00",
-      image: "../../assets/img/banner.jpg"
-    },
-    {
-      id: 8,
-      name: "唯品会限时特卖...",
-      brand: "唯品会",
-      tag: "特卖",
-      delivery: "正品保障",
-      price: "199.00",
-      marketPrice: "499.00",
-      image: "../../assets/img/banner3.jpg"
-    }
-  ],
-  jd: [
-    {
-      id: 9,
-      name: "京东自营商品推荐...",
-      brand: "京东",
-      tag: "自营",
-      delivery: "211限时达",
-      price: "399.00",
-      marketPrice: "499.00",
-      image: "../../assets/img/banner2.jpg"
-    },
-    {
-      id: 10,
-      name: "京东超值优惠商品...",
-      brand: "京东",
-      tag: "PLUS",
-      delivery: "京东物流",
-      price: "299.00",
-      marketPrice: "399.00",
-      image: "../../assets/img/banner1.jpg"
-    }
-  ],
-  tmall: [
-    {
-      id: 11,
-      name: "天猫国际商品推荐...",
-      brand: "天猫",
-      tag: "国际",
-      delivery: "天猫国际直邮",
-      price: "599.00",
-      marketPrice: "799.00",
-      image: "../../assets/img/banner3.jpg"
-    },
-    {
-      id: 12,
-      name: "天猫超级品牌日特惠...",
-      brand: "天猫",
-      tag: "品牌日",
-      delivery: "品牌直发",
-      price: "499.00",
-      marketPrice: "699.00",
-      image: "../../assets/img/banner.jpg"
-    }
-  ]
-};
 
 // 根据当前选中的标签页计算显示的商品
 const currentProducts = ref([]);

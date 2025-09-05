@@ -1,6 +1,6 @@
 <template>
   <div class="register-container">
-    <!-- 语言选择器 -->
+    <!-- 语言选择器 
     <div class="language-selector">
       <div class="dropdown-wrapper" @click="toggleLangList">
         <img :src="flagMap[langStore.locale]" class="flag-icon" />
@@ -17,7 +17,7 @@
           {{ lang }}
         </li>
       </ul>
-    </div>
+    </div>-->
 
     <!-- 应用Logo和名称 -->
     <div class="app-logo">
@@ -35,7 +35,7 @@
           <div class="input-icon">
             <img src="../../assets/image/user.svg" alt />
           </div>
-          <input type="text" v-model="form.loginAccount" :placeholder="t('输入用户名')" />
+          <input type="text" v-model="form.loginAccount" placeholder="输入用户名" />
         </div>
 
         <!-- 手机号带区号 -->
@@ -74,7 +74,7 @@
             <option value="+971">+971</option>
             <option value="+90">+90</option>
           </select>
-          <input v-model="form.phone" type="tel" :placeholder="t('请输入电话号码')" class="phone-input" />
+          <input v-model="form.phone" type="tel" placeholder="请输入电话号码" class="phone-input" />
         </div>
 
         <!-- 密码输入框 -->
@@ -85,7 +85,7 @@
           <input
             :type="passwordVisible.loginPassword ? 'text' : 'password'"
             v-model="form.loginPassword"
-            :placeholder="t('请输入密码')"
+            placeholder="请输入密码"
           />
           <div class="eye-icon" @click="togglePassword('loginPassword')">
             <i :class="passwordVisible.loginPassword ? 'eye-open' : 'eye-closed'"></i>
@@ -100,7 +100,7 @@
           <input
             :type="passwordVisible.fundPassword ? 'text' : 'password'"
             v-model="form.fundPassword"
-            :placeholder="t('请输入确认密码')"
+            placeholder="请输入确认密码"
           />
           <div class="eye-icon" @click="togglePassword('fundPassword')">
             <i :class="passwordVisible.fundPassword ? 'eye-open' : 'eye-closed'"></i>
@@ -112,18 +112,18 @@
           <div class="input-icon">
             <img src="../../assets/image/init.svg" alt />
           </div>
-          <input type="text" v-model="form.invitationCode" :placeholder="t('请输入邀请码')" />
+          <input type="text" v-model="form.invitationCode" placeholder="请输入邀请码" />
         </div>
 
         <!-- 登录链接 -->
         <div class="login-link">
-          <span>{{ t("已有账号？") }}</span>
-          <a @click="router.push('/login')">{{ t("立即登录") }}</a>
+          <span>{{ "已有账号？" }}</span>
+          <a @click="router.push('/login')">{{ "立即登录" }}</a>
         </div>
 
         <!-- 注册按钮 -->
         <div class="register-btn">
-          <button @click.prevent="onSubmit" type="submit">{{ t("注册") }}</button>
+          <button @click.prevent="onSubmit" type="submit">{{ "注册" }}</button>
         </div>
       </form>
     </div>

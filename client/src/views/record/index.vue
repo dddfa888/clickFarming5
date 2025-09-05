@@ -423,16 +423,14 @@ const handlePay = debounce(() => {
 
 @media screen and (min-width: 768px) {
   .orders-page {
-    width: 450px;
-    margin: 0 auto;
-  }
-  .orders-page {
-    background: #1e201f;
+    background: #ecebf0;
     font-family: sans-serif;
     overflow: auto;
     padding-bottom: 100px;
-    color: #fff;
+    color: #000;
     height: 100vh;
+    max-width: 450px;
+    margin: 0 auto;
   }
 
   .balance {
@@ -442,12 +440,11 @@ const handlePay = debounce(() => {
 
   .tabs {
     display: flex;
-    background: #1e201f;
+    background: #ecebf0;
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 10px;
-    width: 450px;
-    margin: 0 auto;
+    margin-top: 50px;
   }
 
   .tab {
@@ -455,19 +452,17 @@ const handlePay = debounce(() => {
     text-align: center;
     padding: 10px 0;
     font-size: 14px;
-    color: #fff;
+    color: #000;
     cursor: pointer;
     border-bottom: 2px solid transparent;
   }
 
   .tab.active {
-    color: #cf9e63;
-    font-weight: bold;
-    border-bottom: 2px solid #cf9e63;
+    color: #1296db;
   }
 
   .no-order {
-    width: 150px;
+    width: 450px;
     margin: 0 auto;
   }
   .no-order img {
@@ -487,7 +482,7 @@ const handlePay = debounce(() => {
 
   .history-item {
     padding: 15px;
-    background-color: #252726;
+    background-color: #fff;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -500,7 +495,8 @@ const handlePay = debounce(() => {
 
   .time-code {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
     font-size: 14px;
   }
 
@@ -544,14 +540,15 @@ const handlePay = debounce(() => {
   .product-price {
     width: 100%;
     display: flex;
-    font-weight: bold;
     font-size: 14px;
     margin-bottom: 5px;
     align-items: center;
+    color: red;
     justify-content: space-between;
   }
 
   .quantity {
+    color: #000;
     font-size: 14px;
   }
 

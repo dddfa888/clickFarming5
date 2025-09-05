@@ -3,7 +3,7 @@
     <div class="modal-box">
       <!-- 顶部标题 -->
       <div class="modal-header">
-        <p>匹配到淘宝的订单</p>
+        <p>匹配到{{ platform }}的订单</p>
       </div>
 
       <!-- 时间 & 订单号 -->
@@ -23,27 +23,27 @@
       <!-- 价格明细 -->
       <div class="price-info">
         <div class="row">
-          <span>{{ t("订单总数") }}</span>
+          <span>{{ "订单总数" }}</span>
           <span>{{ data.totalAmount }}</span>
         </div>
         <div class="row">
-          <span>{{ t("返现") }}</span>
+          <span>{{ "返现" }}</span>
           <span>{{ data.profit }}</span>
         </div>
         <div class="row">
-          <span>{{ t("合计金额") }}</span>
+          <span>{{ "合计金额" }}</span>
           <span style="color: #ff0000">{{ data.totalAmount }}+{{ data.profit }}</span>
         </div>
         <div class="row">
-          <span>{{ t("订单日期") }}</span>
+          <span>{{ "订单日期" }}</span>
           <span>${{ data.createTime }}</span>
         </div>
       </div>
 
       <!-- 底部按钮 -->
       <div class="actions">
-        <button class="btn btn-cancel" @click="close">{{ t("取消") }}</button>
-        <button class="btn btn-pay" @click="onPay">{{ t("提交订单") }}</button>
+        <button class="btn btn-cancel" @click="close">{{ "取消" }}</button>
+        <button class="btn btn-pay" @click="onPay">{{ "提交订单" }}</button>
       </div>
     </div>
   </div>
@@ -62,9 +62,11 @@ const props = defineProps({
 
 const { id } = toRefs(props);
 const { t } = useI18n();
+const platform = ref("");
 const data = ref({});
 getOrderById(id.value).then(res => {
-  data.value = res.data;
+  data.value = res.data.orderRecord;
+  platform.value = res.data.platform;
 });
 
 const emit = defineEmits(["close", "pay"]);
@@ -88,7 +90,7 @@ const onPay = () => emit("pay");
 .modal-box {
   width: 90%;
   max-width: 380px;
-  background-color: #fff;
+  background-color: #eeeaea;
   border-radius: 12px;
   overflow: hidden;
   color: #000;
@@ -193,10 +195,10 @@ const onPay = () => emit("pay");
   .modal-box {
     width: 90%;
     max-width: 380px;
-    background: #252726;
+    background-color: #eeeaea;
     border-radius: 12px;
     overflow: hidden;
-    color: #333;
+    color: #000;
     font-size: 14px;
   }
 
@@ -218,7 +220,7 @@ const onPay = () => emit("pay");
   .order-info {
     padding: 10px 16px;
     font-size: 12px;
-    color: #fff;
+    color: #000;
   }
 
   /* 商品 */
@@ -242,7 +244,7 @@ const onPay = () => emit("pay");
   .product-desc .product-name {
     font-weight: bold;
     margin-bottom: 4px;
-    color: #424242;
+    color: #000;
   }
 
   /* 价格信息 */
@@ -254,12 +256,7 @@ const onPay = () => emit("pay");
     display: flex;
     justify-content: space-between;
     margin: 6px 0;
-    color: #fff;
-  }
-
-  .price-info .highlight {
-    font-size: 16px;
-    color: #f0deb8;
+    color: #000;
   }
 
   /* 底部按钮 */
