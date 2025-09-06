@@ -3,7 +3,7 @@
     <!-- 顶部区域 -->
     <div class="p_header">
       <div class="header-top">
-        <div class="app-name">聚品坊</div>
+        <div class="app-name">快团</div>
         <div class="record-link" @click="router.push('/record')">拼团记录</div>
       </div>
 

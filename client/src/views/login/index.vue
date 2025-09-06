@@ -22,9 +22,9 @@
     <!-- 应用Logo和名称 -->
     <div class="app-logo">
       <div class="logo-icon">
-        <img src="../../assets/image/logo.png" alt="聚品坊" />
+        <img src="../../assets/image/logo.png" alt="快团" />
       </div>
-      <div class="app-name">聚品坊</div>
+      <div class="app-name">快团</div>
     </div>
 
     <!-- 登录表单 -->

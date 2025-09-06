@@ -22,9 +22,9 @@
     <!-- 应用Logo和名称 -->
     <div class="app-logo">
       <div class="logo-icon">
-        <img src="../../assets/image/logo.png" alt="聚品坊" />
+        <img src="../../assets/image/logo.png" alt="快团" />
       </div>
-      <div class="app-name">聚品坊</div>
+      <div class="app-name">快团</div>
     </div>
 
     <!-- 注册表单 -->
@@ -144,7 +144,7 @@ const route = useRoute();
 const langStore = useLangStore();
 const form = reactive({
   loginAccount: "",
-  areaCode: "+84",
+  areaCode: "+86",
   phone: "",
   loginPassword: "",
   fundPassword: "",
