@@ -1,6 +1,7 @@
 package com.ruoyi.click.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import com.ruoyi.common.annotation.Excel;
@@ -15,6 +16,7 @@ import java.util.Date;
  * @date 2025-06-19
  */
 @Data
+@TableName("m_money_invest_withdraw")
 public class MMoneyInvestWithdraw
 {
     private static final long serialVersionUID = 1L;

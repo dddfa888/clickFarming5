@@ -290,4 +290,66 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE user_id = #{userId}
           AND process_status = #{processStatus}
     </select>
+
+    <select id="selectCustomerConsumeStat" resultType="com.ruoyi.click.domain.vo.RankingVo">
+        SELECT
+            m.uid AS userId,
+            m.login_account AS userName,
+            m.head_img AS headImg,
+            SUM(r.profit) AS totalAmount
+        FROM
+            m_order_receive_record r
+                INNER JOIN
+            m_user m ON r.user_id = m.uid
+        WHERE
+          -- 筛选当天数据（今天 00:00:00 至次日 00:00:00）
+            r.create_time >= CURDATE()
+          AND r.create_time &lt; DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+          AND r.profit IS NOT NULL
+          AND r.user_id IS NOT NULL
+        GROUP BY
+            r.user_id, m.uid, m.login_account, m.head_img
+        ORDER BY
+            totalAmount DESC
+            LIMIT 100
+    </select>
+
+
+    <select id="selectByUid" parameterType="java.lang.Long" resultType="com.ruoyi.business.domain.OrderReceiveRecord">
+        SELECT
+            id,
+            total_amount,
+            profit,
+            process_status
+        FROM m_order_receive_record
+        WHERE user_id = #{userId}
+          AND create_time BETWEEN CAST(CURDATE() AS DATETIME)
+            AND CAST(DATE_ADD(CURDATE(), INTERVAL 1 DAY) AS DATETIME)
+    </select>
+
+    <select id="selectYesterdayByUid" resultType="com.ruoyi.business.domain.OrderReceiveRecord">
+        SELECT
+            id,
+            total_amount,
+            profit,
+            process_status
+        FROM m_order_receive_record
+        WHERE user_id = #{userId}
+          AND create_time BETWEEN DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+            AND CURDATE()
+    </select>
+
+
+    <select id="selectTotal" resultType="int">
+        select count(1) n from m_order_receive_record
+        where user_id = #{userId}
+        <!-- 核心修改：包含update_time为空的记录，或在时间范围内的记录 -->
+        and (
+        update_time is null
+        or (update_time <![CDATA[ >= ]]> #{date1} and update_time <![CDATA[ < ]]> #{date2})
+        )
+        <if test="processStatus != null  and processStatus != ''">
+            and process_status = #{processStatus}
+        </if>
+    </select>
 </mapper>

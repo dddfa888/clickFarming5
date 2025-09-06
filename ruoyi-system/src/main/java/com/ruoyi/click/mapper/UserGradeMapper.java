@@ -70,4 +70,11 @@ public interface UserGradeMapper extends BaseMapper<UserGrade>
      * @return 结果
      */
     public int deleteUserGradeByIds(Long[] ids);
+
+    /**
+     * 查询当前用户等级
+     * @param level
+     * @return
+     */
+    UserGrade selectUserGradeById1(Integer level);
 }

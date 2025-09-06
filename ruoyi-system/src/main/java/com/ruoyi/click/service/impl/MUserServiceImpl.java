@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.click.domain.MMoneyInvestWithdraw;
 import com.ruoyi.click.mapper.MAccountChangeRecordsMapper;
@@ -210,14 +211,8 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
         if(StringUtils.isEmpty(mUser.getBankAccountName())){
             throw new ServiceException("银行名不能为空");//user
         }
-        if(StringUtils.isEmpty(mUser.getFundPassword())){
-            throw new ServiceException("资金密码不能为空");//user
-        }
         if (this.getOne(new LambdaQueryWrapper<MUser>().eq(MUser::getBankAccountNumber, bank)) != null) {
             throw new ServiceException("银行卡已被绑定");//user
-        }
-        if(!user.getFundPassword().equals(mUser.getFundPassword())){
-            mUser.setFundPassword(EncoderUtil.encoder(mUser.getFundPassword()));
         }
         return mUserMapper.updateMUser(mUser);
     }
@@ -488,24 +483,6 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
     }
 
     @Override
-    public int updateScore(MUser mUser) {
-        return mUserMapper.updateMUser(mUser);
-    }
-
-    @Override
-    public int updateLoginAccount(MUser mUser) {
-        MUser user = mUserMapper.selectMUserByUid(mUser.getUid());
-        String loginAccount = mUser.getLoginAccount();
-        if(!user.getLoginAccount().equals(loginAccount)){
-            MUser one1 = this.getByLoginAccount(mUser.getLoginAccount());
-            if(one1!=null){
-                throw new ServiceException("账号已存在");
-            }
-        }
-        return mUserMapper.updateMUser(mUser);
-    }
-
-    @Override
     public int updatePassword(Long uid, String oldPassword, String newPassword) {
         // 查询用户信息
         MUser user = mUserMapper.selectById(uid);
@@ -533,23 +510,12 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
     }
 
     @Override
-    public int updateFoundPassword(Long uid, String oldPassword, String newPassword) {
+    public int updateFoundPassword(Long uid, String newPassword) {
         // 查询用户信息
         MUser user = mUserMapper.selectById(uid);
         if (user == null) {
             throw new ServiceException("用户不存在");
         }
-
-        // 验证原始密码是否正确
-        if (!passwordEncoder.matches(oldPassword, user.getFundPassword())) {
-            throw new ServiceException("原始密码错误");
-        }
-
-        // 检查新密码是否与原始密码相同
-        if (passwordEncoder.matches(newPassword, user.getFundPassword())) {
-            throw new ServiceException("新密码不能与原始密码相同");
-        }
-
         // 加密新密码并更新
         MUser updateUser = new MUser();
         updateUser.setUid(uid);
@@ -559,4 +525,22 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
         return mUserMapper.updateById(updateUser);
     }
 
+    @Override
+    public int updateUser(MUser mUser) {
+        MUser user = mUserMapper.selectMUserByUid(mUser.getUid());
+        String loginAccount = mUser.getLoginAccount();
+        if(!user.getLoginAccount().equals(loginAccount)){
+            MUser one1 = this.getByLoginAccount(mUser.getLoginAccount());
+            if(one1!=null){
+                throw new ServiceException("账号已存在");
+            }
+        }
+        return mUserMapper.updateMUser(mUser);
+    }
+
+    @Override
+    public List<MUser> listInformain() {
+        List<MUser> mUsers =  mUserMapper.selectInformation();
+        return mUsers;
+    }
 }

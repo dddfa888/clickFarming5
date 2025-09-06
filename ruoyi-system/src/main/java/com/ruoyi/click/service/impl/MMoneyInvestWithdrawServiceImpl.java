@@ -240,6 +240,16 @@ public class MMoneyInvestWithdrawServiceImpl extends ServiceImpl<MMoneyInvestWit
         return mMoneyInvestWithdrawMapper.selectWithdrawByTimeRange1(withdraw, startTime, endTime);
     }
 
+    @Override
+    public List<MMoneyInvestWithdraw> selectInfo(Long userId, String type ,Integer status) {
+        return mMoneyInvestWithdrawMapper.selectInfo(userId, type ,status);
+    }
+
+    @Override
+    public List<MMoneyInvestWithdraw> selectTodayPendingWithdraws(Long uid) {
+        return Collections.emptyList();
+    }
+
     /**
      * 生成16位唯一订单号：时间戳偏移+4位随机数
      * 格式示例：4367778709968925（与业务系统常见订单ID格式一致）

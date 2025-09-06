@@ -51,6 +51,7 @@ public class MNotifyController extends BaseController {
         MNotify mNotify = new MNotify();
         mNotify.setUserId(userId);
         List<MNotify> mNotifies = mNotifyService.selectMNotifyList(mNotify);
+
         //批量修改通知状态为已读
         for (MNotify notify : mNotifies) {
             notify.setRead(true);

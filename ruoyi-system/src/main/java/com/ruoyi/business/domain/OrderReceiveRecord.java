@@ -1,6 +1,8 @@
 package com.ruoyi.business.domain;
 
 import java.math.BigDecimal;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -12,6 +14,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author ruoyi
  * @date 2025-06-17
  */
+@TableName("m_order_receive_record")
 public class OrderReceiveRecord extends BaseEntity
 {
     public static final String PROCESS_STATUS_WAIT = "Waiting";     //过程状态：未完成

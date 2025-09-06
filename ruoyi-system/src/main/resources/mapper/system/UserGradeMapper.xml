@@ -18,7 +18,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectUserGradeVo">
-        select id, sort_num, grade_name, join_cost, min_balance, buy_prod_num, min_bonus, max_bonus, create_time, update_time from m_user_grade
+        select id, sort_num, grade_name, join_cost, min_balance, buy_prod_num, min_bonus, max_bonus,withdraw_times,withdraw_amount,commission_rate,amount_range ,commission_rate, create_time, update_time from m_user_grade
     </sql>
 
     <select id="selectUserGradeList" parameterType="UserGrade" resultMap="UserGradeResult">
@@ -33,7 +33,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="maxBonus != null  and maxBonus != ''"> and max_bonus = #{maxBonus}</if>
         </where>
         ORDER BY sort_num ASC
-
     </select>
 
     <select id="selectUserGradeById" parameterType="Long" resultMap="UserGradeResult">
@@ -86,6 +85,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="maxBonus != null">max_bonus = #{maxBonus},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <!-- 新增 withdraw_times 字段 -->
+            <if test="withdrawTimes != null">withdraw_times = #{withdrawTimes},</if>
+            <!-- 新增 withdraw_amount 字段 -->
+            <if test="withdrawAmount != null">withdraw_amount = #{withdrawAmount},</if>
+            <!-- 新增 commission_rate 字段 -->
+            <if test="commissionRate != null">commission_rate = #{commissionRate},</if>
+            <!-- 新增 amount_range 字段 -->
+            <if test="amountRange != null and amountRange != ''">amount_range = #{amountRange},</if>
         </trim>
         where id = #{id}
     </update>
@@ -100,4 +107,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <select id="selectUserGradeById1" resultType="com.ruoyi.click.domain.UserGrade">
+        <include refid="selectUserGradeVo"/>
+        where id = #{id}
+    </select>
 </mapper>

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.ruoyi.business.domain.OrderReceiveRecord;
 import com.ruoyi.business.mapper.OrderReceiveRecordMapper;
 import com.ruoyi.click.domain.MAccountChangeRecords;
@@ -22,6 +24,9 @@ import com.ruoyi.click.domain.vo.AccountQueryVO;
 import com.ruoyi.click.domain.vo.BackOperateVo;
 import com.ruoyi.click.domain.vo.WithdrawVo;
 import com.ruoyi.click.domain.vo.WithdrawalVO;
+import com.ruoyi.click.mapper.MMoneyInvestWithdrawMapper;
+import com.ruoyi.click.mapper.MUserMapper;
+import com.ruoyi.click.mapper.UserGradeMapper;
 import com.ruoyi.click.service.IMAccountChangeRecordsService;
 import com.ruoyi.click.service.IMMoneyInvestWithdrawService;
 import com.ruoyi.click.service.IMUserService;
@@ -79,6 +84,13 @@ public class MMoneyInvestWithdrawController extends BaseController
     private IUserGradeService userGradeService;
     @Autowired
     private SysConfigMapper configMapper;
+    @Autowired
+    private UserGradeMapper userGradeMapper;
+    @Autowired
+    private MUserMapper mUserMapper;
+
+    @Autowired
+    private MMoneyInvestWithdrawMapper mMoneyInvestWithdrawMapper;
 
     /**
      * 获取个人的提现记录
@@ -197,51 +209,74 @@ public class MMoneyInvestWithdrawController extends BaseController
         return success();
     }
 
-    /**
-     * 提款
-     * @param withdrawalVO
-     * @return
-     */
     @PostMapping("/draw")
-    public AjaxResult draw(@RequestBody WithdrawalVO withdrawalVO){
+    public AjaxResult draw(@RequestBody WithdrawalVO withdrawalVO) {
         MUser mUser = mUserService.selectMUserByUid(withdrawalVO.getUserId());
-        // 1. 账户余额校验（BigDecimal必须用compareTo比较）
-        BigDecimal balance = mUser.getAccountBalance();
+        UserGrade userGrade = userGradeMapper.selectUserGradeById1(mUser.getLevel());
 
-        // 2. 先判断金额是否为null
+        // ---------- 新增：审核中提现记录校验 ----------
+        String type = "0";
+        Integer status =0;
+        List<MMoneyInvestWithdraw> todayWithdrawRecords =
+                mMoneyInvestWithdrawService.selectInfo(mUser.getUid(), type,status);
+
+        // 筛选当日“审核中”的提现记录（status=0 表示审核中，需与数据库一致）
+        List<MMoneyInvestWithdraw> pendingWithdraws = new ArrayList<>();
+        for (MMoneyInvestWithdraw record : todayWithdrawRecords) {
+            // 注意：需确保 record.getStatus() 能正确获取状态，且 0 对应“审核中”
+            if (record.getStatus() != null && record.getStatus() == 0) {
+                pendingWithdraws.add(record);
+            }
+        }
+        if (!pendingWithdraws.isEmpty()) {
+            return AjaxResult.error("已有提现申请正在审核中，暂不允许提现");
+        }
+        // ---------- 审核中提现记录校验结束 ----------
+
+        // ---------- 原有：次数与额度校验 ----------
+        int todayWithdrawCount = todayWithdrawRecords.size(); // 当日已提现次数（含所有状态）
+
+        BigDecimal todayWithdrawTotalAmount = BigDecimal.ZERO;
+        for (MMoneyInvestWithdraw record : todayWithdrawRecords) {
+            if (record.getAmount() != null) {
+                todayWithdrawTotalAmount = todayWithdrawTotalAmount.add(record.getAmount());
+            }
+        }
+
+        int maxWithdrawCount = userGrade.getWithdrawTimes() != null ? userGrade.getWithdrawTimes() : 0;
+        BigDecimal maxWithdrawQuota = userGrade.getWithdrawAmount() != null
+                ? userGrade.getWithdrawAmount()
+                : BigDecimal.ZERO;
+
+        int remainingWithdrawCount = Math.max(maxWithdrawCount - todayWithdrawCount, 0);
+        BigDecimal remainingWithdrawQuota = maxWithdrawQuota.subtract(todayWithdrawTotalAmount);
+        remainingWithdrawQuota = remainingWithdrawQuota.compareTo(BigDecimal.ZERO) < 0
+                ? BigDecimal.ZERO
+                : remainingWithdrawQuota;
+
+        if (remainingWithdrawCount <= 0) {
+            return AjaxResult.error("今日提现次数已达上限（" + maxWithdrawCount + "次），请明日再提");
+        }
+
+        if (withdrawalVO.getAmount().compareTo(remainingWithdrawQuota) > 0) {
+            return AjaxResult.error("今日剩余提现额度不足（剩余：" + remainingWithdrawQuota + "），无法提款");
+        }
+        // ---------- 次数与额度校验结束 ----------
+
+        // 原有：余额、密码、金额有效性校验
+        BigDecimal balance = mUser.getAccountBalance();
         if (withdrawalVO.getAmount() == null) {
             return AjaxResult.error("提款金额不能为空");
         }
-
-        // 新增：判断金额是否为整数（小数部分必须为0）
-        if (withdrawalVO.getAmount().stripTrailingZeros().scale() > 0) {
-            return AjaxResult.error("提款金额必须为整数，不能包含小数");
+        if (mUser.getFundPassword() == null || "".equals(mUser.getFundPassword().trim())) {
+            return AjaxResult.error("请先设置银行卡密码");
         }
-
-        // 3. 再判断金额是否大于0（提款场景下的正确提示）
-        if (withdrawalVO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            return AjaxResult.error("提款金额必须大于0，请重新输入");
-        }
-
-        // 4. 资金密码非空校验（VO中存储的是前端传递的明文密码）
-        String plainFundPassword = withdrawalVO.getFundPassword();
-        if (StringUtils.isBlank(plainFundPassword)) {
-            return AjaxResult.error("请输入资金密码");
-        }
-
-        // 5. 核心验证：使用BCrypt比对明文与密文（自动处理盐值）
-        if (!BCrypt.checkpw(plainFundPassword, mUser.getFundPassword())) {
-            return AjaxResult.error("资金密码错误，请重新输入");
-        }
-
-        // 6. 比较：如果余额 < 提款金额
         if (balance.compareTo(withdrawalVO.getAmount()) < 0) {
             return AjaxResult.error("账户余额不足，无法提款");
         }
 
         mMoneyInvestWithdrawService.insertDraw(withdrawalVO);
-
-        return success();
+        return AjaxResult.success("提现已提交，等待管理员同意");
     }
 
     /**
@@ -490,5 +525,60 @@ public class MMoneyInvestWithdrawController extends BaseController
     public AjaxResult updateUserInfoByUserId(Map<String,Object> param)
     {
         return toAjax(mMoneyInvestWithdrawService.updateUserInfoByUserId(param));
+    }
+
+
+    @GetMapping("/getUserInfo/{userId}")
+    public AjaxResult getUserInfo(@PathVariable Long userId) {
+        // 查询用户信息
+        MUser mUser = mUserMapper.selectMUserByUid(userId);
+        if (mUser == null) {
+            return AjaxResult.error("用户不存在");
+        }
+
+        // 查询用户等级信息
+        UserGrade userGrade = userGradeMapper.selectUserGradeById1(mUser.getLevel());
+        if (userGrade == null) {
+            return AjaxResult.error("用户等级信息不存在");
+        }
+
+        // 查询当日提现记录（type = "0" 表示提现）
+        String type = "0";
+        Integer status = 0;
+        List<MMoneyInvestWithdraw> mMoneyInvestWithdraws = mMoneyInvestWithdrawService.selectInfo(userId, type,status);
+
+        // 1. 统计当日提现金额总和
+        BigDecimal todayWithdrawTotalAmount = BigDecimal.ZERO;
+        for (MMoneyInvestWithdraw record : mMoneyInvestWithdraws) {
+            if (record.getAmount() != null) {
+                todayWithdrawTotalAmount = todayWithdrawTotalAmount.add(record.getAmount());
+            }
+        }
+
+        // 2. 统计提现次数相关数据
+        int todayWithdrawCount = mMoneyInvestWithdraws.size(); // 当日已提现次数（记录数即次数）
+        int maxWithdrawCount = userGrade.getWithdrawTimes() != null ? userGrade.getWithdrawTimes() : 0; // 等级允许的最大提现次数
+        int remainingWithdrawCount = maxWithdrawCount - todayWithdrawCount; // 剩余可提现次数（避免负数）
+        remainingWithdrawCount = Math.max(remainingWithdrawCount, 0);
+
+        // 3. 计算剩余提现额度
+        BigDecimal withdrawQuota = userGrade.getWithdrawAmount() != null ? userGrade.getWithdrawAmount() : BigDecimal.ZERO;
+        BigDecimal remainingQuota = withdrawQuota.subtract(todayWithdrawTotalAmount);
+        // 确保剩余额度不为负数
+        if (remainingQuota.compareTo(BigDecimal.ZERO) < 0) {
+            remainingQuota = BigDecimal.ZERO;
+        }
+
+        // 封装返回数据
+        Map<String, Object> map = new HashMap<>();
+        map.put("AccountBalance", mUser.getAccountBalance());       // 可用余额
+        map.put("maxWithdrawCount", maxWithdrawCount);           // 当日最大可提现次数（等级决定）
+        map.put("todayWithdrawCount", todayWithdrawCount);       // 当日已提现次数
+        map.put("remainingWithdrawCount", remainingWithdrawCount); // 剩余可提现次数
+        map.put("withdrawQuota", withdrawQuota);                 // 当日总提现额度
+        map.put("todayWithdrawTotalAmount", todayWithdrawTotalAmount); // 当日已提现总金额
+        map.put("remainingQuota", remainingQuota);               // 剩余提现额度
+
+        return AjaxResult.success(map);
     }
 }

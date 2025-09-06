@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户Service接口
@@ -132,20 +133,6 @@ public interface IMUserService extends IService<MUser> {
     int updateUserAvatar(Long uId, MultipartFile file);
 
     /**
-     * 更改信用分
-     * @param mUser
-     * @return
-     */
-    int updateScore(MUser mUser);
-
-    /**
-     * 更改用户账号
-     * @param mUser
-     * @return
-     */
-    int updateLoginAccount(MUser mUser);
-
-    /**
      * 更改用户登录密码
      * @param uid
      * @param oldPassword
@@ -157,9 +144,21 @@ public interface IMUserService extends IService<MUser> {
     /**
      * 更改用户的资金密码
      * @param uid
-     * @param oldPassword
      * @param newPassword
      * @return
      */
-    int updateFoundPassword(Long uid, String oldPassword, String newPassword);
+    int updateFoundPassword(Long uid, String newPassword);
+
+    /**
+     * 修改用户信息
+     * @param mUser
+     * @return
+     */
+    int updateUser(MUser mUser);
+
+    /**
+     * 循环下单
+     * @return
+     */
+    List<MUser> listInformain();
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.YueBaoProfitRecordMapper">
+    <insert id="insert" parameterType="YueBaoProfitRecord">
+        INSERT INTO m_yuebao_profit_record
+        (user_id, profit_date, daily_profit, total_assets, annualized_rate, create_time)
+        VALUES
+            (#{userId}, #{profitDate}, #{dailyProfit}, #{totalAssets}, #{annualizedRate}, #{createTime})
+    </insert>
+
+
+</mapper>

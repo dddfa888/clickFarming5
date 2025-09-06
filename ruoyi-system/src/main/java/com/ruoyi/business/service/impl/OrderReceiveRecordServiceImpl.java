@@ -13,6 +13,7 @@ import com.ruoyi.business.mapper.MRewardRecordMapper;
 import com.ruoyi.business.mapper.MUserOrderSetMapper;
 import com.ruoyi.business.mapper.ProductManageMapper;
 import com.ruoyi.click.domain.vo.OrderReceiveRecordVo;
+import com.ruoyi.click.domain.vo.RankingVo;
 import com.ruoyi.common.core.domain.entity.MUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
@@ -159,7 +160,6 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         return orderReceiveRecordMapper.countNumByUserDate(param);
     }
 
-
     /**
      * 前台用户点击后添加订单
      * 为了数据入库后返回id，orderReceiveRecord由Controller传过来而不是本方法内新建
@@ -204,7 +204,7 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
                     nameCn = "黄金";
                     break;
                 case 3:
-                    nameCn = "白金";
+                    nameCn = "铂金";
                     break;
                 case 4:
                     nameCn = "钻石";
@@ -400,16 +400,17 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
      * @return
      */
     public BigDecimal calcProfit(UserGrade userGrade, BigDecimal totalAmount) {
-        //最大值与最小值之差
+        BigDecimal rate = userGrade.getCommissionRate();
+        return DecimalUtil.multiply(rate, totalAmount).setScale(2, RoundingMode.HALF_UP);
+/*        //最大值与最小值之差
         BigDecimal range = DecimalUtil.subtract(userGrade.getMaxBonus(), userGrade.getMinBonus());
         //最大值与最小值之差 * 随机数
         BigDecimal num = DecimalUtil.multiply(range, DecimalUtil.toBigDecimal(Math.random()));
         //最大值与最小值之差 * 随机数 + 最小值 = 最小值与最大值之间的随机数（利率）。原值用%表示，所以最后除以100后是实际利率值。
         BigDecimal ratio = num.add(userGrade.getMinBonus()).divide(DecimalUtil.toBigDecimal(100));
         //利率 * 订单总金额 = 利润  最终保留2位小数
-        return DecimalUtil.multiply(ratio, totalAmount).setScale(2, RoundingMode.HALF_UP);
+        return DecimalUtil.multiply(ratio, totalAmount).setScale(2, RoundingMode.HALF_UP);*/
     }
-
 
     /**
      * 支付订单
@@ -471,4 +472,40 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         return orderReceiveRecordMapper.updateOrderReceiveRecord(orderReceiveRecord);
     }
 
+    @Override
+    public List<RankingVo> getRanking() {
+        // 1. 调用 Mapper 查询数据（已包含头像）
+        List<RankingVo> profitStatList = orderReceiveRecordMapper.selectCustomerConsumeStat();
+
+        // 2. 处理空数据
+        if (profitStatList == null || profitStatList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 3. 计算排名（同分同排名逻辑）
+        int currentRank = 1;
+        BigDecimal prevProfit = null;
+
+        for (int i = 0; i < profitStatList.size(); i++) {
+            RankingVo rankingVo = profitStatList.get(i);
+            BigDecimal currentProfit = rankingVo.getTotalAmount();
+
+            if (i == 0) {
+                rankingVo.setRank(currentRank);
+                prevProfit = currentProfit;
+                continue;
+            }
+
+            if (currentProfit != null && currentProfit.compareTo(prevProfit) == 0) {
+                rankingVo.setRank(currentRank);
+            } else {
+                currentRank = i + 1;
+                rankingVo.setRank(currentRank);
+                prevProfit = currentProfit;
+            }
+        }
+
+        // 4. 返回结果（包含头像、排名、利润等）
+        return profitStatList;
+    }
 }

@@ -4,9 +4,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.business.domain.OrderReceiveRecord;
 import com.ruoyi.click.domain.vo.OrderReceiveRecordVo;
+import com.ruoyi.click.domain.vo.RankingVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 /**
@@ -16,7 +20,7 @@ import org.apache.ibatis.annotations.Select;
  * @date 2025-06-17
  */
 @Mapper
-public interface OrderReceiveRecordMapper
+public interface OrderReceiveRecordMapper extends BaseMapper<OrderReceiveRecord>
 {
     /**
      * 查询订单接收记录
@@ -117,4 +121,40 @@ public interface OrderReceiveRecordMapper
      * @return
      */
     BigDecimal sumProfit(Map<String, Object> param1);
+
+    /**
+     * 一个月订单利润总和
+     * @return
+     */
+    List<RankingVo> selectCustomerConsumeStat();
+
+    /**
+     * 查询个人当天全部订单记录
+     * @param userId
+     * @return
+     */
+    List<OrderReceiveRecord> selectByUid(Long userId);
+
+    /**
+     * 查询个人昨天全部订单记录
+     * @param userId
+     * @return
+     */
+    List<OrderReceiveRecord> selectYesterdayByUid(Long userId);
+
+
+    /**
+     * 根据用户ID列表查询订单记录
+     * @param userIds 用户ID列表
+     * @return 符合条件的订单记录列表
+     */
+    @Select("SELECT * FROM m_order_receive_record WHERE user_id IN (#{userIds})")
+    List<OrderReceiveRecord> listByUserIds(@Param("userIds") List<Long> userIds);
+
+    /**
+     * 统计订单数量
+     * @param userId
+     * @return
+     */
+    int selectTotal(Long userId);
 }

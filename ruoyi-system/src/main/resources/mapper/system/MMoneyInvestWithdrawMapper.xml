@@ -178,4 +178,12 @@
         <!-- 按创建时间倒序排序 -->
         ORDER BY create_time DESC
     </select>
+
+    <select id="selectInfo" resultType="com.ruoyi.click.domain.MMoneyInvestWithdraw">
+        select * from m_money_invest_withdraw
+        where user_id=#{userId}
+        and type=#{type}
+        and status=#{status}
+        and DATE(create_time) = CURDATE()  <!-- 新增：只查询当天数据 -->
+    </select>
 </mapper>

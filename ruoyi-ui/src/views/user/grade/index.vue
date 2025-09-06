@@ -69,8 +69,9 @@
       <el-table-column label="参加费" align="center" prop="joinCost" />
       <el-table-column label="最低余额" align="center" prop="minBalance" />
       <el-table-column label="每天购买的产品数量" align="center" prop="buyProdNum" />
-      <el-table-column label="% 最小奖金" align="center" prop="minBonus" />
-      <el-table-column label="% 最大奖金" align="center" prop="maxBonus" />
+      <el-table-column label="提现次数" align="center" prop="withdrawTimes" />
+      <el-table-column label="提现额度" align="center" prop="withdrawAmount" />
+      <el-table-column label="佣金比例" align="center" prop="commissionRate" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -117,12 +118,21 @@
         <el-form-item label="每天购买的产品数量" prop="buyProdNum">
           <el-input v-model="form.buyProdNum" placeholder="请输入每天购买的产品数量" />
         </el-form-item>
-        <el-form-item label="最小奖金" prop="minBonus">
-          <el-input v-model="form.minBonus" placeholder="请输入最小奖金" />
+        <el-form-item label="提现次数" prop="withdrawTimes">
+          <el-input v-model="form.withdrawTimes" placeholder="请输入每日提现次数" />
         </el-form-item>
-        <el-form-item label="最大奖金" prop="maxBonus">
-          <el-input v-model="form.maxBonus" placeholder="请输入最大奖金" />
+        <el-form-item label="提现额度" prop="withdrawAmount">
+          <el-input v-model="form.withdrawAmount" placeholder="请输入每日提现额度" />
         </el-form-item>
+        <el-form-item label="佣金比例" prop="commissionRate">
+          <el-input v-model="form.commissionRate" placeholder="请输入佣金比例" />
+        </el-form-item>
+        <!--        <el-form-item label="最小奖金" prop="minBonus">
+                  <el-input v-model="form.minBonus" placeholder="请输入最小奖金" />
+                </el-form-item>
+                <el-form-item label="最大奖金" prop="maxBonus">
+                  <el-input v-model="form.maxBonus" placeholder="请输入最大奖金" />
+                </el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -173,7 +183,10 @@ export default {
         minBalance: null,
         buyProdNum: null,
         minBonus: null,
-        maxBonus: null
+        maxBonus: null,
+        withdrawTimes: null,
+        withdrawAmount: null,
+        commissionRate: null
       },
       // 表单参数
       form: {},
@@ -214,6 +227,9 @@ export default {
         buyProdNum: null,
         minBonus: null,
         maxBonus: null,
+        withdrawTimes: null,
+        withdrawAmount: null,
+        commissionRate: null,
         createBy: null,
         createTime: null,
         updateBy: null,
