@@ -16,19 +16,8 @@ const tabbarPaths = [
   "/warehouse",
   "/cskh",
   "/me",
-  "/company",
-  "/rule",
-  "/cooperation",
-  "/notice",
-  "/withdraw",
-  "/orderHistory",
-  "/orderdetail",
-  "/address",
-  "/bankInfo",
-  "/groupReport",
-  "/rewardHistory",
-  "/depositHistory",
-  "/withdrawHistory"
+  "/record",
+  "/information"
 ];
 
 const showTabBar = computed(() => tabbarPaths.includes(route.path));

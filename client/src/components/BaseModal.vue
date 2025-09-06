@@ -6,8 +6,8 @@
         <slot name="body"></slot>
       </div>
       <div class="modal-footer">
-        <button class="btn cancel" @click="onCancel">{{t("取消")}}</button>
-        <button class="btn confirm" @click="onConfirm">{{t("确认")}}</button>
+        <button class="btn cancel" @click="onCancel">{{"取消"}}</button>
+        <button class="btn confirm" @click="onConfirm">{{"确认"}}</button>
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@ const { t } = useI18n();
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
-  title: { type: String, default: "" },
+  title: { type: String, default: "" }
 });
 
 const emits = defineEmits(["update:modelValue", "confirm", "cancel"]);

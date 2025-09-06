@@ -1,6 +1,6 @@
 <!-- src/components/HeaderBar.vue -->
 <template>
-  <div :style="`background-color:${backcolor};`" class="header-bar">
+  <div :style="`background-color:${backcolor};color: ${headercolor};`" class="header-bar">
     <van-icon name="arrow-left" class="back-icon" @click="toback" />
     <span class="title">{{ title }}</span>
     <span class="right-placeholder"></span>
@@ -15,6 +15,10 @@ defineProps({
   backcolor: {
     type: String,
     default: "#121212"
+  },
+  headercolor: {
+    type: String,
+    default: "#000"
   }
 });
 const router = useRouter();
@@ -30,7 +34,7 @@ function toback() {
   height: 50px;
   width: 100%;
   background-color: #1d1d1f;
-  color: white;
+  color: #000;
   font-size: 16px;
   position: fixed;
   top: 0;
@@ -51,10 +55,6 @@ function toback() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.right-placeholder {
-  width: 24px; /* 预留和返回按钮差不多的宽度，保证标题真居中 */
 }
 
 @media screen and (min-width: 768px) {

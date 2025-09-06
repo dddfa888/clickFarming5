@@ -15,7 +15,7 @@ import zhTW from "./locales/zh-TW"
 const i18n = createI18n({
     legacy: false,
     globalInjection: true,
-    locale: localStorage.getItem('locale') || 'ko', 
+    locale: localStorage.getItem('locale') || 'zh', 
     fallbackLocale: 'en', 
      missing(locale, key) {
     console.warn(locale, key);

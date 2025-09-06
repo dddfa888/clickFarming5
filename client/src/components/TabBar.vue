@@ -1,101 +1,156 @@
 <template>
   <div class="tabbar">
+    <!-- tablist（上面的那条） -->
     <div
-      class="tabbar-item"
-      v-for="(item, index) in tabs.slice(0, 2)"
-      :key="index"
-      :class="{ active: currentRoute === item.path }"
-      @click="navigate(item.path, item.name)"
+      v-if="showCustomerService"
+      style="display:flex;justify-content:space-between;width:100%;height:50px;"
     >
-      <img :src="currentRoute === item.path ? item.iconActive : item.icon" class="tabbar-icon" />
-      <span style="text-align: center;">{{ $t(item.name)}}</span>
+      <div
+        class="tabbar-item"
+        v-for="(item, index) in tablist"
+        :key="index"
+        :class="{ active: activeListIndex === index }"
+        @click="onClickList(item, index)"
+      >
+        <img :src="activeListIndex === index ? item.iconActive : item.icon" class="tabbar-icon" />
+        <span style="text-align:center;">{{ item.name }}</span>
+      </div>
     </div>
 
-    <div class="tabbar-middle" @click="onCenterClick">
-      <img :src="centerIcon" class="center-icon" />
-    </div>
-
-    <div
-      class="tabbar-item"
-      v-for="(item, index) in tabs.slice(2)"
-      :key="index + 2"
-      :class="{ active: currentRoute === item.path }"
-      @click="navigate(item.path, item.name)"
-    >
-      <img :src="currentRoute === item.path ? item.iconActive : item.icon" class="tabbar-icon" />
-      <span>{{ item.name }}</span>
+    <!-- tabs（底部那条，包含“网页版”） -->
+    <div style="display:flex;justify-content:space-between;width:100%;height:50px;">
+      <div
+        class="tabbar-item"
+        v-for="(item, index) in tabs"
+        :key="index"
+        :class="{ active: activeTabsIndex === index }"
+        @click="onClickTabs(item, index)"
+      >
+        <img :src="activeTabsIndex === index ? item.iconActive : item.icon" class="tabbar-icon" />
+        <span style="text-align:center;">{{ item.name }}</span>
+      </div>
     </div>
   </div>
-  <!-- 客服弹窗组件 -->
 </template>
-
 
 <script setup>
 import { ref, computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { useI18n } from "vue-i18n";
-import { getUserInfo } from "../api/index";
-
-const { t } = useI18n();
-const getImageUrl = name =>
-  new URL(`../assets/img/${name}`, import.meta.url).href;
+import { useRouter } from "vue-router";
 
 const router = useRouter();
-const route = useRoute();
-const showCustomerService = ref(false);
+const getImageUrl = name =>
+  new URL(`../assets/image/${name}`, import.meta.url).href;
 
+// tabs 和 tablist 配置（与你原来相同）
 const tabs = computed(() => [
   {
-    name: t("首页"),
+    name: "发现",
     path: "/",
-    icon: getImageUrl("black-tb2.png"),
-    iconActive: getImageUrl("black-tb22.png")
+    icon: getImageUrl("home.svg"),
+    iconActive: getImageUrl("homeactive.svg")
   },
   {
-    name: t("仓库"),
+    name: "信息",
+    path: "/information",
+    icon: getImageUrl("xinxi.svg"),
+    iconActive: getImageUrl("xinxiactive.svg")
+  },
+  {
+    name: "聚品坊",
     path: "/warehouse",
-    icon: getImageUrl("black-tb3.png"),
-    iconActive: getImageUrl("black-tb33.png")
+    icon: getImageUrl("shop.svg"),
+    iconActive: getImageUrl("shopactive.svg")
   },
   {
-    name: t("客服"), // 客服，不跳转
-    path:
-      "https://chatlink.ichatlinks.net/widget/standalone.html?eid=6df096f4e9b05ad245f542d63ed1c8d7&language=en",
-    icon: getImageUrl("black-tb4.png"),
-    iconActive: getImageUrl("black-tb44.png")
+    name: "网页版",
+    path: "web",
+    icon: getImageUrl("wj.svg"),
+    iconActive: getImageUrl("wjactive.svg")
   },
   {
-    name: t("我"),
+    name: "个人中心",
     path: "/me",
-    icon: getImageUrl("black-tb1.png"),
-    iconActive: getImageUrl("black-tb11.png")
+    icon: getImageUrl("gr.svg"),
+    iconActive: getImageUrl("gractive.svg")
   }
 ]);
 
-const centerIcon = getImageUrl("gif_1.png");
-const currentRoute = computed(() => route.path);
+const tablist = computed(() => [
+  {
+    name: "发现",
+    path: "/",
+    icon: getImageUrl("home.svg"),
+    iconActive: getImageUrl("homeactive.svg")
+  },
+  {
+    name: "聚品坊",
+    path: "/warehouse",
+    icon: getImageUrl("shop.svg"),
+    iconActive: getImageUrl("shopactive.svg")
+  },
+  {
+    name: "记录",
+    path: "/record",
+    icon: getImageUrl("jl.svg"),
+    iconActive: getImageUrl("jlactive.svg")
+  },
+  {
+    name: "个人中心",
+    path: "/me",
+    icon: getImageUrl("gr.svg"),
+    iconActive: getImageUrl("gractive.svg")
+  }
+]);
 
-const navigate = (path, name = "") => {
-  if (name === "CSKH") {
-    window.open(
-      "https://chat.ichatlink.net/widget/standalone.html?eid=6df096f4e9b05ad245f542d63ed1c8d7&language=en",
-      "_blank"
-    );
+// 控制两条导航显示/高亮的状态
+const showCustomerService = ref(false); // 是否显示上方 tablist（点击 "网页版" 会打开）
+const activeTabsIndex = ref(0); // 底部 tabs 的高亮索引（初始可改）
+const activeListIndex = ref(-1); // 上方 tablist 的高亮索引（-1 表示无高亮）
+
+// 点击底部 tabs（带 "网页版" 的那条）
+function onClickTabs(item, index) {
+  // 只高亮底部被点中的项，清除上方高亮
+  activeTabsIndex.value = index;
+  activeListIndex.value = -1;
+
+  // 特殊逻辑：点击 "网页版" 只显示 tablist（并不导航）
+  if (item.path === "web") {
+    showCustomerService.value = true;
     return;
   }
 
-  if (path.startsWith("http")) {
-    window.open(path, "_blank");
-  } else if (path !== currentRoute.value) {
-    router.push(path);
+  // 其它项：隐藏 tablist（只显示底部）
+  showCustomerService.value = false;
+
+  // 外链处理或路由跳转
+  if (item.path && typeof item.path === "string") {
+    if (item.path.startsWith("http")) {
+      window.open(item.path, "_blank");
+    } else {
+      router.push(item.path).catch(() => {});
+    }
   }
-};
+}
 
-const onCenterClick = () => {
-  router.push("/orderdetail");
-};
+// 点击上方 tablist
+function onClickList(item, index) {
+  // 只高亮上方被点中的项，清除底部高亮
+  activeListIndex.value = index;
+  activeTabsIndex.value = -1;
+
+  // 点击上方项后（你之前的逻辑）若想只显示上方可保留 showCustomerService = true
+  // 这里保持 showCustomerService 为 true（两条同时显示的状态下点击上方不隐藏）
+  // 若希望点击上方后只显示上方，请改为： showCustomerService.value = true; 并隐藏底部（不推荐）
+
+  if (item.path && typeof item.path === "string") {
+    if (item.path.startsWith("http")) {
+      window.open(item.path, "_blank");
+    } else {
+      router.push(item.path).catch(() => {});
+    }
+  }
+}
 </script>
-
 
 <style scoped>
 .tabbar {
@@ -104,106 +159,64 @@ const onCenterClick = () => {
   left: 0;
   right: 0;
   max-width: 100%;
-  height: 60px;
-  background-color: #1d1d1f;
+  background-color: #e4e2e2;
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 999;
-  padding: 0 10px;
   margin: 0 auto;
+  flex-direction: column;
 }
-
 .tabbar-item {
   flex: 1;
   display: flex;
   font-size: 12px;
   flex-direction: column;
   align-items: center;
-  color: #ccc;
+  color: #000;
   cursor: pointer;
 }
-
 .tabbar-item.active {
-  color: #dcb671;
+  color: #1296db;
   font-weight: bold;
 }
-
 .tabbar-icon {
   width: 24px;
   height: 24px;
   margin-bottom: 4px;
 }
-
-.tabbar-middle {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  margin-top: -5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.center-icon {
-  width: 55px;
-  height: 55px;
-}
-
-/* PC端适配 */
 @media screen and (min-width: 768px) {
   .tabbar {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    width: 450px;
-    height: 60px;
-    background-color: #1d1d1f;
+    max-width: 450px;
+    background-color: #e4e2e2;
     display: flex;
     justify-content: space-around;
     align-items: center;
     z-index: 999;
-    padding: 0;
     margin: 0 auto;
+    flex-direction: column;
   }
-
   .tabbar-item {
     flex: 1;
     display: flex;
     font-size: 12px;
     flex-direction: column;
     align-items: center;
-    color: #ccc;
+    color: #000;
     cursor: pointer;
   }
-
   .tabbar-item.active {
-    color: #dcb671;
+    color: #1296db;
     font-weight: bold;
   }
-
   .tabbar-icon {
     width: 24px;
     height: 24px;
     margin-bottom: 4px;
-  }
-
-  .tabbar-middle {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    margin-top: -5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
-
-  .center-icon {
-    width: 55px;
-    height: 55px;
   }
 }
 </style>

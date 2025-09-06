@@ -2,8 +2,7 @@
   <div id="app" class="container">
     <h3>商城统计</h3>
     <p class="time">{{ localTime }}</p>
-    <div class="stats-grid">
-      <!-- 循环渲染所有统计卡片 -->
+    <!--<div class="stats-grid">
       <div v-for="(card, index) in cards" :key="index" :class="['stat-card', card.cardClass]">
         <p>{{ card.title }}</p>
         <p class="big-num">{{ card.bigNum }}</p>
@@ -14,7 +13,7 @@
         <p>{{ card.detail2 }}</p>
         <i :class="card.icon"></i>
       </div>
-    </div>
+    </div>-->
   </div>
 </template>
 
