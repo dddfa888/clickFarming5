@@ -55,6 +55,22 @@ public class UserGrade
     @Excel(name = "最大奖金", readConverterExp = "%=")
     private BigDecimal maxBonus;
 
+    /** 每天购买的产品数量 */
+    @Excel(name = "每天提现次数")
+    private Integer withdrawTimes;
+
+    /** 每天提现额度 */
+    @Excel(name = "每天提现额度")
+    private BigDecimal withdrawAmount;
+
+    /** 佣金比例（%） */
+    @Excel(name = "佣金比例", readConverterExp = "%=")
+    private BigDecimal commissionRate;
+
+    /** 金额挡位 */
+    @Excel(name = "金额挡位")
+    private String amountRange;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
 

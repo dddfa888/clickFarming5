@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.YueBaoMapper">
+
+    <select id="selectById" resultType="com.ruoyi.click.domain.YueBao">
+        select * from m_yuebao where user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="YueBao">
+        INSERT INTO m_yuebao
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="totalAssets != null">total_assets,</if>
+            <if test="yesterdayProfit != null">yesterday_profit,</if>
+            <if test="cumulativeProfit != null">cumulative_profit,</if>
+            <if test="annualizedRate != null">annualized_rate,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="totalAssets != null">#{totalAssets},</if>
+            <if test="yesterdayProfit != null">#{yesterdayProfit},</if>
+            <if test="cumulativeProfit != null">#{cumulativeProfit},</if>
+            <if test="annualizedRate != null">#{annualizedRate},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <select id="selectByUserId" resultType="com.ruoyi.click.domain.YueBao">
+        SELECT id, user_id, total_assets, yesterday_profit, cumulative_profit, annualized_rate, create_time, update_time
+        FROM m_yuebao
+        WHERE user_id = #{userId}
+    </select>
+
+    <update id="updateById">
+        UPDATE m_yuebao
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="totalAssets != null">total_assets = #{totalAssets},</if>
+            <if test="yesterdayProfit != null">yesterday_profit = #{yesterdayProfit},</if>
+            <if test="cumulativeProfit != null">cumulative_profit = #{cumulativeProfit},</if>
+            <if test="annualizedRate != null">annualized_rate = #{annualizedRate},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="list" resultType="com.ruoyi.click.domain.YueBao">
+    </select>
+</mapper>

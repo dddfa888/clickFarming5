@@ -76,4 +76,16 @@ public interface IMAccountChangeRecordsService
      * @return 结果
      */
     public int deleteMAccountChangeRecordsByUuid(String uuid);
+
+    /**
+     * 查询账变记录列表
+     * @return
+     */
+    Map<String,Object> getInformation();
+
+    /**
+     * 总资产列表
+     * @return
+     */
+    Map<String,Object> getTotalAssets();
 }

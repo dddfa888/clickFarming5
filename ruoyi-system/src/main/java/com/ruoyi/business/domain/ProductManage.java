@@ -36,6 +36,11 @@ public class ProductManage extends BaseEntity
     @Excel(name = "图片附件url")
     private String imageUrl;
 
+    /** 平台 1是淘宝，2是拼多多，3唯品会，4是京东，5是天猫 */
+    @Excel(name = "平台", readConverterExp = "1=淘宝,2=拼多多,3=唯品会,4=京东,5=天猫")
+    private Integer platform; // 新增的platform字段
+
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -86,6 +91,14 @@ public class ProductManage extends BaseEntity
         return imageUrl;
     }
 
+    public Integer getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(Integer platform) {
+        this.platform = platform;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -94,6 +107,7 @@ public class ProductManage extends BaseEntity
             .append("content", getContent())
             .append("price", getPrice())
             .append("imageUrl", getImageUrl())
+            .append("platform", getPlatform())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())

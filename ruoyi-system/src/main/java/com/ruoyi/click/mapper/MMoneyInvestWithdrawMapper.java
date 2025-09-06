@@ -1,10 +1,12 @@
 package com.ruoyi.click.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.click.domain.MMoneyInvestWithdraw;
 import com.ruoyi.click.domain.UserGrade;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -96,4 +98,13 @@ public interface MMoneyInvestWithdrawMapper extends BaseMapper<MMoneyInvestWithd
             @Param("endTime") LocalDateTime endTime            // 指定参数名为endTime
     );
 
+    @Select("SELECT * FROM m_money_invest_withdraw " +
+            "WHERE user_id = #{userIds} " +
+            "AND type = #{type}")
+    List<MMoneyInvestWithdraw> listByUserIdsAndType(
+            @Param("userIds") List<Long> userIds,
+            @Param("type") Integer type);
+
+
+    List<MMoneyInvestWithdraw> selectInfo(@Param("userId") Long userId, @Param("type") String type ,@Param("status") Integer status);
 }

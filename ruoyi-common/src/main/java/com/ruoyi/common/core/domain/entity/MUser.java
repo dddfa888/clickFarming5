@@ -120,6 +120,12 @@ public class MUser
     @Excel(name = "连单数量")
     private Integer multiOrderNum;
 
+    @Excel(name = "性别")
+    private Integer sex;
+
+    @Excel(name = "个性标签")
+    private String signature;
+
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date updateTime;

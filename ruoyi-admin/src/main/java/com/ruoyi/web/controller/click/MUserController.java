@@ -1,6 +1,10 @@
 package com.ruoyi.web.controller.click;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -9,8 +13,12 @@ import javax.validation.constraints.NotNull;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.business.domain.MRewardRecord;
+import com.ruoyi.business.domain.OrderReceiveRecord;
+import com.ruoyi.business.mapper.OrderReceiveRecordMapper;
 import com.ruoyi.business.service.IMRewardRecordService;
+import com.ruoyi.click.domain.MMoneyInvestWithdraw;
 import com.ruoyi.click.domain.vo.PasswordUpdateVO;
+import com.ruoyi.click.mapper.MMoneyInvestWithdrawMapper;
 import com.ruoyi.click.service.IMMoneyInvestWithdrawService;
 import com.ruoyi.common.core.domain.entity.MUser;
 import com.ruoyi.common.exception.ServiceException;
@@ -70,11 +78,20 @@ public class MUserController extends BaseController
     @Autowired
     private SysConfigMapper configMapper;
 
+    @Autowired
+    private MMoneyInvestWithdrawMapper investWithdrawMapper;
+
+    @Autowired
+    private OrderReceiveRecordMapper orderRecordMapper;
+
 
     @GetMapping("/userInfo")
     public AjaxResult userInfo(HttpServletRequest request) {
         Long userId = tokenService.getLoginUser(request).getmUser().getUid();
         MUser mUser = mUserService.selectMUserByUid(userId);
+        if (mUser.getSignature()==null){
+            mUser.setSignature("这个人很懒什么也没留下");
+        }
         mUser.setLevelName(userGradeService.getOne(new LambdaQueryWrapper<UserGrade>()
                 .eq(UserGrade::getSortNum,mUser.getLevel())).getGradeName());
         mUser.setLoginPassword("***************");
@@ -212,19 +229,39 @@ public class MUserController extends BaseController
     }
 
     /**
-     * 获取前4级用户下级
+     * 获取前3级用户下级
      */
     @GetMapping("/getUpToFourLevelInviters")
     public AjaxResult getUpToFourLevelInviters(HttpServletRequest request) {
+        // 1. 获取当前登录用户信息
         Long uid = tokenService.getLoginUser(request).getmUser().getUid();
         MUser currentUser = mUserService.selectMUserByUid(uid);
+        if (currentUser == null) {
+            return AjaxResult.error("当前用户不存在");
+        }
         String invitationCode = currentUser.getInvitationCode();
+        if (invitationCode == null) {
+            // 构建空结果（各级数组为空）
+            Map<String, Object> emptyResult = new HashMap<>();
+            emptyResult.put("level1", new ArrayList<>());
+            emptyResult.put("level2", new ArrayList<>());
+            emptyResult.put("level3", new ArrayList<>());
+            emptyResult.put("totalAccountBalance", BigDecimal.ZERO);
+            emptyResult.put("totalRecharge", BigDecimal.ZERO);
+            emptyResult.put("teamTotal", 0);
+            emptyResult.put("totalProfit", BigDecimal.ZERO);
+            emptyResult.put("todayNewUsers", 0);
+            return AjaxResult.success(emptyResult);
+        }
 
-        List<MUser> result = new ArrayList<>();
+        // 2. 初始化各级列表（分别存储1-3级数据）
+        List<MUser> level1Users = new ArrayList<>();
+        List<MUser> level2Users = new ArrayList<>();
+        List<MUser> level3Users = new ArrayList<>();
         List<String> currentLevelCodes = Collections.singletonList(invitationCode);
-
         int hierarchy = 0;
-        while (!currentLevelCodes.isEmpty() && hierarchy < 4) {
+
+        while (!currentLevelCodes.isEmpty() && hierarchy < 3) {
             hierarchy++;
 
             List<MUser> nextLevelUsers = mUserService.list(
@@ -234,19 +271,147 @@ public class MUserController extends BaseController
 
             if (nextLevelUsers.isEmpty()) break;
 
-            final int currentHierarchy = hierarchy; // 用 final 变量供 lambda 使用
+            final int currentHierarchy = hierarchy;
             nextLevelUsers.forEach(user -> user.setHierarchy(currentHierarchy));
 
-            result.addAll(nextLevelUsers);
+            // 按层级添加到对应列表
+            switch (currentHierarchy) {
+                case 1:
+                    level1Users.addAll(nextLevelUsers);
+                    break;
+                case 2:
+                    level2Users.addAll(nextLevelUsers);
+                    break;
+                case 3:
+                    level3Users.addAll(nextLevelUsers);
+                    break;
+            }
 
+            // 准备下一级查询的邀请码
             currentLevelCodes = nextLevelUsers.stream()
                     .map(MUser::getInvitationCode)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
 
+        // 合并所有层级数据用于统计
+        List<MUser> allUsers = new ArrayList<>();
+        allUsers.addAll(level1Users);
+        allUsers.addAll(level2Users);
+        allUsers.addAll(level3Users);
+
+        // 3. 计算各项团队统计数据
+        BigDecimal totalAccountBalance = calculateTotalBalance(allUsers);
+        int teamTotal = allUsers.size();
+        BigDecimal totalRecharge = calculateTotalRecharge(allUsers);
+        BigDecimal totalProfit = calculateTotalProfit(allUsers);
+        int todayNewUsers = countTodayNewUsers(allUsers);
+
+        // 4. 封装各级数组和统计结果
+        Map<String, Object> result = new HashMap<>();
+        result.put("level1", level1Users);  // 1级数据数组
+        result.put("level2", level2Users);  // 2级数据数组
+        result.put("level3", level3Users);  // 3级数据数组
+        result.put("totalAccountBalance", totalAccountBalance);
+        result.put("totalRecharge", totalRecharge);
+        result.put("teamTotal", teamTotal);
+        result.put("totalProfit", totalProfit);
+        result.put("todayNewUsers", todayNewUsers);
+
         return AjaxResult.success(result);
     }
+
+    /**
+     * 累加用户列表中所有用户的accountBalance（处理null值，避免空指针）
+     */
+    private BigDecimal calculateTotalBalance(List<MUser> userList) {
+        return userList.stream()
+                .map(user -> user.getAccountBalance() == null ? BigDecimal.ZERO : user.getAccountBalance())
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
+    // 计算团队总充值（核心逻辑）
+    private BigDecimal calculateTotalRecharge(List<MUser> teamUsers) {
+        if (teamUsers.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        List<Long> teamUserIds = teamUsers.stream()
+                .map(MUser::getUid)
+                .collect(Collectors.toList());
+        // 替换为自定义 SQL 方式
+        List<MMoneyInvestWithdraw> rechargeRecords = investWithdrawMapper.listByUserIdsAndType(teamUserIds, 1);
+        return rechargeRecords.stream()
+                .map(MMoneyInvestWithdraw::getAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
+    // 计算团队总收益（核心逻辑）
+    private BigDecimal calculateTotalProfit(List<MUser> teamUsers) {
+        if (teamUsers.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        List<Long> teamUserIds = teamUsers.stream()
+                .map(MUser::getUid)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (teamUserIds.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        List<OrderReceiveRecord> orderRecords = orderRecordMapper.listByUserIds(teamUserIds);
+        return orderRecords.stream()
+                .map(OrderReceiveRecord::getProfit)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * 统计今日新增用户（今天注册的团队用户）
+     */
+    private int countTodayNewUsers(List<MUser> teamUsers) {
+        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime todayEnd = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+
+        Date todayStartDate = Date.from(todayStart.atZone(ZoneId.systemDefault()).toInstant());
+        Date todayEndDate = Date.from(todayEnd.atZone(ZoneId.systemDefault()).toInstant());
+
+        return (int) teamUsers.stream()
+                .filter(user -> {
+                    Date createTime = user.getCreateTime();
+                    return createTime != null && createTime.after(todayStartDate) && createTime.before(todayEndDate);
+                })
+                .count();
+    }
+
+    // 重构 buildResult：整合所有团队统计数据
+    private AjaxResult buildResult(List<MUser> teamUsers,
+                                   BigDecimal totalBalance,
+                                   BigDecimal totalRecharge,
+                                   int teamTotal,
+                                   BigDecimal totalProfit,
+                                   int todayNewUsers) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("invitedUsers", teamUsers);
+        data.put("totalAccountBalance", totalBalance);
+        data.put("totalRecharge", totalRecharge);
+        data.put("teamTotal", teamTotal);
+        data.put("totalProfit", totalProfit);
+        data.put("todayNewUsers", todayNewUsers);
+        data.put("levelCount", countUsersByLevel(teamUsers));
+        return AjaxResult.success(data);
+    }
+
+    /**
+     * 统计各层级的用户数量
+     */
+    private Map<Integer, Long> countUsersByLevel(List<MUser> userList) {
+        return userList.stream()
+                .collect(Collectors.groupingBy(MUser::getHierarchy, Collectors.counting()));
+    }
+
 
 
     /**
@@ -285,8 +450,6 @@ public class MUserController extends BaseController
     }
 
 
-
-
     @GetMapping(value = "editStatus/{uid}")
     public AjaxResult editStatus(@PathVariable("uid") Long uid)
     {
@@ -322,8 +485,6 @@ public class MUserController extends BaseController
         return toAjax(mUserService.insertMUser(mUser));
     }
 
-
-
     /**
      * 修改用户
      */
@@ -355,12 +516,11 @@ public class MUserController extends BaseController
         return toAjax(mUserService.deleteMUserByUids(uids));
     }
 
-
     /**
      * 前端修改用户信息，不传id
      */
     @Log(title = "用户", businessType = BusinessType.UPDATE)
-    @PostMapping("updateUserBank")
+    @PostMapping("/updateUserBank")
     public AjaxResult updateUserFront(HttpServletRequest request, @RequestBody MUser mUser)
     {
         Long userId = tokenService.getLoginUser(request).getmUser().getUid();
@@ -442,23 +602,14 @@ public class MUserController extends BaseController
     }
 
     /**
-     * 修改信用分
+     * 修改用户信息
      * @param mUser
      * @return
      */
-    @PostMapping("/updateCreditScore")
-    public AjaxResult updateCreditScore(@RequestBody MUser mUser){
-        return toAjax(mUserService.updateScore(mUser));
-    }
-
-    /**
-     * 修改账户名
-     * @param mUser
-     * @return
-     */
-    @PutMapping("/updateLoginAccount")
-    public AjaxResult updateLoginAccount(@RequestBody MUser mUser){
-        return toAjax(mUserService.updateLoginAccount(mUser));
+    @PutMapping("/updateUser")
+    public AjaxResult updateUser(@RequestBody MUser mUser){
+        mUser.setUid(getUserId());
+        return toAjax(mUserService.updateUser(mUser));
     }
 
     /**
@@ -494,19 +645,39 @@ public class MUserController extends BaseController
     public AjaxResult updateFundPassword(@RequestBody PasswordUpdateVO passwordUpdateVO){
         //通过Security获取用户uid
         Long uid = SecurityUtils.getUserId();
-        //判断传递的数据是否为空
-        if (passwordUpdateVO.getOldPassword()==""){
-            throw new ServiceException("旧密码不能为空");
-        }
-        if (passwordUpdateVO.getNewPassword()==""){
-            throw new ServiceException("新密码不能为空");
-        }
-        // 校验新密码和确认密码是否一致
-        if (!passwordUpdateVO.getNewPassword().equals(passwordUpdateVO.getConfirmPassword())) {
-            throw new ServiceException("俩次输入的新密码不一致");
-        }
         // 调用服务层修改密码
-        return toAjax(mUserService.updateFoundPassword(uid, passwordUpdateVO.getOldPassword(), passwordUpdateVO.getNewPassword()));
+        return toAjax(mUserService.updateFoundPassword(uid, passwordUpdateVO.getNewPassword()));
     }
 
+    /**
+     * 用户信息
+     * @return
+     */
+    @GetMapping("/listInformation")
+    public AjaxResult listInformation(){
+        // 获取前50条用户数据
+        List<MUser> users = mUserService.listInformain();
+
+        // 初始化随机数生成器
+        Random random = new Random();
+
+        // 为每个用户添加1-30的随机数，用Map存储需要返回的字段
+        List<Map<String, Object>> result = users.stream().map(user -> {
+            Map<String, Object> userMap = new HashMap<>();
+
+            // 1. 添加用户原有字段（根据需要选择，这里示例添加id和username）
+            userMap.put("id", user.getUid());
+            userMap.put("username", user.getLoginAccount());
+            userMap.put("image",user.getHeadImg());
+            // 可根据实际需求添加其他字段，如createTime等
+
+            // 2. 生成1-30的随机数并添加
+            int randomNum = random.nextInt(30) + 1; // nextInt(30)生成0-29，+1后变为1-30
+            userMap.put("randomNum", randomNum);
+
+            return userMap;
+        }).collect(Collectors.toList());
+
+        return AjaxResult.success(result);
+    }
 }

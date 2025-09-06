@@ -81,4 +81,14 @@ public interface MUserMapper extends BaseMapper<MUser> {
      * @param avatarUrl
      */
     int updateUserAvatar(@Param("uId") Long uId,@Param("avatarUrl") String avatarUrl);
+
+    /**
+     * 查询所有用户信息
+     * @return
+     */
+    List<MUser> selectInformation();
+
+    MUser selectMUserByUid1(@Param("uid") Long uid);
+
+    int updateById(MUser mUser);
 }

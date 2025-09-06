@@ -1,10 +1,13 @@
 package com.ruoyi.web.controller.business;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.click.domain.vo.OrderReceiveRecordVo;
+import com.ruoyi.click.domain.vo.RankingVo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,9 +78,23 @@ public class OrderReceiveRecordController extends BaseController
      * 获取订单接收记录详细信息
      */
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
-        return success(orderReceiveRecordService.selectOrderReceiveRecordById(id));
+    public AjaxResult getInfo(@PathVariable("id") Long id) {
+        // 1. 获取原始订单记录
+        OrderReceiveRecord orderRecord = orderReceiveRecordService.selectOrderReceiveRecordById(id);
+        if (orderRecord == null) {
+            return AjaxResult.error("订单记录不存在");
+        }
+
+        // 2. 定义平台列表并随机选择一个
+        String[] platforms = {"拼多多", "淘宝", "唯品会", "京东", "天猫"};
+        String randomPlatform = platforms[new Random().nextInt(platforms.length)];
+
+        // 3. 创建Map整合原订单对象和随机平台字段
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderRecord", orderRecord); // 原订单对象
+        result.put("platform", randomPlatform); // 新增的随机平台字段
+
+        return success(result);
     }
 
     /**
@@ -142,6 +159,17 @@ public class OrderReceiveRecordController extends BaseController
     public AjaxResult payOrder(@PathVariable("id") Long id)
     {
         return toAjax(orderReceiveRecordService.payOrder(id));
+    }
+
+
+    /**
+     * 排行版
+     * @return
+     */
+    @GetMapping("/rankingList")
+    public AjaxResult rankingList(){
+        List<RankingVo> rankingList = orderReceiveRecordService.getRanking();
+        return AjaxResult.success(rankingList);
     }
 
 }

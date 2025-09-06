@@ -166,4 +166,23 @@ public class MAccountChangeRecordsController extends BaseController
     {
         return toAjax(mAccountChangeRecordsService.deleteMAccountChangeRecordsByUuids(uuids));
     }
+
+    /**
+     *账变信息展示
+     */
+    @GetMapping("/getInformation")
+    public AjaxResult getInformation(){
+        return success(mAccountChangeRecordsService.getInformation()) ;
+    }
+
+
+    /**
+     * 总资产信息
+     * @return
+     */
+    @GetMapping("/totalAssets")
+    public AjaxResult totalAssets(){
+        return success(mAccountChangeRecordsService.getTotalAssets());
+    }
+
 }

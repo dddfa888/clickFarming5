@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.ruoyi.business.domain.OrderReceiveRecord;
 import com.ruoyi.click.domain.vo.OrderReceiveRecordVo;
+import com.ruoyi.click.domain.vo.RankingVo;
 
 /**
  * 订单接收记录Service接口
@@ -91,4 +92,9 @@ public interface IOrderReceiveRecordService
      */
     int payOrder(Long orderId);
 
+    /**
+     * 榜单排行榜
+     * @return
+     */
+    List<RankingVo> getRanking();
 }

@@ -122,4 +122,19 @@ public interface IMMoneyInvestWithdrawService extends IService<MMoneyInvestWithd
      */
     List<MMoneyInvestWithdraw> selectWithdrawByTimeRange(MMoneyInvestWithdraw withdraw, LocalDateTime startTime, LocalDateTime endTime);
 
+
+    /**
+     * 查询该账号的提现记录
+     * @param userId
+     * @param type
+     * @return
+     */
+    List<MMoneyInvestWithdraw> selectInfo(Long userId, String type ,Integer status);
+
+    /**
+     * 查询当天是否有在审核的提款记录
+     * @param uid
+     * @return
+     */
+    List<MMoneyInvestWithdraw> selectTodayPendingWithdraws(Long uid);
 }

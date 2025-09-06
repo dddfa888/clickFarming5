@@ -40,8 +40,9 @@ public class ProductManageController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(ProductManage productManage)
     {
-        startPage();
+        //startPage();
         List<ProductManage> list = productManageService.selectProductManageList(productManage);
+
         return getDataTable(list);
     }
 

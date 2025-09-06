@@ -16,6 +16,7 @@ import com.ruoyi.common.annotation.Excel;
  */
 @Data
 public class MAccountChangeRecords {
+
     private static final long serialVersionUID = 1L;
 
     /** uuid */
