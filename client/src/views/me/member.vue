@@ -7,7 +7,13 @@
     <!-- 会员卡片列表 -->
     <div class="member-cards">
       <!-- 铂金会员卡片 -->
-      <div class="member-card" v-for="item in memberCenter" :key="item.id" :class="item.level">
+      <div
+        class="member-card"
+        :style="{ backgroundImage: `url(${item.image})` }"
+        v-for="item in memberCenter"
+        :key="item.id"
+        :class="item.level"
+      >
         <div class="card-top">
           <div class="member-info">
             <div class="member-level">{{ item.gradeName }}</div>
@@ -94,9 +100,10 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   position: relative;
-  width: 90%;
-  height: auto;
-  background-color: #efefef;
+  width: 85%;
+  margin-left: 1.5%;
+  height: 130px;
+  background-size: 100% 100%;
 }
 
 .silver {
@@ -199,8 +206,10 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     position: relative;
-    width: 90%;
-    height: auto;
+    width: 85%;
+    margin-left: 2%;
+    height: 130px;
+    background-size: 100% 100%;
   }
 
   .silver {

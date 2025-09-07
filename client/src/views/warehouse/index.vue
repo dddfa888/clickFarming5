@@ -108,6 +108,8 @@ const handleOrder = () => {
       console.log(res.orderId);
       id.value = res.orderId;
       isProcessing.value = true;
+    } else if (res.code === 5001) {
+      showAlert(res.data.level + res.data.name + "最低" + res.data.value, 4000);
     } else {
       isProcessing.value = false;
       showAlert(res.msg, 4000);
