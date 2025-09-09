@@ -46,7 +46,7 @@
           <div class="user-avatar">
             <img src="../../assets/avatars/1.png" alt="用户头像" />
           </div>
-          <div class="user-name">大山</div>
+          <div class="user-name">唐国强</div>
           <div class="user-earnings">+213.36</div>
           <div class="earnings-date">2025-08-28</div>
           <div class="arrow-right">
@@ -57,7 +57,7 @@
           <div class="user-avatar">
             <img src="../../assets/avatars/12.png" alt="用户头像" />
           </div>
-          <div class="user-name">王强</div>
+          <div class="user-name">王琳琳</div>
           <div class="user-earnings">+192.96</div>
           <div class="earnings-date">2025-08-28</div>
           <div class="arrow-right">
