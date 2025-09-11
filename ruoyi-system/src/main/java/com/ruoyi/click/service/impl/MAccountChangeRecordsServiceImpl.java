@@ -226,8 +226,24 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
     public Map<String, Object> getInformation() {
         // 查询用户信息
         MUser mUser = mUserMapper.selectMUserByUid(getUserId());
+
+        // 添加用户空值检查
+        if (mUser == null) {
+            throw new RuntimeException("用户信息不存在");
+        }
+
+        // 添加账户余额空值检查
+        if (mUser.getAccountBalance() == null) {
+            throw new RuntimeException("用户账户余额信息异常");
+        }
+
         // 根据用户id去查询等级信息
         UserGrade userGrade = userGradeMapper.selectUserGradeBySortNum(mUser.getLevel());
+
+        // 添加用户等级空值检查
+        if (userGrade == null) {
+            throw new RuntimeException("用户等级信息不存在");
+        }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = LocalDate.now();
@@ -257,7 +273,10 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
         BigDecimal frozenAmount = BigDecimal.ZERO;
         if (!waitingRecords.isEmpty()) {
             firstRecord = waitingRecords.get(0);
-            frozenAmount = firstRecord.getRefundAmount();
+            // 添加对退款金额的空值检查
+            if (firstRecord.getRefundAmount() != null) {
+                frozenAmount = firstRecord.getRefundAmount();
+            }
         }
 
         // 余额 = 总金额-未支付订单金额
@@ -272,7 +291,7 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal profit = totalProfit.subtract(firstRecord != null ?
+        BigDecimal profit = totalProfit.subtract(firstRecord != null && firstRecord.getProfit() != null ?
                 firstRecord.getProfit().setScale(2, RoundingMode.HALF_UP) :
                 BigDecimal.ZERO);
 
@@ -288,11 +307,21 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
         return res;
     }
 
-    @Override
 
+    @Override
     public Map<String, Object> getTotalAssets() {
         // 查询用户信息
         MUser mUser = mUserMapper.selectMUserByUid(getUserId());
+
+        // 添加空值检查
+        if (mUser == null) {
+            throw new RuntimeException("用户信息不存在");
+        }
+
+        // 检查账户余额是否为空
+        if (mUser.getAccountBalance() == null) {
+            throw new RuntimeException("用户账户余额信息异常");
+        }
 
         // 查询该用户今天的所有订单
         List<OrderReceiveRecord> orderReceiveRecord = orderReceiveRecordMapper.selectByUid(getUserId());
@@ -308,7 +337,9 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
         BigDecimal frozenAmount = BigDecimal.ZERO;
         if (!waitingRecords.isEmpty()) {
             firstRecord = waitingRecords.get(0);
-            frozenAmount = firstRecord.getRefundAmount();
+            if (firstRecord.getRefundAmount() != null) {
+                frozenAmount = firstRecord.getRefundAmount();
+            }
         }
 
         // 余额 = 总金额-未支付订单金额
@@ -323,7 +354,7 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal profit = totalProfit.subtract(firstRecord != null ?
+        BigDecimal profit = totalProfit.subtract(firstRecord != null && firstRecord.getProfit() != null ?
                 firstRecord.getProfit().setScale(2, RoundingMode.HALF_UP) :
                 BigDecimal.ZERO);
 
@@ -338,7 +369,7 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal profit1 = totalProfit1.subtract(firstRecord != null ?
+        BigDecimal profit1 = totalProfit1.subtract(firstRecord != null && firstRecord.getProfit() != null ?
                 firstRecord.getProfit().setScale(2, RoundingMode.HALF_UP) :
                 BigDecimal.ZERO);
 
@@ -352,4 +383,6 @@ public class MAccountChangeRecordsServiceImpl implements IMAccountChangeRecordsS
         res.put("total", total);              // 总收益
         return res;
     }
+
+
 }

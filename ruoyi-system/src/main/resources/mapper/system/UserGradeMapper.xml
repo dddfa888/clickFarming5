@@ -18,7 +18,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectUserGradeVo">
-        select id, sort_num, grade_name, join_cost, min_balance, buy_prod_num, min_bonus, max_bonus,withdraw_times,withdraw_amount,commission_rate,amount_range ,commission_rate, create_time, update_time from m_user_grade
+        select id, sort_num,image, grade_name, join_cost, min_balance, buy_prod_num, min_bonus, max_bonus,withdraw_times,withdraw_amount,commission_rate,amount_range ,commission_rate, create_time, update_time from m_user_grade
     </sql>
 
     <select id="selectUserGradeList" parameterType="UserGrade" resultMap="UserGradeResult">
