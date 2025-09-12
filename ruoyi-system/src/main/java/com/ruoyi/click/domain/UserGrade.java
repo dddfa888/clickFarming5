@@ -27,6 +27,10 @@ public class UserGrade
     @Excel(name = "序号")
     private Integer sortNum;
 
+    /** 背景图片 */
+    @Excel(name = "背景图片")
+    private String image;
+
     /*  白银  Bạc
         黄金  Vàng
         白金  Bạch Kim
