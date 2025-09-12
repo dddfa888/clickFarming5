@@ -17,7 +17,7 @@
         <div class="card-top">
           <div class="member-info">
             <div class="member-level">{{ item.gradeName }}</div>
-            <div class="commission-rate">{{item.maxBonus}}%佣金比例</div>
+            <div class="commission-rate">{{item.commissionRate}}%佣金比例</div>
           </div>
           <div class="price">¥{{item.withdrawAmount}}元</div>
         </div>
