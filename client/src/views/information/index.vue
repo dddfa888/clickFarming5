@@ -67,7 +67,7 @@
         </svg>
         <span>新朋友</span>
       </div>-->
-      <div class="chat-item customer-service">
+      <div class="chat-item customer-service" @click="goToCustomerService">
         <img src="../../assets/image/images.png" alt="客服头像" class="cs-avatar" />
         <div class="cs-info">
           <div class="cs-name">
@@ -81,7 +81,19 @@
 </template>
 
 <script setup>
-// 这里可以编写 Vue3 的组合式 API 逻辑，本布局主要是静态结构，暂无需复杂逻辑
+import { ref, onMounted } from "vue";
+import { getCustomerService } from "../../api/index";
+const CustomerService = ref("");
+const goToCustomerService = () => {
+  window.open(CustomerService.value, "_blank");
+};
+
+onMounted(() => {
+  getCustomerService().then(res => {
+    CustomerService.value = res.data[0].configValue;
+    console.log(res.data[0].configValue);
+  });
+});
 </script>
 
 <style scoped>
