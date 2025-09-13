@@ -75,4 +75,7 @@ public interface SysConfigMapper
      * @return 结果
      */
     public int deleteConfigByIds(Long[] configIds);
+
+//    客服链接
+    public List<SysConfig> selectCustomerServiceConfig();
 }
