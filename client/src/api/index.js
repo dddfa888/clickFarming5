@@ -360,3 +360,12 @@ export function getMemberCenter() {
 }
 
 
+// 获取客服链接
+export function getCustomerService() {
+    return request({
+        url: '/system/config/customerService',
+        method: 'get',
+    })
+}
+
+
