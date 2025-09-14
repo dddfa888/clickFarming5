@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private SysConfigMapper sysConfigMapper;
     /**
      * 项目启动时，初始化参数到缓存
      */
@@ -217,6 +220,11 @@ public class SysConfigServiceImpl implements ISysConfigService
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
+    }
+
+    // 定义查询客服中心配置的方法
+    public List<SysConfig> getCustomerServiceConfig() {
+        return sysConfigMapper.selectCustomerServiceConfig();
     }
 
     /**

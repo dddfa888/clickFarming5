@@ -70,6 +70,8 @@ public class MMoneyInvestWithdraw
     /** 提款方式 */
     private Integer withdrawalMethod;
 
+    /** 充值类型 */
+    private Integer rechargeType;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date updateTime;

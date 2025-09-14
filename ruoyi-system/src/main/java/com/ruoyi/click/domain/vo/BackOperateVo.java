@@ -11,4 +11,7 @@ public class BackOperateVo {
     private Long id;
 
     private String notes;
+
+    // 添加充值类型字段，数字类型
+    private Integer rechargeType;
 }

@@ -34,6 +34,8 @@ import com.ruoyi.click.service.IMUserService;
 import com.ruoyi.click.service.IUserGradeService;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.mapper.SysConfigMapper;
+import com.ruoyi.web.controller.click.domain.TeamStatisticsVO;
+import com.ruoyi.web.controller.click.domain.UserInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -309,6 +311,7 @@ public class MUserController extends BaseController
 
         // 4. 封装各级数组和统计结果
         Map<String, Object> result = new HashMap<>();
+
         result.put("level1", level1Users);  // 1级数据数组
         result.put("level2", level2Users);  // 2级数据数组
         result.put("level3", level3Users);  // 3级数据数组
@@ -320,6 +323,250 @@ public class MUserController extends BaseController
 
         return AjaxResult.success(result);
     }
+
+    /**
+     * 获取团队详细统计信息
+     */
+    @GetMapping("/teamStatistics")
+    public AjaxResult getTeamStatistics(HttpServletRequest request) {
+        try {
+            // 1. 获取当前登录用户信息
+            Long currentUserId = tokenService.getLoginUser(request).getmUser().getUid();
+            MUser currentUser = mUserService.selectMUserByUid(currentUserId);
+
+            if (currentUser == null) {
+                return AjaxResult.error("当前用户不存在");
+            }
+
+            String invitationCode = currentUser.getInvitationCode();
+            if (invitationCode == null) {
+                return AjaxResult.success(new TeamStatisticsVO());
+            }
+
+            // 2. 初始化统计对象
+            TeamStatisticsVO teamStats = new TeamStatisticsVO();
+
+            // 3. 获取所有下级用户（1-3级）
+            Map<String, Object> teamData = getTeamUsersWithDetails(invitationCode);
+
+            @SuppressWarnings("unchecked")
+            List<MUser> level1Users = (List<MUser>) teamData.get("level1");
+            @SuppressWarnings("unchecked")
+            List<MUser> level2Users = (List<MUser>) teamData.get("level2");
+            @SuppressWarnings("unchecked")
+            List<MUser> level3Users = (List<MUser>) teamData.get("level3");
+            @SuppressWarnings("unchecked")
+            List<MUser> allTeamUsers = (List<MUser>) teamData.get("allUsers");
+
+            // 4. 计算各项统计数据
+            // 团队总人数
+            teamStats.setTeamTotalCount(allTeamUsers.size());
+
+            // 直推人数（一级人数）
+            teamStats.setDirectPushCount(level1Users.size());
+            teamStats.setLevel1Count(level1Users.size());
+            teamStats.setLevel2Count(level2Users.size());
+            teamStats.setLevel3Count(level3Users.size());
+
+            // 今日新增人数
+            teamStats.setTodayNewCount(countTodayNewUsers(allTeamUsers));
+
+            // 活跃人数（这里定义为有交易记录的用户，您可以根据实际需求调整）
+            teamStats.setActiveCount(countActiveUsers(allTeamUsers));
+
+            // 团队总充值
+            teamStats.setTeamTotalRecharge(calculateTotalRecharge(allTeamUsers));
+
+            // 团队总收益
+            teamStats.setTeamTotalProfit(calculateTotalProfit(allTeamUsers));
+
+            // 下级佣金（这里可以理解为下级用户产生的总收益）
+            teamStats.setSubordinateCommission(teamStats.getTeamTotalProfit());
+
+            // 总资产（当前用户自己的账户余额 + 下级佣金）
+            BigDecimal selfBalance = currentUser.getAccountBalance() != null ?
+                    currentUser.getAccountBalance() : BigDecimal.ZERO;
+            BigDecimal subordinateCommission = teamStats.getSubordinateCommission() != null ?
+                    teamStats.getSubordinateCommission() : BigDecimal.ZERO;
+
+            teamStats.setTotalCommission(selfBalance.add(subordinateCommission));
+
+            // 5. 转换用户信息为VO对象
+            teamStats.setLevel1Users(convertToUserInfoVO(level1Users));
+            teamStats.setLevel2Users(convertToUserInfoVO(level2Users));
+            teamStats.setLevel3Users(convertToUserInfoVO(level3Users));
+
+            return AjaxResult.success(teamStats);
+
+        } catch (Exception e) {
+            log.error("获取团队统计信息失败", e);
+            return AjaxResult.error("获取团队统计信息失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取团队用户详细信息
+     */
+    private Map<String, Object> getTeamUsersWithDetails(String invitationCode) {
+        Map<String, Object> result = new HashMap<>();
+
+        // 初始化各级列表
+        List<MUser> level1Users = new ArrayList<>();
+        List<MUser> level2Users = new ArrayList<>();
+        List<MUser> level3Users = new ArrayList<>();
+        List<String> currentLevelCodes = Collections.singletonList(invitationCode);
+        int hierarchy = 0;
+
+        while (!currentLevelCodes.isEmpty() && hierarchy < 3) {
+            hierarchy++;
+
+            List<MUser> nextLevelUsers = mUserService.list(
+                    new LambdaQueryWrapper<MUser>()
+                            .in(MUser::getInviterCode, currentLevelCodes)
+            );
+
+            if (nextLevelUsers.isEmpty()) break;
+
+            final int currentHierarchy = hierarchy;
+            nextLevelUsers.forEach(user -> user.setHierarchy(currentHierarchy));
+
+            // 按层级添加到对应列表
+            switch (currentHierarchy) {
+                case 1:
+                    level1Users.addAll(nextLevelUsers);
+                    break;
+                case 2:
+                    level2Users.addAll(nextLevelUsers);
+                    break;
+                case 3:
+                    level3Users.addAll(nextLevelUsers);
+                    break;
+            }
+
+            // 准备下一级查询的邀请码
+            currentLevelCodes = nextLevelUsers.stream()
+                    .map(MUser::getInvitationCode)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+
+        // 合并所有层级数据
+        List<MUser> allUsers = new ArrayList<>();
+        allUsers.addAll(level1Users);
+        allUsers.addAll(level2Users);
+        allUsers.addAll(level3Users);
+
+        result.put("level1", level1Users);
+        result.put("level2", level2Users);
+        result.put("level3", level3Users);
+        result.put("allUsers", allUsers);
+
+        return result;
+    }
+
+    /**
+     * 统计活跃用户数（有交易记录的用户）
+     */
+    private int countActiveUsers(List<MUser> teamUsers) {
+        if (teamUsers.isEmpty()) {
+            return 0;
+        }
+
+        List<Long> userIds = teamUsers.stream()
+                .map(MUser::getUid)
+                .collect(Collectors.toList());
+
+        // 查询有充值记录的用户数
+        LambdaQueryWrapper<MMoneyInvestWithdraw> rechargeWrapper = new LambdaQueryWrapper<>();
+        rechargeWrapper.in(MMoneyInvestWithdraw::getUserId, userIds);
+        rechargeWrapper.eq(MMoneyInvestWithdraw::getType, "1"); // 充值记录
+
+        long rechargeUserCount = mMoneyInvestWithdrawService.count(rechargeWrapper);
+
+        // 查询有订单记录的用户数
+        if (!userIds.isEmpty()) {
+            LambdaQueryWrapper<OrderReceiveRecord> orderWrapper = new LambdaQueryWrapper<>();
+            orderWrapper.in(OrderReceiveRecord::getUserId, userIds);
+            long orderUserCount = orderRecordMapper.selectCount(orderWrapper);
+
+            // 合并去重（有充值或有订单的用户视为活跃用户）
+            Set<Long> activeUserIds = new HashSet<>();
+
+            // 获取有充值记录的用户ID
+            List<MMoneyInvestWithdraw> rechargeRecords = mMoneyInvestWithdrawService.list(rechargeWrapper);
+            rechargeRecords.forEach(record -> activeUserIds.add(record.getUserId()));
+
+            // 获取有订单记录的用户ID
+            List<OrderReceiveRecord> orderRecords = orderRecordMapper.selectList(orderWrapper);
+            orderRecords.forEach(record -> activeUserIds.add(record.getUserId()));
+
+            return activeUserIds.size();
+        }
+
+        return (int) rechargeUserCount;
+    }
+
+    /**
+     * 转换用户信息为VO对象
+     */
+    private List<UserInfoVO> convertToUserInfoVO(List<MUser> users) {
+        if (users == null || users.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return users.stream().map(user -> {
+            UserInfoVO userInfo = new UserInfoVO();
+            userInfo.setUid(user.getUid());
+            userInfo.setUsername(user.getLoginAccount());
+            userInfo.setPhoneNumber(user.getPhoneNumber());
+            userInfo.setInvitationCode(user.getInvitationCode());
+            userInfo.setAccountBalance(user.getAccountBalance() != null ? user.getAccountBalance() : BigDecimal.ZERO);
+            userInfo.setCreateTime(user.getCreateTime() != null ? DateUtils.parseDateToStr("yyyy-MM-dd HH:mm:ss", user.getCreateTime()) : "");
+
+            // 计算用户累计充值
+            BigDecimal totalRecharge = calculateUserTotalRecharge(user.getUid());
+            userInfo.setTotalRecharge(totalRecharge);
+
+            // 计算用户累计收益
+            BigDecimal totalProfit = calculateUserTotalProfit(user.getUid());
+            userInfo.setTotalProfit(totalProfit);
+
+            return userInfo;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 计算单个用户累计充值
+     */
+    private BigDecimal calculateUserTotalRecharge(Long userId) {
+        LambdaQueryWrapper<MMoneyInvestWithdraw> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MMoneyInvestWithdraw::getUserId, userId);
+        wrapper.eq(MMoneyInvestWithdraw::getType, "1");
+        wrapper.eq(MMoneyInvestWithdraw::getStatus, 1); // 成功的充值
+
+        List<MMoneyInvestWithdraw> records = mMoneyInvestWithdrawService.list(wrapper);
+        return records.stream()
+                .map(MMoneyInvestWithdraw::getAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * 计算单个用户累计收益
+     */
+    private BigDecimal calculateUserTotalProfit(Long userId) {
+        LambdaQueryWrapper<OrderReceiveRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderReceiveRecord::getUserId, userId);
+        // wrapper.eq(OrderReceiveRecord::getProcessStatus, 1); // 错误：应该是字符串"Success"
+        wrapper.eq(OrderReceiveRecord::getProcessStatus, "Success"); // 正确
+
+        List<OrderReceiveRecord> records = orderRecordMapper.selectList(wrapper);
+        return records.stream()
+                .map(OrderReceiveRecord::getProfit)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
 
     /**
      * 累加用户列表中所有用户的accountBalance（处理null值，避免空指针）
@@ -339,8 +586,13 @@ public class MUserController extends BaseController
         List<Long> teamUserIds = teamUsers.stream()
                 .map(MUser::getUid)
                 .collect(Collectors.toList());
-        // 替换为自定义 SQL 方式
-        List<MMoneyInvestWithdraw> rechargeRecords = investWithdrawMapper.listByUserIdsAndType(teamUserIds, 1);
+
+        LambdaQueryWrapper<MMoneyInvestWithdraw> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(MMoneyInvestWithdraw::getUserId, teamUserIds);
+        wrapper.eq(MMoneyInvestWithdraw::getType, "1");  // 充值类型为字符串"1"
+        wrapper.eq(MMoneyInvestWithdraw::getStatus, 1);  // 成功状态为整数1
+
+        List<MMoneyInvestWithdraw> rechargeRecords = mMoneyInvestWithdrawService.list(wrapper);
         return rechargeRecords.stream()
                 .map(MMoneyInvestWithdraw::getAmount)
                 .filter(Objects::nonNull)
@@ -360,7 +612,12 @@ public class MUserController extends BaseController
         if (teamUserIds.isEmpty()) {
             return BigDecimal.ZERO;
         }
-        List<OrderReceiveRecord> orderRecords = orderRecordMapper.listByUserIds(teamUserIds);
+
+        LambdaQueryWrapper<OrderReceiveRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(OrderReceiveRecord::getUserId, teamUserIds);
+        wrapper.eq(OrderReceiveRecord::getProcessStatus, "Success");  // 成功状态为字符串"Success"
+
+        List<OrderReceiveRecord> orderRecords = orderRecordMapper.selectList(wrapper);
         return orderRecords.stream()
                 .map(OrderReceiveRecord::getProfit)
                 .filter(Objects::nonNull)

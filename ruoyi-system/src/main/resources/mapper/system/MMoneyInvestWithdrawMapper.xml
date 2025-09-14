@@ -21,10 +21,11 @@
         <result property="accountBack"    column="account_back"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="rechargeType" column="recharge_type"/>
     </resultMap>
 
     <sql id="selectMMoneyInvestWithdrawVo">
-        select id, user_id, user_name, user_type, amount, bank_name, bank_account_name, bank_account_number, type, reason_for_rejection, status, order_id,withdrawal_method, account_forward,account_back, create_time, update_time from m_money_invest_withdraw
+        select id, user_id, user_name, user_type, amount, bank_name, bank_account_name, bank_account_number, type, reason_for_rejection, status, order_id,withdrawal_method, account_forward,account_back, create_time, update_time ,recharge_type from m_money_invest_withdraw
     </sql>
 
     <select id="selectMMoneyInvestWithdrawList" parameterType="MMoneyInvestWithdraw" resultMap="MMoneyInvestWithdrawResult">
@@ -115,6 +116,7 @@
             <if test="accountBack != null">account_back = #{accountBack},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="rechargeType != null">recharge_type = #{rechargeType},</if>
         </trim>
         where id = #{id}
     </update>
