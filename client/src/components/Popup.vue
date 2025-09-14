@@ -4,7 +4,7 @@
       <p class="popup-text">请联系客服进行充值</p>
       <p class="popup-subtext">每日10:00至23:00期间联系客服办理充值业务</p>
       <div class="popup-buttons">
-        <button class="contact-btn" @click="contactCustomerService">立即联系</button>
+        <button class="contact-btn" @click="goToCustomerService">立即联系</button>
         <button class="cancel-btn" @click="closePopup">取消</button>
       </div>
     </div>
@@ -12,7 +12,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { getCustomerService } from "../api/index";
 
 // 控制弹框显示隐藏
 const showPopup = ref(false);
@@ -32,6 +33,17 @@ const contactCustomerService = () => {
   console.log("联系客服");
   // 这里可以添加调用客服相关接口或打开客服聊天窗口等逻辑
 };
+const CustomerService = ref("");
+const goToCustomerService = () => {
+  window.open(CustomerService.value, "_blank");
+};
+
+onMounted(() => {
+  getCustomerService().then(res => {
+    CustomerService.value = res.data[0].configValue;
+    console.log(res.data[0].configValue);
+  });
+});
 
 // 暴露方法给父组件
 defineExpose({

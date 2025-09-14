@@ -15,9 +15,7 @@ axios.defaults.headers["Content-Type"] = "application/json;charset=utf-8";
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
-  baseURL: "https://cf5api.dadwqwqee.shop/",
-  // baseURL: "http://192.168.1.203:8089/",
-  // 超时
+  baseURL: "https://cf5api.dadwqwqee.shop/",  // 超时
   timeout: 10000,
 });
 

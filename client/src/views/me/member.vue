@@ -19,7 +19,7 @@
             <div class="member-level">{{ item.gradeName }}</div>
             <div class="commission-rate">{{item.commissionRate}}%佣金比例</div>
           </div>
-          <div class="price">¥{{item.withdrawAmount}}元</div>
+          <div class="price">¥{{item.amountRange}}元</div>
         </div>
         <div class="card-bottom">
           <div class="item">
@@ -28,7 +28,7 @@
           </div>
           <div class="item">
             <div class="label">提现额度</div>
-            <div class="value">{{ item.amountRange }}</div>
+            <div class="value">{{ item.withdrawAmount }}</div>
           </div>
           <div class="item">
             <div class="label">拼团次数</div>
