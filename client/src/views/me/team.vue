@@ -118,13 +118,13 @@ onMounted(async () => {
     totalCommission.value = res.data.totalCommission;
     teamTotalProfit.value = res.data.teamTotalProfit;
     teamTotalRecharge.value = res.data.teamTotalRecharge;
-    if (newVal == 0) {
+    if (activeTab.value == 0) {
       teamData.value = res.data.level1Users;
       leve1num.value = res.data.level1Count;
-    } else if (newVal == 1) {
+    } else if (activeTab.value == 1) {
       teamData.value = res.data.level2Users;
       leve2num.value = res.data.level2Count;
-    } else if (newVal == 2) {
+    } else if (activeTab.value == 2) {
       teamData.value = res.data.level3Users;
       leve3num.value = res.data.level3Count;
     }
