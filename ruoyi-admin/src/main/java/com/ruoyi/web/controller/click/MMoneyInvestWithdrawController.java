@@ -162,7 +162,6 @@ public class MMoneyInvestWithdrawController extends BaseController
         dataTable.setRows(rows);*/
         return getDataTable(list);
     }
-
     /**
      * 导出存款取款记录列表
      */
@@ -306,6 +305,38 @@ public class MMoneyInvestWithdrawController extends BaseController
             mMoneyInvestWithdrawService.updateMMoneyInvestWithdrawRecharge( withdraw);
         }
         return success();
+    }
+
+
+    @PostMapping("/updateRechargeType")
+    public AjaxResult updateRechargeType(@RequestParam Long id, @RequestParam Integer rechargeType) {
+        try {
+            MMoneyInvestWithdraw withdraw = mMoneyInvestWithdrawService.selectMMoneyInvestWithdrawById(id);
+            if (withdraw == null) {
+                return error("订单不存在");
+            }
+
+            // 设置充值类型
+            withdraw.setRechargeType(rechargeType);
+            // 更新状态为成功
+            withdraw.setStatus(1);
+
+            // 根据订单类型调用不同的处理方法
+            if ("0".equals(withdraw.getType())) {
+                // 提现订单
+                mMoneyInvestWithdrawService.updateMMoneyInvestWithdrawWithdrawal(withdraw);
+            } else if ("1".equals(withdraw.getType())) {
+                // 充值订单
+                mMoneyInvestWithdrawService.updateMMoneyInvestWithdrawRecharge(withdraw);
+            } else {
+                return error("订单类型不正确");
+            }
+
+            return success("操作成功");
+        } catch (Exception e) {
+            logger.error("更新充值类型失败: ", e);
+            return error("操作失败: " + e.getMessage());
+        }
     }
 
     /**
