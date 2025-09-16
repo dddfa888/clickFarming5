@@ -107,4 +107,6 @@ public interface MMoneyInvestWithdrawMapper extends BaseMapper<MMoneyInvestWithd
 
 
     List<MMoneyInvestWithdraw> selectInfo(@Param("userId") Long userId, @Param("type") String type ,@Param("status") Integer status);
+
+    List<MMoneyInvestWithdraw> selectTodayAllWithdrawRecords(@Param("userId")Long userId, @Param("type")String type);
 }

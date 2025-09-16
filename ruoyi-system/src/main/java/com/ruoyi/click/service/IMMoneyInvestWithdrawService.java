@@ -130,6 +130,13 @@ public interface IMMoneyInvestWithdrawService extends IService<MMoneyInvestWithd
      * @return
      */
     List<MMoneyInvestWithdraw> selectInfo(Long userId, String type ,Integer status);
+    /**
+     * 查询用户今日所有提现记录（不管状态）
+     * @return 提现记录列表
+     */
+    List<MMoneyInvestWithdraw> selectTodayAllWithdrawRecords(@Param("userId") Long userId,
+                                                             @Param("type") String type);
+
 
     /**
      * 查询当天是否有在审核的提款记录

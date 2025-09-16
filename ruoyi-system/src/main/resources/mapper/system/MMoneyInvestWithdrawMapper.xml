@@ -188,4 +188,11 @@
         and status=#{status}
         and DATE(create_time) = CURDATE()  <!-- 新增：只查询当天数据 -->
     </select>
+
+    <select id="selectTodayAllWithdrawRecords" parameterType="map" resultMap="MMoneyInvestWithdrawResult">
+        select * from m_money_invest_withdraw
+        where user_id = #{userId}
+          and type = #{type}
+          and DATE(create_time) = CURDATE()
+    </select>
 </mapper>
