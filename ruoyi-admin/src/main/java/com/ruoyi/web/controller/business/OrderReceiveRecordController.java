@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.business;
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,6 +144,17 @@ public class OrderReceiveRecordController extends BaseController
     @PostMapping("/insertOrderByUser")
     public AjaxResult insertOrderByUser()
     {
+        // 要判断晚上10点到早上10点不能刷单
+        LocalTime now = LocalTime.now();
+        LocalTime startTime = LocalTime.of(22, 0); // 晚上10点
+        LocalTime endTime = LocalTime.of(10, 0);   // 早上10点
+
+        // 如果当前时间在晚上10点到午夜之间，或在凌晨到早上10点之间，则禁止刷单
+        if ((now.isAfter(startTime) || now.equals(startTime)) ||
+                (now.isBefore(endTime) || now.equals(endTime))) {
+            return AjaxResult.error("晚上10点到早上10点不能刷单");
+        }
+
         OrderReceiveRecord orderReceiveRecord = new OrderReceiveRecord();
         Map<String, Object> map = orderReceiveRecordService.insertOrderByUser(orderReceiveRecord);
         if(map.get("name")!=null){

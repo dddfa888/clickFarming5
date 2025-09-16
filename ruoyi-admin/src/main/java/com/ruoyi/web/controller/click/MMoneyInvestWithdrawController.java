@@ -382,18 +382,18 @@ public class MMoneyInvestWithdrawController extends BaseController
 
         // 驳回金额返还
         MUser mUser = mUserService.selectMUserByUid(withdraw.getUserId());
-        BigDecimal accountForward = mUser.getAccountBalance();
-        BigDecimal accountBack = DecimalUtil.add(accountForward, withdraw.getAmount());
-        mUser.setAccountBalance(accountBack);
-        mUserService.updateMUser(mUser);
+//        BigDecimal accountForward = mUser.getAccountBalance();
+//        BigDecimal accountBack = DecimalUtil.add(accountForward, withdraw.getAmount());
+//        mUser.setAccountBalance(accountBack);
+//        mUserService.updateMUser(mUser);
 
         // 日志
         MAccountChangeRecords mAccountChangeRecords = new MAccountChangeRecords();
         mAccountChangeRecords.setLoginAccount(mUser.getLoginAccount());
         mAccountChangeRecords.setUid(String.valueOf(mUser.getUid()));
         mAccountChangeRecords.setAmount(withdraw.getAmount());
-        mAccountChangeRecords.setAccountBack(accountBack);
-        mAccountChangeRecords.setAccountForward(accountForward);
+        mAccountChangeRecords.setAccountBack(mUser.getAccountBalance());
+        mAccountChangeRecords.setAccountForward(mUser.getAccountBalance());
         mAccountChangeRecords.setType(0);
         mAccountChangeRecords.setTransactionType(4);
         mAccountChangeRecords.setDescription("提现订单["+withdraw.getOrderId()+"] 驳回");
