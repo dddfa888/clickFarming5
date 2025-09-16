@@ -292,11 +292,10 @@ export function updateUserInfo(data) {
 }
 
 // 团队
-export function getTeamList(params) {
+export function getTeamList() {
     return request({
-        url: '/api/user/getUpToFourLevelInviters',
+        url: '/api/user/teamStatistics',
         method: 'get',
-        params
     })
 }
 
@@ -367,5 +366,7 @@ export function getCustomerService() {
         method: 'get',
     })
 }
+
+
 
 

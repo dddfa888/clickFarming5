@@ -20,7 +20,9 @@
               }}
             </span>
           </div>
-          <div class="transaction-balance">充值说明:后台管理操作</div>
+          <div
+            class="transaction-balance"
+          >充值说明:{{ transaction.rechargeType === 1 ? '微信' : transaction.rechargeType === 2 ? '支付宝' : '银行卡' }}</div>
         </div>
       </div>
 

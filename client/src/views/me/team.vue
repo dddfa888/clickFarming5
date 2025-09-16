@@ -6,29 +6,29 @@
       <div class="main-stats">
         <div class="stat-item">
           <p class="stat-label">总资产(元)</p>
-          <p class="stat-value">10210.62</p>
+          <p class="stat-value">{{ totalCommission }}</p>
         </div>
         <div class="stat-item">
           <p class="stat-label">下级佣金</p>
-          <p class="stat-value">+0.0000</p>
+          <p class="stat-value">{{ subordinateCommission }}</p>
         </div>
         <div class="stat-item">
           <p class="stat-label">团队总充值</p>
-          <p class="stat-value">0.00</p>
+          <p class="stat-value">{{ teamTotalRecharge }}</p>
         </div>
         <div class="stat-item">
           <p class="stat-label">团队总收益</p>
-          <p class="stat-value">0.00</p>
+          <p class="stat-value">{{ teamTotalProfit }}</p>
         </div>
       </div>
 
       <div class="sub-stats">
         <div class="sub-stat-item">
-          <p class="sub-stat-value">0</p>
+          <p class="sub-stat-value">{{ teamTotalCount }}</p>
           <p class="sub-stat-label">团队人数</p>
         </div>
         <div class="sub-stat-item">
-          <p class="sub-stat-value">0</p>
+          <p class="sub-stat-value">{{ directPushCount }}</p>
           <p class="sub-stat-label">直推人数</p>
         </div>
         <div class="sub-stat-item">
@@ -36,7 +36,7 @@
           <p class="sub-stat-label">今日新增</p>
         </div>
         <div class="sub-stat-item">
-          <p class="sub-stat-value">0</p>
+          <p class="sub-stat-value">{{ activeCount }}</p>
           <p class="sub-stat-label">活跃人数</p>
         </div>
       </div>
@@ -49,14 +49,14 @@
         :key="index"
         :class="['tab-button', { 'active': activeTab === index }]"
         @click="activeTab = index"
-      >{{ tab }}</button>
+      >{{ tab }}({{ index === 0 ? leve1num : index === 1 ? leve2num : leve3num}}人)</button>
     </div>
 
     <!-- 主内容区域 - 无数据状态 -->
     <div class="content-area">
       <div class="data-container" v-if="teamData.length > 0">
         <div class="data-item" v-for="(item, index) in teamData" :key="index">
-          <p>{{ item.inviterName }}</p>
+          <p>{{ item.username }}</p>
           <p>手机号:{{ item.phoneNumber }}</p>
         </div>
       </div>
@@ -76,30 +76,57 @@ import { getTeamList } from "../../api/index";
 const { t } = useI18n();
 
 // 选项卡数据和状态
-const tabs = ["一级(0人)", "二级(0人)", "三级(0人)"];
+const tabs = ["一级", "二级", "三级"];
 const activeTab = ref(0);
+const teamTotal = ref(0);
 const teamData = ref([]);
+const leve1num = ref(0);
+const leve2num = ref(0);
+const leve3num = ref(0);
+const teamTotalProfit = ref(0);
+const teamTotalCount = ref(0);
+const directPushCount = ref(0);
+const subordinateCommission = ref(0);
+const totalCommission = ref(0);
+const teamTotalRecharge = ref(0);
+const activeCount = ref(0);
 watch(activeTab, newVal => {
   getTeamList().then(res => {
     if (newVal == 0) {
-      teamData.value = res.data.level1;
+      teamData.value = res.data.level1Users;
+      leve1num.value = res.data.level1Count;
     } else if (newVal == 1) {
-      teamData.value = res.data.level2;
+      teamData.value = res.data.level2Users;
+      leve2num.value = res.data.level2Count;
     } else if (newVal == 2) {
-      teamData.value = res.data.level3;
+      teamData.value = res.data.level3Users;
+      leve3num.value = res.data.level3Count;
     }
   });
 });
 
 onMounted(async () => {
   getTeamList().then(res => {
-    console.log(res.data.invitedUsers);
+    teamTotal.value = res.data.teamTotal;
+    leve1num.value = res.data.level1Count;
+    leve2num.value = res.data.level2Count;
+    leve3num.value = res.data.level3Count;
+    teamTotalCount.value = res.data.teamTotalCount;
+    activeCount.value = res.data.activeCount;
+    directPushCount.value = res.data.directPushCount;
+    subordinateCommission.value = res.data.subordinateCommission;
+    totalCommission.value = res.data.totalCommission;
+    teamTotalProfit.value = res.data.teamTotalProfit;
+    teamTotalRecharge.value = res.data.teamTotalRecharge;
     if (activeTab.value == 0) {
-      teamData.value = res.data.level1;
+      teamData.value = res.data.level1Users;
+      leve1num.value = res.data.level1Count;
     } else if (activeTab.value == 1) {
-      teamData.value = res.data.level2;
+      teamData.value = res.data.level2Users;
+      leve2num.value = res.data.level2Count;
     } else if (activeTab.value == 2) {
-      teamData.value = res.data.level3;
+      teamData.value = res.data.level3Users;
+      leve3num.value = res.data.level3Count;
     }
   });
 });
@@ -327,7 +354,6 @@ onMounted(async () => {
 
   /* 内容区域样式 */
   .content-area {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;

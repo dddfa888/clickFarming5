@@ -83,3 +83,25 @@ export function delWithdraw(id) {
     method: 'delete'
   })
 }
+
+
+// 同意的支付方式
+export function agreePayType(data) {
+  return request({
+    url: '/api/withdraw/agree',
+    method: 'post',
+    data
+  })
+}
+
+// 新增专门用于更新充值类型的接口
+export function updateRechargeType(id, rechargeType) {
+  return request({
+    url: '/api/withdraw/updateRechargeType',
+    method: 'post',
+    params: {
+      id: id,
+      rechargeType: rechargeType
+    }
+  })
+}

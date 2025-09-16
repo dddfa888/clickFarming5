@@ -22,7 +22,7 @@
         <div class="item-header">
           <div class="time-code">
             <span class="code">订单号: {{ item.id }}</span>
-            <span style="color:red;">已完成</span>
+            <span style="color:red;" v-if="!(item.processStatus === 'Waiting')">已完成</span>
           </div>
         </div>
 

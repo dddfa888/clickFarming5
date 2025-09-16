@@ -104,6 +104,7 @@ import Popup from "../../components/Popup.vue";
 import { getUserInfo, getTotalAssets } from "../../api/index";
 import { showAlert } from "../../utils/notify";
 
+
 const router = useRouter();
 const popupRef = ref(null);
 
