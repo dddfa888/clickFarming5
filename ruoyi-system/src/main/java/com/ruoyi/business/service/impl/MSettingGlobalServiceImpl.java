@@ -69,10 +69,10 @@ public class MSettingGlobalServiceImpl implements IMSettingGlobalService
     public int updateMSettingGlobal(MSettingGlobal mSettingGlobal)
     {
         mSettingGlobal.setUpdateTime(DateUtils.getNowDate());
-        //判断link_support 如果不是空的话 就要修改H5的客服链接
-        if(mSettingGlobal.getLinkSupport() != null && !"".equals(mSettingGlobal.getLinkSupport())){
-            mSettingGlobalMapper.updateLinkSupport(mSettingGlobal.getLinkSupport());
-        }
+            //判断link_support 如果不是空的话 就要修改H5的客服链接
+            if(mSettingGlobal.getLinkSupport() != null && !"".equals(mSettingGlobal.getLinkSupport())){
+                mSettingGlobalMapper.updateLinkSupport(mSettingGlobal.getLinkSupport());
+            }
         return mSettingGlobalMapper.updateMSettingGlobal(mSettingGlobal);
     }
 

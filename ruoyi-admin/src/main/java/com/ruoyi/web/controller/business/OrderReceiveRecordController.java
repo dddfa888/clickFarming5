@@ -146,13 +146,14 @@ public class OrderReceiveRecordController extends BaseController
     {
         // 要判断晚上10点到早上10点不能刷单
         LocalTime now = LocalTime.now();
-        LocalTime startTime = LocalTime.of(22, 0); // 晚上10点
-        LocalTime endTime = LocalTime.of(10, 0);   // 早上10点
+        LocalTime startTime = LocalTime.of(10, 0);  // 早上10点
+        LocalTime endTime = LocalTime.of(23, 59, 59);   // 晚上12点前一秒
 
-        // 如果当前时间在晚上10点到午夜之间，或在凌晨到早上10点之间，则禁止刷单
-        if ((now.isAfter(startTime) || now.equals(startTime)) ||
-                (now.isBefore(endTime) || now.equals(endTime))) {
-            return AjaxResult.error("晚上10点到早上10点不能刷单");
+        // 判断是否在允许时间段内
+        boolean isAllowedTime = !now.isBefore(startTime) && !now.isAfter(endTime);
+
+        if (!isAllowedTime) {
+            return AjaxResult.error("只有早上10点到晚上12点才能刷单");
         }
 
         OrderReceiveRecord orderReceiveRecord = new OrderReceiveRecord();
