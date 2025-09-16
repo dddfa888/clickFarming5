@@ -89,6 +89,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </update>
 
+    <update id="updateLinkSupport" parameterType="SysConfig">
+        update sys_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="configValue != null and configValue != ''">config_value = #{configValue},</if>
+        </trim>
+        where config_key = 'CustomerService'
+    </update>
+
     <delete id="deleteMSettingGlobalById" parameterType="Long">
         delete from m_setting_global where id = #{id}
     </delete>
