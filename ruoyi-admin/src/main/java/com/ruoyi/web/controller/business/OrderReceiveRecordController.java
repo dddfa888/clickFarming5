@@ -153,7 +153,7 @@ public class OrderReceiveRecordController extends BaseController
         boolean isAllowedTime = !now.isBefore(startTime) && !now.isAfter(endTime);
 
         if (!isAllowedTime) {
-            return AjaxResult.error("只有早上10点到晚上12点才能刷单");
+            return AjaxResult.error("只有早上10点到晚上12点才能拼团");
         }
 
         OrderReceiveRecord orderReceiveRecord = new OrderReceiveRecord();
