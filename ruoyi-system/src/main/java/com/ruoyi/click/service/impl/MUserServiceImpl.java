@@ -315,14 +315,21 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
         BigDecimal changeBalance = balanceModel.getBalance();
         Integer type = 0;
         if(changeBalance.signum()>=0){ //changeBalance大于或等于0
-            type = 0;
+            type = 0; // 增加
         }else {
-            if (accountBalance.compareTo(changeBalance) < 0) {
+            // 修复这里的逻辑，应该比较绝对值
+            if (accountBalance.compareTo(changeBalance.abs()) < 0) {
                 throw new ServiceException("当前账户金额小于减少金额");//user
             }
-            type = 1;
+            type = 1; // 减少
         }
         accountBalance = DecimalUtil.add(accountBalance, changeBalance);
+
+        // 确保余额不会变为负数
+        if (accountBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ServiceException("操作后账户余额不能为负数");//user
+        }
+
         mUser.setAccountBalance(accountBalance);
         this.updateMUser(mUser);
 
@@ -397,10 +404,13 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
      * @return 结果
      */
     @Override
-    public int updateMUserSimple(MUser mUser)
-    {
-        mUser.setUpdateTime(DateUtils.getNowDate());
-        return mUserMapper.updateMUser(mUser);
+    public int updateMUserSimple(MUser mUser) {
+        try {
+            mUser.setUpdateTime(DateUtils.getNowDate());
+            return mUserMapper.updateMUser(mUser);
+        } catch (Exception e) {
+            throw new RuntimeException("更新用户信息失败: " + e.getMessage(), e);
+        }
     }
 
     /**

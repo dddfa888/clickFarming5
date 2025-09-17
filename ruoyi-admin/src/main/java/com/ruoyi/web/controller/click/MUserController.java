@@ -152,37 +152,105 @@ public class MUserController extends BaseController
      * @return
      */
     @PostMapping("setBalance")
-    public AjaxResult setBalance(HttpServletRequest request, MUser mUser) {
-        MUser originMUser = mUserService.selectMUserByUid(mUser.getUid());
-        mUserService.updateMUserSimple(mUser);
+    public AjaxResult setBalance(HttpServletRequest request, @RequestBody MUser mUser) {
+        try {
+            log.info("开始设置用户余额，请求参数: {}", mUser);
 
-        BigDecimal balanceBefore = originMUser.getAccountBalance();
-        BigDecimal balanceAfter = mUser.getAccountBalance();
-        String userName = tokenService.getLoginUser(request).getUser().getUserName();
+            // 参数验证
+            if (mUser.getUid() == null) {
+                log.warn("用户ID不能为空");
+                return AjaxResult.error("用户ID不能为空");
+            }
 
-        Integer type = null; // 0收入 1支出
-        BigDecimal balanceChange = null;
-        if(balanceBefore.compareTo(balanceAfter) < 0){
-            type = 0;
-            balanceChange = DecimalUtil.subtract(balanceAfter, balanceBefore);
-        }else{
-            type = 1;
-            balanceChange = DecimalUtil.subtract(balanceBefore, balanceAfter);
+            if (mUser.getAccountBalance() == null) {
+                log.warn("账户余额不能为空");
+                return AjaxResult.error("账户余额不能为空");
+            }
+
+            // 添加负数检查
+            if (mUser.getAccountBalance().compareTo(BigDecimal.ZERO) < 0) {
+                log.warn("账户余额不能为负数");
+                return AjaxResult.error("账户余额不能为负数");
+            }
+
+            // 验证余额格式
+            try {
+                mUser.setAccountBalance(mUser.getAccountBalance().setScale(2, BigDecimal.ROUND_HALF_UP));
+            } catch (Exception e) {
+                log.error("账户余额格式不正确: {}", mUser.getAccountBalance());
+                return AjaxResult.error("账户余额格式不正确");
+            }
+
+            // 获取原始用户信息
+            MUser originMUser = mUserService.selectMUserByUid(mUser.getUid());
+            if (originMUser == null) {
+                log.warn("用户不存在，uid: {}", mUser.getUid());
+                return AjaxResult.error("用户不存在");
+            }
+            log.info("原始用户信息: {}", originMUser);
+
+            // 记录更新前的余额
+            BigDecimal balanceBefore = originMUser.getAccountBalance() != null ?
+                    originMUser.getAccountBalance() : BigDecimal.ZERO;
+            BigDecimal balanceAfter = mUser.getAccountBalance();
+            log.info("余额变更: {} -> {}", balanceBefore, balanceAfter);
+
+            // 执行更新操作并检查结果
+            int updateResult = mUserService.updateMUserSimple(mUser);
+            log.info("更新操作结果: {}", updateResult);
+
+            // 检查更新是否成功
+            if (updateResult <= 0) {
+                log.warn("更新失败，更新结果: {}", updateResult);
+                return AjaxResult.error("更新失败");
+            }
+
+            String userName = "未知用户";
+            try {
+                userName = tokenService.getLoginUser(request).getUser().getUserName();
+            } catch (Exception e) {
+                log.warn("获取用户名失败，使用默认值");
+            }
+
+            // 计算变化类型和金额
+            Integer type = null; // 0收入 1支出
+            BigDecimal balanceChange = BigDecimal.ZERO;
+            if(balanceBefore.compareTo(balanceAfter) < 0){
+                type = 0;
+                balanceChange = balanceAfter.subtract(balanceBefore);
+                log.info("余额增加: {}", balanceChange);
+            }else if(balanceBefore.compareTo(balanceAfter) > 0){
+                type = 1;
+                balanceChange = balanceBefore.subtract(balanceAfter);
+                log.info("余额减少: {}", balanceChange);
+            } else {
+                // 余额没有变化
+                log.info("余额没有变化");
+                return AjaxResult.success("余额更新成功");
+            }
+
+            // 日志记录
+            try {
+                MAccountChangeRecords changeRecords = new MAccountChangeRecords();
+                changeRecords.setAmount(balanceChange);
+                changeRecords.setType(type);
+                changeRecords.setAccountForward(balanceBefore);
+                changeRecords.setAccountBack(balanceAfter);
+                changeRecords.setUid(String.valueOf(mUser.getUid()));
+                changeRecords.setDescription(userName+"[后台重新设置余额]");
+                changeRecords.setTransactionType(1);
+                accountChangeRecordsService.insertMAccountChangeRecords(changeRecords);
+                log.info("账变记录已保存");
+            } catch (Exception e) {
+                log.error("保存账变记录时发生异常: ", e);
+            }
+
+            log.info("用户余额设置成功");
+            return AjaxResult.success("余额更新成功");
+        } catch (Exception e) {
+            log.error("设置用户余额时发生异常: ", e);
+            return AjaxResult.error("系统未知错误，请反馈给管理员");
         }
-
-        // 日志记录
-        MAccountChangeRecords changeRecords = new MAccountChangeRecords();
-        changeRecords.setAmount(balanceChange);
-        changeRecords.setType(type);
-        changeRecords.setAccountForward(balanceBefore);
-        changeRecords.setAccountBack(balanceAfter);
-        changeRecords.setUid(String.valueOf(mUser.getUid()));
-        changeRecords.setDescription(userName+"[后台重新设置余额]");
-        changeRecords.setTransactionType(1);
-        accountChangeRecordsService.insertMAccountChangeRecords(changeRecords);
-        // 升级等级
-        //mUserService.upgrade(mUser.getUid());
-        return success();
     }
 
 
