@@ -65,6 +65,18 @@ public class OrderReceiveRecord extends BaseEntity
     @Excel(name = "利润")
     private BigDecimal profit;
 
+    /** 隐藏标识（0-不隐藏，1-隐藏） */
+    private Integer hide;
+
+
+    public Integer getHide() {
+        return hide;
+    }
+
+    public void setHide(Integer hide) {
+        this.hide = hide;
+    }
+
     public BigDecimal getBalanceAmount() {
         return balanceAmount;
     }

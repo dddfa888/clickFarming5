@@ -3,6 +3,8 @@ package com.ruoyi.business.service.impl;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -24,6 +26,7 @@ import com.ruoyi.click.mapper.MAccountChangeRecordsMapper;
 import com.ruoyi.click.mapper.MUserMapper;
 import com.ruoyi.click.mapper.UserGradeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.ruoyi.business.mapper.OrderReceiveRecordMapper;
 import com.ruoyi.business.domain.OrderReceiveRecord;
@@ -173,10 +176,12 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         OrderReceiveRecord orderParam = new OrderReceiveRecord();
         orderParam.setUserId(mUser.getUid());
         orderParam.setProcessStatus(OrderReceiveRecord.PROCESS_STATUS_WAIT);
+
         long unfinishedCount = orderReceiveRecordMapper.countNum(orderParam);
         if (unfinishedCount > 0) {
             throw new ServiceException("有订单未完成，请先付款");//user
         }
+
         OrderReceiveRecord order = orderReceiveRecordMapper.selectLastOrder(mUser.getUid());
         if(order != null) {
             Date createTime = order.getCreateTime();
@@ -283,9 +288,29 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         orderReceiveRecord.setProductImageUrl(product.getImageUrl());
         orderReceiveRecord.setUnitPrice(product.getPrice());
 
+        // 随机生成hide值
+        Random random = new Random();
+        int hideValue = random.nextInt(2); // 随机生成0或1
+        orderReceiveRecord.setHide(hideValue);
+
         orderReceiveRecord.setTotalAmount(DecimalUtil.multiple(product.getPrice(), orderReceiveRecord.getNumber()));
-        orderReceiveRecord.setProfit(calcProfit(userGrade, orderReceiveRecord.getTotalAmount()));
-        orderReceiveRecord.setRefundAmount(DecimalUtil.add(orderReceiveRecord.getTotalAmount(), orderReceiveRecord.getProfit()));
+
+        // 计算利润
+        BigDecimal profit = calcProfit(userGrade, orderReceiveRecord.getTotalAmount(), hideValue);
+
+        // 验证隐藏商品条件：如果hide=1，三倍利润不能大于总金额
+        if (hideValue == 1) {
+            BigDecimal tripleProfit = profit.multiply(new BigDecimal(3));
+            // 如果三倍利润大于总金额，则不设置为隐藏商品
+            if (tripleProfit.compareTo(orderReceiveRecord.getTotalAmount()) > 0) {
+                orderReceiveRecord.setHide(0); // 设置为非隐藏商品
+                // 重新计算利润（非隐藏商品的利润）
+                profit = calcProfit(userGrade, orderReceiveRecord.getTotalAmount(), 0);
+            }
+        }
+
+        orderReceiveRecord.setProfit(profit);
+        orderReceiveRecord.setRefundAmount(DecimalUtil.add(orderReceiveRecord.getTotalAmount(), profit));
         orderReceiveRecord.setProcessStatus(OrderReceiveRecord.PROCESS_STATUS_WAIT);
         orderReceiveRecord.setNumTarget(numTarget);
         orderReceiveRecord.setNumSeq(todayCount);
@@ -294,6 +319,8 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         orderReceiveRecord.setCreateTime(DateUtils.getNowDate());
         orderReceiveRecordMapper.insertOrderReceiveRecord(orderReceiveRecord);
     }
+
+
 
     /**
      * 计算用户可支付范围内的产品数量
@@ -397,20 +424,24 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
     /**
      * 计算利润
      *
-     * @return
+     * @param userGrade 用户等级信息
+     * @param totalAmount 订单总金额
+     * @param hideValue 隐藏标识值（0-不隐藏，1-隐藏）
+     * @return 利润金额
      */
-    public BigDecimal calcProfit(UserGrade userGrade, BigDecimal totalAmount) {
+    public BigDecimal calcProfit(UserGrade userGrade, BigDecimal totalAmount, int hideValue) {
         BigDecimal rate = userGrade.getCommissionRate();
-        return DecimalUtil.multiply(rate, totalAmount).setScale(2, RoundingMode.HALF_UP);
-/*        //最大值与最小值之差
-        BigDecimal range = DecimalUtil.subtract(userGrade.getMaxBonus(), userGrade.getMinBonus());
-        //最大值与最小值之差 * 随机数
-        BigDecimal num = DecimalUtil.multiply(range, DecimalUtil.toBigDecimal(Math.random()));
-        //最大值与最小值之差 * 随机数 + 最小值 = 最小值与最大值之间的随机数（利率）。原值用%表示，所以最后除以100后是实际利率值。
-        BigDecimal ratio = num.add(userGrade.getMinBonus()).divide(DecimalUtil.toBigDecimal(100));
-        //利率 * 订单总金额 = 利润  最终保留2位小数
-        return DecimalUtil.multiply(ratio, totalAmount).setScale(2, RoundingMode.HALF_UP);*/
+        BigDecimal profit = DecimalUtil.multiply(rate, totalAmount).setScale(2, RoundingMode.HALF_UP);
+
+        // 如果是隐藏商品（hideValue=1），利润乘以3
+        if (hideValue == 1) {
+            profit = profit.multiply(new BigDecimal(3));
+        }
+
+        return profit;
     }
+
+
 
     /**
      * 支付订单
@@ -432,7 +463,8 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
             throw new ServiceException("您的帐户不足。请继续充值！");//user
 
         BigDecimal balanceBefore = mUser.getAccountBalance(); //记录变化前余额
-        BigDecimal balanceChange = orderReceiveRecord.getProfit(); //新增余额
+        BigDecimal balanceChange = orderReceiveRecord.getProfit(); //新增余额（已根据是否隐藏商品计算了相应利润）
+
         BigDecimal balanceAfter = DecimalUtil.add(balanceBefore, balanceChange);
 
         Date nowDate = DateUtils.getNowDate();
@@ -507,5 +539,128 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
 
         // 4. 返回结果（包含头像、排名、利润等）
         return profitStatList;
+    }
+
+    /**
+     * 每天凌晨0点执行检查当天刷单任务的用户
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+// @Scheduled(cron = "0 * * * * ?")  // 每小时执行（原来）
+    public void checkUnfinishedOrders() {
+        System.out.println("=== 定时任务开始执行 === 时间: " + new Date());
+        try {
+            // 获取今天的时间范围（今天00:00:00到今天23:59:59）
+            LocalDate today = LocalDate.now();
+            LocalDateTime startTime = LocalDateTime.of(today, LocalTime.MIN);      // 今天00:00:00
+            LocalDateTime endTime = LocalDateTime.of(today, LocalTime.MAX);       // 今天23:59:59
+
+            System.out.println("检查时间范围: " + startTime + " 到 " + endTime);
+
+            // 查询今天有刷单记录的所有用户ID（去重）
+            Map<String, Object> timeParams = new HashMap<>();
+            timeParams.put("startTime", DateUtils.toDate(startTime));
+            timeParams.put("endTime", DateUtils.toDate(endTime));
+            System.out.println("查询参数: " + timeParams);
+
+            List<Long> userIds = orderReceiveRecordMapper.selectUserIdsWithOrdersToday(timeParams);
+            System.out.println("查询到的用户数量: " + (userIds != null ? userIds.size() : 0));
+            if (userIds != null) {
+                System.out.println("用户ID列表: " + userIds);
+            }
+
+            // 检查每个有刷单记录的用户是否完成了对应等级的刷单任务
+            if (userIds != null && !userIds.isEmpty()) {
+                for (Long userId : userIds) {
+                    System.out.println("开始检查用户ID: " + userId);
+                    MUser user = mUserMapper.selectMUserByUid(userId);
+                    if (user == null) {
+                        System.out.println("用户不存在，跳过: " + userId);
+                        continue; // 跳过不存在用户
+                    }
+                    if (user.getStatus() == null || user.getStatus() != 1) {
+                        System.out.println("用户状态不是活跃状态，跳过: " + userId + ", 状态: " + user.getStatus());
+                        continue; // 跳过非活跃用户
+                    }
+
+                    // 根据用户等级获取应完成的刷单数量
+                    int requiredBrushNumber = getRequiredBrushNumberByLevel(user.getLevel());
+                    System.out.println("用户等级: " + user.getLevel() + ", 要求完成订单数: " + requiredBrushNumber);
+
+                    // 统计用户今天完成的订单数
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("userId", userId);
+                    params.put("startTime", DateUtils.toDate(startTime));
+                    params.put("endTime", DateUtils.toDate(endTime));
+                    params.put("processStatus", OrderReceiveRecord.PROCESS_STATUS_SUCCESS); // 已完成状态
+                    System.out.println("统计订单参数: " + params);
+
+                    int finishedOrders = orderReceiveRecordMapper.countFinishedOrdersByUserAndDate(params);
+                    System.out.println("用户 " + userId + " 今天已完成订单数: " + finishedOrders);
+
+                    // 如果未达到要求，则冻结用户账户
+                    if (finishedOrders < requiredBrushNumber) {
+                        System.out.println("用户 " + userId + " 未完成任务要求，将被冻结");
+                        freezeUserAccount(userId);
+                    } else {
+                        System.out.println("用户 " + userId + " 已完成任务要求");
+                    }
+                }
+            } else {
+                System.out.println("今天没有用户有刷单记录");
+            }
+            System.out.println("=== 定时任务执行完成 ===");
+        } catch (Exception e) {
+            System.err.println("定时任务执行出错: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+    /**
+     * 冻结用户账户资金
+     * @param userId 用户ID
+     */
+    private void freezeUserAccount(Long userId) {
+        try {
+            MUser user = mUserMapper.selectMUserByUid(userId);
+            if (user != null && user.getStatus() != null && user.getStatus() == 1) {
+                // 设置用户状态为冻结（0表示冻结状态，1表示正常状态）
+                user.setStatus(0);
+                user.setUpdateTime(DateUtils.getNowDate());
+                mUserMapper.updateMUser(user);
+
+                // 可以添加日志记录或发送通知
+                System.out.println("用户ID " + userId + " 因未完成刷单任务已被冻结，请联系客服解冻");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 可以添加日志记录
+        }
+    }
+
+
+
+    /**
+     * 根据用户等级获取应完成的刷单数量
+     * @param level 用户等级
+     * @return 应完成的刷单数量
+     */
+    private int getRequiredBrushNumberByLevel(Integer level) {
+        if (level == null) return 30; // 默认白银等级
+
+        switch (level) {
+            case 1: // 白银会员
+                return 30;
+            case 2: // 黄金会员
+                return 70;
+            case 3: // 铂金会员
+                return 120;
+            case 4: // 钻石会员
+                return 200;
+            default:
+                return 30; // 默认要求
+        }
     }
 }

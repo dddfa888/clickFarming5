@@ -157,4 +157,17 @@ public interface OrderReceiveRecordMapper extends BaseMapper<OrderReceiveRecord>
      * @return
      */
     int selectTotal(Long userId);
+
+    /**
+     * 统计用户在指定时间范围内指定状态的订单数
+     * @param params 查询参数
+     * @return 订单数
+     */
+    int countFinishedOrdersByUserAndDate(Map<String, Object> params);
+    /**
+     * 查询指定时间范围内有订单记录的用户ID列表
+     * @param params 时间参数
+     * @return 用户ID列表
+     */
+    List<Long> selectUserIdsWithOrdersToday(Map<String, Object> params);
 }

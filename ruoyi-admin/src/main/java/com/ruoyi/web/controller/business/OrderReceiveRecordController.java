@@ -166,6 +166,16 @@ public class OrderReceiveRecordController extends BaseController
             return AjaxResult.error("只有早上10点到晚上12点才能拼团");
         }
 
+        //账号被锁定就提示
+        if (getLoginUser() != null && getLoginUser().getmUser() != null) {
+            System.out.println("DEBUG: 用户状态检查 - status=" + getLoginUser().getmUser().getStatus());
+            if (getLoginUser().getmUser().getStatus() == 0) {
+                System.out.println("DEBUG: 账户被锁定，返回警告");
+                return AjaxResult.error("你的帐户已经被冻结请找客服解除");
+            }
+        } else {
+            System.out.println("DEBUG: 无法获取用户状态信息");
+        }
 
         OrderReceiveRecord orderReceiveRecord = new OrderReceiveRecord();
         Map<String, Object> map = orderReceiveRecordService.insertOrderByUser(orderReceiveRecord);

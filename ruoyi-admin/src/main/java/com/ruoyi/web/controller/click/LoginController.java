@@ -48,9 +48,9 @@ public class LoginController {
         }
         MUser user = mUserService.getUserOne(loginAccount, model.getLoginPassword());
 
-        if (user.getStatus()==0) {
-            return AjaxResult.warn("用户被禁用");
-        }
+//        if (user.getStatus()==0) {
+//            return AjaxResult.warn("用户被禁用");
+//        }
         LoginUser loginUser = new LoginUser();
         loginUser.setmUser(user);
         loginUser.setUserId(Long.valueOf(user.getUid()));

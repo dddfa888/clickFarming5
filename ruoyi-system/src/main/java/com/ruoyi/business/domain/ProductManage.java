@@ -40,8 +40,18 @@ public class ProductManage extends BaseEntity
     @Excel(name = "平台", readConverterExp = "1=淘宝,2=拼多多,3=唯品会,4=京东,5=天猫")
     private Integer platform; // 新增的platform字段
 
+    /** 0是显示，1是隐藏 */
+    private Integer hide;
 
-    public void setId(Long id) 
+    public Integer getHide() {
+        return hide;
+    }
+
+    public void setHide(Integer hide) {
+        this.hide = hide;
+    }
+
+    public void setId(Long id)
     {
         this.id = id;
     }

@@ -239,4 +239,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             </set>
             WHERE uid = #{uid}
     </update>
+
+    <select id="selectActiveUsers" resultMap="MUserResult">
+        SELECT * FROM m_user WHERE status = 1
+    </select>
 </mapper>

@@ -91,4 +91,10 @@ public interface MUserMapper extends BaseMapper<MUser> {
     MUser selectMUserByUid1(@Param("uid") Long uid);
 
     int updateById(MUser mUser);
+
+    /**
+     * 查询所有活跃用户
+     * @return 用户列表
+     */
+    List<MUser> selectActiveUsers();
 }
