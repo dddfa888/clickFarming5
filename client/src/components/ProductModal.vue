@@ -3,7 +3,10 @@
     <div class="modal-box">
       <!-- 顶部标题 -->
       <div class="modal-header">
-        <p>匹配到{{ platform }}的订单</p>
+        <p>
+          匹配到{{ platform }}的
+          <span v-if="data.hide===1">隐藏</span>订单
+        </p>
       </div>
 
       <!-- 时间 & 订单号 -->
