@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.click;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -75,13 +76,62 @@ public class MAccountChangeRecordsController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(MAccountChangeRecords mAccountChangeRecords)
     {
-        startPage();
+        // 调试信息
+        logger.info("接收到的查询参数 - loginAccount: {}", mAccountChangeRecords.getLoginAccount());
+
+        // 获取分页参数
+        com.ruoyi.common.core.page.PageDomain pageDomain = com.ruoyi.common.core.page.TableSupport.buildPageRequest();
+        Integer pageNum = pageDomain.getPageNum();
+        Integer pageSize = pageDomain.getPageSize();
+
+        logger.info("分页参数 - pageNum: {}, pageSize: {}", pageNum, pageSize);
+
         if(!StringUtils.isEmpty(mAccountChangeRecords.getLoginAccount())){
             MUser one = mUserService.getOne(new LambdaQueryWrapper<MUser>().eq(MUser::getLoginAccount, mAccountChangeRecords.getLoginAccount()));
-            mAccountChangeRecords.setUid(String.valueOf(one.getUid()));
+            logger.info("根据loginAccount查询到的用户: {}", one != null ? one.getUid() : "null");
+            if (one != null) {
+                mAccountChangeRecords.setUid(String.valueOf(one.getUid()));
+            } else {
+                TableDataInfo emptyResult = new TableDataInfo();
+                emptyResult.setTotal(0);
+                emptyResult.setRows(new ArrayList<>());
+                return emptyResult;
+            }
         }
-        List<MAccountChangeRecords> list = mAccountChangeRecordsService.selectMAccountChangeRecordsList(mAccountChangeRecords);
-        TableDataInfo dataTable = getDataTable(list);
+
+        // 获取所有数据（不分页）
+        List<MAccountChangeRecords> allList = mAccountChangeRecordsService.selectMAccountChangeRecordsList(mAccountChangeRecords);
+        logger.info("查询返回总记录数: {}", allList.size());
+
+        // 手动分页
+        int total = allList.size();
+        int fromIndex = (pageNum - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
+
+        // 确保索引不越界
+        if (fromIndex > total) {
+            fromIndex = total;
+        }
+        if (toIndex > total) {
+            toIndex = total;
+        }
+
+        // 如果fromIndex >= toIndex，说明没有数据
+        List<MAccountChangeRecords> pageList;
+        if (fromIndex >= toIndex) {
+            pageList = new ArrayList<>();
+        } else {
+            pageList = allList.subList(fromIndex, toIndex);
+        }
+
+        // 构造返回结果
+        TableDataInfo dataTable = new TableDataInfo();
+        dataTable.setTotal(total);
+        dataTable.setRows(pageList);
+
+        logger.info("分页后返回记录数: {}", pageList.size());
+
+        // 设置用户名
         List<MAccountChangeRecords> rows = (List<MAccountChangeRecords>) dataTable.getRows();
         for (MAccountChangeRecords mAccountChangeRecord : rows) {
             MUser one = mUserService.selectMUserByUid(Long.valueOf(mAccountChangeRecord.getUid()));
@@ -92,8 +142,10 @@ public class MAccountChangeRecordsController extends BaseController
             }
         }
         dataTable.setRows(rows);
+
         return dataTable;
     }
+
 
     /**
      * 个人的奖励历史记录

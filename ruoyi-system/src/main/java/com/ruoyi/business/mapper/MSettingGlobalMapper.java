@@ -47,6 +47,11 @@ public interface MSettingGlobalMapper
     public int updateMSettingGlobal(MSettingGlobal mSettingGlobal);
 
     /**
+     * 如果是修改了客服链接支持这调用修改H5的客服链接
+    */
+    public int updateLinkSupport(String configValue);
+
+    /**
      * 删除设置全球化
      * 
      * @param id 设置全球化主键

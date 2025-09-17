@@ -168,7 +168,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="brushNumber != null">brush_number = #{brushNumber},</if>
             <if test="creditScore != null">credit_score = #{creditScore},</if>
             <if test="multiOrderNum != null">multi_order_num = #{multiOrderNum},</if>
-            <if test="creditScore != null">credit_score=#{creditScore},</if>
             <if test="sex != null">sex=#{sex},</if>
             <if test="signature != null">signature=#{signature},</if>
         </trim>

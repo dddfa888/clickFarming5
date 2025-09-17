@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.business;
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,6 +144,29 @@ public class OrderReceiveRecordController extends BaseController
     @PostMapping("/insertOrderByUser")
     public AjaxResult insertOrderByUser()
     {
+        // 使用北京时间时区
+        java.time.ZoneId beijingZone = java.time.ZoneId.of("Asia/Shanghai");
+        LocalTime now = LocalTime.now(beijingZone);
+        LocalTime startTime = LocalTime.of(10, 0);  // 早上10点
+        LocalTime endTime = LocalTime.of(23, 59, 59);   // 晚上12点前一秒
+
+        // 打印更多时间信息
+        System.out.println("当前北京时间: " + now);
+        System.out.println("当前本地时间: " + LocalTime.now());
+        System.out.println("允许开始时间: " + startTime);
+        System.out.println("允许结束时间: " + endTime);
+
+        // 判断是否在允许时间段内（早上10点到晚上12点）
+        boolean isAllowedTime = (now.equals(startTime) || now.isAfter(startTime)) &&
+                (now.equals(endTime) || now.isBefore(endTime));
+
+        System.out.println("是否在允许时间内: " + isAllowedTime);
+
+        if (!isAllowedTime) {
+            return AjaxResult.error("只有早上10点到晚上12点才能拼团");
+        }
+
+
         OrderReceiveRecord orderReceiveRecord = new OrderReceiveRecord();
         Map<String, Object> map = orderReceiveRecordService.insertOrderByUser(orderReceiveRecord);
         if(map.get("name")!=null){

@@ -246,6 +246,11 @@ public class MMoneyInvestWithdrawServiceImpl extends ServiceImpl<MMoneyInvestWit
     }
 
     @Override
+    public List<MMoneyInvestWithdraw> selectTodayAllWithdrawRecords(Long userId, String type) {
+        return mMoneyInvestWithdrawMapper.selectTodayAllWithdrawRecords(userId, type);
+    }
+
+    @Override
     public List<MMoneyInvestWithdraw> selectTodayPendingWithdraws(Long uid) {
         return Collections.emptyList();
     }

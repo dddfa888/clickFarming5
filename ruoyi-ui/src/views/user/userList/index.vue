@@ -329,12 +329,16 @@
         <el-input readonly v-model="balanceForm.phoneNumber"></el-input>
       </el-form-item>
       <el-form-item :label="$t('userPage.balForm.origin')">
-        <el-input readonly v-model="balanceForm.originalBalance"></el-input>
+        <el-input
+          v-model.number="balanceForm.originalBalance"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="请输入余额">
+        </el-input>
       </el-form-item>
-      <el-form-item :label="$t('userPage.balForm.newNum')" prop="balance">
-        <el-input v-model="balanceForm.balance"  ref="balanceInput"></el-input>
-      </el-form-item>
-       <el-form-item :label="$t('userPage.balForm.selectReason')">
+
+      <el-form-item :label="$t('userPage.balForm.selectReason')">
       <el-select v-model="selectedReason" placeholder="" @change="changeReason">
         <el-option :label="$t('userPage.balForm.noReason')" :value="$t('userPage.balForm.noReason')"></el-option>
         <el-option :label="$t('userPage.balForm.adjust')" :value="$t('userPage.balForm.adjust')"></el-option>
@@ -726,8 +730,20 @@ export default {
         //brushNumber:"",
       },
       selectedReason: '',
-      balanceRules: { // 表单验证规则
-        balance: [{ required: true, message: '请输入金钱数额', trigger: 'blur' }],
+      balanceRules: {
+        originalBalance: [
+          { required: true, message: '请输入余额', trigger: 'blur' },
+          {
+            validator: (rule, value, callback) => {
+              if (value < 0) {
+                callback(new Error('余额不能为负数'));
+              } else {
+                callback();
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
         reason: [{ required: true, message: '请输入理由', trigger: 'blur' }]
       },
       orderNumForm:{
@@ -1065,40 +1081,53 @@ export default {
       let that = this;
       this.$refs.balanceForm.validate(valid => {
         if (valid) {
+          // 额外检查余额是否为负数
+          if (parseFloat(that.balanceForm.originalBalance) < 0) {
+            this.$message.error("余额不能为负数");
+            return;
+          }
+
           let form = {
-            uid : that.balanceForm.uid,
-            balance : that.balanceForm.balance,
-            reason : that.balanceForm.reason
+            uid: that.balanceForm.uid,
+            accountBalance: parseFloat(that.balanceForm.originalBalance),
+            reason: that.balanceForm.reason
           };
-          changeBalance(form).then(res => {
-            if(res.code != 200){
-              this.$message.error("修改失败")
-              return
+
+          console.log("提交表单数据:", form);
+
+          setBalance(form).then(res => {
+            console.log("接口返回结果:", res);
+            if(res.code === 200){
+              this.$message.success("修改成功");
+              this.handleCloseBalance();
+              this.getList();
+            } else {
+              this.$message.error("修改失败: " + (res.msg || "未知错误"));
             }
-            this.handleCloseBalance()
-            this.getList()
-            this.$message.success("修改成功")
-          })
+          }).catch(error => {
+            console.error("请求异常: ", error);
+            this.$message.error("请求异常: " + (error.message || "系统未知错误，请反馈给管理员"));
+          });
+        } else {
+          console.log("表单验证失败");
         }
-      })
+      });
     },
     handleCloseBalance(){
       this.dialogBalance = false
-      let m = this.balanceForm;
-      for(let k in m){
-        m[k] = ''
-      }
+      // 清空 originalBalance 而不是 balance
+      this.balanceForm.originalBalance = ''
+      this.balanceForm.reason = ''
       this.selectedReason = ''
     },
     handleUpdateBalance(row){
       this.balanceForm.uid = row.uid
-      this.balanceForm.loginAccount=row.loginAccount
-      this.balanceForm.phoneNumber=row.phoneNumber
-      this.balanceForm.originalBalance=row.accountBalance
-      this.balanceForm.balance=''
-      this.balanceForm.reason=this.$t('userPage.balForm.noReason')
-      //this.balanceForm.bankAccountNumber=row.bankAccountNumber
-      this.selectedReason =this.$t('userPage.balForm.noReason')
+      this.balanceForm.loginAccount = row.loginAccount
+      this.balanceForm.phoneNumber = row.phoneNumber
+      // 直接使用 originalBalance 字段
+      this.balanceForm.originalBalance = row.accountBalance
+      this.balanceForm.reason = this.$t('userPage.balForm.noReason')
+      this.selectedReason = this.$t('userPage.balForm.noReason')
       this.dialogBalance = true
     },
     changeReason(value){

@@ -21,4 +21,15 @@ public class BalanceModel {
 
     @NotNull(message = "更改余额理由不能为空")
     private String reason;
+
+    // 在 BalanceModel 类中添加（如果还没有的话）
+    private BigDecimal accountBalance;
+
+    public BigDecimal getAccountBalance() {
+        return accountBalance;
+    }
+
+    public void setAccountBalance(BigDecimal accountBalance) {
+        this.accountBalance = accountBalance;
+    }
 }

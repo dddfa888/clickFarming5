@@ -83,7 +83,7 @@ export function updateMUserSimple(data) {
   return request({
     url: '/api/user/updateMUserSimple',
     method: 'post',
-    params: data
+    data: data
   })
 }
 
