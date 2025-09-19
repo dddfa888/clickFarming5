@@ -12,7 +12,7 @@ const request = axios.create({
   baseURL:
     import.meta.env.MODE === "development"
       ? "/api"
-      : "https://cf5api.dadwqwqee.shop/",
+      : "https://cf5api.gzgov.cc/",
   // baseURL: baseURL,
   timeout: 10000,
 });

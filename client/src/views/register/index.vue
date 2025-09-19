@@ -22,9 +22,9 @@
     <!-- 应用Logo和名称 -->
     <div class="app-logo">
       <div class="logo-icon">
-        <img src="../../assets/image/logo.png" alt="快团" />
+        <img src="../../assets/image/shoplogo.png" />
       </div>
-      <div class="app-name">快团</div>
+      <div class="app-name">多元优选</div>
     </div>
 
     <!-- 注册表单 -->
