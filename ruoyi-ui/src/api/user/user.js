@@ -26,6 +26,15 @@ export function getUser(uid) {
   })
 }
 
+//刷新账户订单
+export function refreshOrderCount(data) {
+  return request({
+    url: 'api/user/refreshOrderCount',
+    method: 'post',
+    data
+  })
+}
+
 
 export function setStatus(uid) {
   return request({

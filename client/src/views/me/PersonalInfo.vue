@@ -149,20 +149,35 @@ const handleFileChange = async e => {
   const file = e.target.files[0];
   if (!file) return;
 
+  // 先保存当前头像，防止失败回退
+  const oldAvatar = avatarimg.value;
+
+  // 本地预览（更快）
+  avatarimg.value = URL.createObjectURL(file);
+
   const formData = new FormData();
   formData.append("file", file);
 
   try {
     const res = await updateAvatar(formData);
     if (res.code === 200) {
+      // 后端返回的头像地址覆盖本地预览
       avatarimg.value = res.data;
       userinfo();
-      showAlert(res.msg, 2000);
+      showAlert(res.msg || "上传成功", 2000);
     } else {
-      showAlert(res.msg, 2000);
+      // 恢复原头像
+      avatarimg.value = oldAvatar;
+      showAlert(res.msg || "上传失败", 2000);
     }
   } catch (error) {
     console.error("上传异常:", error);
+    // 恢复原头像
+    avatarimg.value = oldAvatar;
+    showAlert("上传失败，请稍后重试", 2000);
+  } finally {
+    // 清空 input，保证能再次选择同一文件
+    e.target.value = "";
   }
 };
 

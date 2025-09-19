@@ -27,6 +27,21 @@
       <div class="app-name">多元优选</div>
     </div>
 
+    <!-- 头像上传 -->
+    <div class="avatar-group">
+      <!-- 上传容器 -->
+      <div class="avatar-upload-circle">
+        <label for="avatarInput" class="avatar-label-circle">
+          <div v-if="!avatarPreview" class="upload-placeholder">
+            <span class="plus-icon">+</span>
+            <p>上传头像</p>
+          </div>
+          <img v-else :src="avatarPreview" alt="头像预览" class="avatar-preview-circle" />
+        </label>
+        <input id="avatarInput" type="file" accept="image/*" @change="handleFileChange" hidden />
+      </div>
+    </div>
+
     <!-- 注册表单 -->
     <div class="register-form">
       <form>
@@ -132,7 +147,7 @@
 
 <script setup>
 import { reactive, ref, onMounted } from "vue";
-import { register } from "../../api/index.js";
+import { register, updateAvatar } from "../../api/index.js";
 import { useRouter, useRoute } from "vue-router";
 import { showAlert } from "../../utils/notify.js";
 import { useLangStore } from "../../store/useLangStore.js";
@@ -141,6 +156,7 @@ import { useI18n } from "vue-i18n";
 const { t, locale } = useI18n();
 const router = useRouter();
 const route = useRoute();
+const avatarPreview = ref(null);
 const langStore = useLangStore();
 const form = reactive({
   loginAccount: "",
@@ -219,6 +235,26 @@ function toggleLangList() {
   showLangList.value = !showLangList.value;
 }
 
+const handleFileChange = async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await updateAvatar(formData);
+    if (res.code === 200) {
+      avatarPreview.value = res.url;
+      showAlert("上传成功", 2000);
+    } else {
+      showAlert("上传失败", 2000);
+    }
+  } catch (error) {
+    console.error("上传异常:", error);
+  }
+};
+
 // 表单提交
 function onSubmit() {
   // 验证密码是否一致
@@ -240,7 +276,8 @@ function onSubmit() {
 
   const payload = {
     ...form,
-    phone: form.areaCode + form.phone // 拼接完整手机号
+    phone: form.areaCode + form.phone, // 拼接完整手机号，
+    headimg: avatarPreview.value // 头像
   };
 
   register(payload).then(res => {
@@ -600,6 +637,61 @@ function onSubmit() {
   cursor: pointer;
 }
 
+/* 圆形头像上传 */
+.avatar-upload-circle {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.avatar-label-circle {
+  width: 80px;
+  height: 80px;
+  border: 2px dashed #ccc;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  overflow: hidden;
+  background: #fafafa;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.avatar-label-circle:hover {
+  border-color: #f1c40f;
+  background: #fffbe6;
+}
+
+.upload-placeholder {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+}
+
+.plus-icon {
+  font-size: 24px;
+  font-weight: bold;
+  color: #bbb;
+  margin-bottom: 4px;
+}
+
+.avatar-preview-circle {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 /* 响应式调整 */
 @media screen and (min-width: 768px) {
   .register-container {
@@ -945,6 +1037,60 @@ function onSubmit() {
     text-decoration: none;
     margin-left: 5px;
     cursor: pointer;
+  }
+
+  /* 圆形头像上传 */
+  .avatar-upload-circle {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .avatar-label-circle {
+    width: 80px;
+    height: 80px;
+    border: 2px dashed #ccc;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    overflow: hidden;
+    background: #fafafa;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .avatar-label-circle:hover {
+    border-color: #f1c40f;
+    background: #fffbe6;
+  }
+
+  .upload-placeholder {
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+  }
+
+  .plus-icon {
+    font-size: 24px;
+    font-weight: bold;
+    color: #bbb;
+    margin-bottom: 4px;
+  }
+
+  .avatar-preview-circle {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  .avatar-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
   }
 }
 </style>

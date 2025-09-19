@@ -104,7 +104,6 @@ import Popup from "../../components/Popup.vue";
 import { getUserInfo, getTotalAssets } from "../../api/index";
 import { showAlert } from "../../utils/notify";
 
-
 const router = useRouter();
 const popupRef = ref(null);
 
@@ -139,7 +138,7 @@ const functionItems = ref([
     path: "/yubao"
   },
   {
-    label: "收货地址",
+    label: "银行卡绑定",
     iconPath: getImageUrl("sk.svg"),
     path: "/backcard"
   },

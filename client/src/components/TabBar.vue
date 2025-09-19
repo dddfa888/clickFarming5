@@ -56,7 +56,7 @@ const tabs = computed(() => [
     iconActive: getImageUrl("xinxiactive.svg")
   },
   {
-    name: "快团",
+    name: "选好物",
     path: "/warehouse",
     icon: getImageUrl("shop.svg"),
     iconActive: getImageUrl("shopactive.svg")
@@ -83,7 +83,7 @@ const tablist = computed(() => [
     iconActive: getImageUrl("homeactive.svg")
   },
   {
-    name: "快团",
+    name: "选好物",
     path: "/warehouse",
     icon: getImageUrl("shop.svg"),
     iconActive: getImageUrl("shopactive.svg")

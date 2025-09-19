@@ -142,6 +142,7 @@
           </div>
 
           <div class="action-buttons">
+
             <el-button
               @click="handleOpenUserOrderList(scope.row)"
               size="small"
@@ -184,6 +185,18 @@
           </div>
 
           <div class="action-buttons">
+             <el-button
+             @click="handleUserOrderList(scope.row)"
+              size="small"
+              :style="{
+                backgroundColor: '#FF9F43',
+                borderColor: '#FF9F43',
+                color: '#fff'
+              }"
+            >
+              <!--订单接收历史记录-->
+              {{ $t('刷新账户订单') }}
+            </el-button>
             <el-button
               @click="handleListGroupInformation(scope.row)"
               :style="{
@@ -641,7 +654,7 @@
 </template>
 
 <script>
-import {getAllSuperiorUids,changeBalance,setBalance,setStatus, listUser, getUser, delUser, addUser, updateUser, setRegisterType, getOrderList,updateMultiOrderNum,selectByUserId,updateMUserSimple,updateOrederSet} from "@/api/user/user"
+import {getAllSuperiorUids,changeBalance,setBalance,setStatus, listUser, getUser, delUser, addUser, updateUser, setRegisterType, getOrderList,updateMultiOrderNum,selectByUserId,updateMUserSimple,updateOrederSet,refreshOrderCount} from "@/api/user/user"
 import { listGrade,updateGradeScore } from "@/api/user/grade"
 import {  addNotify } from "@/api/notify/notify"
 
@@ -880,6 +893,19 @@ export default {
   }
 },
   methods: {
+    // 刷新账户订单
+    handleUserOrderList(row){
+    refreshOrderCount({uid:row.uid}).then(response => {
+      console.log(response)
+      if(response.code == 200)
+      {
+        this.$modal.msgSuccess('刷新成功');
+      }else
+      {
+        this.$modal.msgError('刷新失败');
+      }
+      })
+    },
     //打开《订单设置》
     handleOpenOrederSet(row){
       let that = this;

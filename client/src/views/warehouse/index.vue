@@ -19,7 +19,7 @@
           </div>
           <div class="balance-row">
             <div class="balance-label">佣金比例</div>
-            <div class="balance-value">0.20%</div>
+            <div class="balance-value">{{ userInfo.rate || '0.00'}}</div>
           </div>
         </div>
 
