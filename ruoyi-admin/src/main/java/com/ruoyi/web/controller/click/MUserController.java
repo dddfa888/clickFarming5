@@ -1005,4 +1005,24 @@ public class MUserController extends BaseController
 
         return AjaxResult.success(result);
     }
+
+    /**
+     * 修改用户信誉分
+     */
+    @Log(title = "用户", businessType = BusinessType.UPDATE)
+    @PostMapping("updateCreditScore")
+    public AjaxResult updateCreditScore(@RequestBody MUser mUser) {
+        // 验证参数
+        if (mUser.getUid() == null) {
+            return AjaxResult.error("用户ID不能为空");
+        }
+
+        if (mUser.getCreditScore() == null) {
+            return AjaxResult.error("信誉分不能为空");
+        }
+
+        // 更新用户信誉分
+        return toAjax(mUserService.updateMUserSimple(mUser));
+    }
+
 }
