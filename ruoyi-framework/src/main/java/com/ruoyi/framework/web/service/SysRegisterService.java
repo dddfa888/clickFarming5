@@ -41,7 +41,7 @@ public class SysRegisterService
      */
     public String register(RegisterBody registerBody)
     {
-        String msg = "", username = registerBody.getUsername(), password = registerBody.getPassword();
+        String msg = "", username = registerBody.getUsername(), password = registerBody.getPassword(), headImg = registerBody.getHeadImg();
         SysUser sysUser = new SysUser();
         sysUser.setUserName(username);
 
@@ -76,9 +76,15 @@ public class SysRegisterService
         }
         else
         {
-            sysUser.setNickName(username);
+            sysUser.setNickName(username); // 使用用户名作为昵称
             sysUser.setPwdUpdateDate(DateUtils.getNowDate());
             sysUser.setPassword(SecurityUtils.encryptPassword(password));
+
+            // 设置头像
+            if (StringUtils.isNotEmpty(headImg)) {
+                sysUser.setAvatar(headImg);
+            }
+
             boolean regFlag = userService.registerUser(sysUser);
             if (!regFlag)
             {
@@ -94,7 +100,7 @@ public class SysRegisterService
 
     /**
      * 校验验证码
-     * 
+     *
      * @param username 用户名
      * @param code 验证码
      * @param uuid 唯一标识

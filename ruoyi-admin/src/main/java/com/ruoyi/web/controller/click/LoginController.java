@@ -4,6 +4,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.domain.entity.MUser;
 import com.ruoyi.common.utils.ServletUtils;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.ip.AddressUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.web.service.TokenService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 
 @RestController
@@ -35,9 +37,11 @@ public class LoginController {
      */
     @PostMapping("/register")
     public AjaxResult register(@Validated @RequestBody UserRegisterModel model) {
+        // 直接使用前端传递的headImg，不从Session中获取
         mUserService.userRegister(model);
         return AjaxResult.success();
     }
+
 
     @PostMapping("/login")
     public AjaxResult login(@Validated @RequestBody LoginModel model) {

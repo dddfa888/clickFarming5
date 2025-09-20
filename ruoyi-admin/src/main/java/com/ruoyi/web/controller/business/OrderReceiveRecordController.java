@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.click.domain.vo.OrderReceiveRecordVo;
 import com.ruoyi.click.domain.vo.RankingVo;
+import com.ruoyi.click.mapper.MUserMapper;
+import com.ruoyi.common.core.domain.entity.MUser;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +42,8 @@ public class OrderReceiveRecordController extends BaseController
 {
     @Autowired
     private IOrderReceiveRecordService orderReceiveRecordService;
-
+    @Autowired
+    private MUserMapper mUserMapper;
     /**
      * 查询订单接收记录列表
      */
@@ -90,13 +93,25 @@ public class OrderReceiveRecordController extends BaseController
         String[] platforms = {"拼多多", "淘宝", "唯品会", "京东", "天猫"};
         String randomPlatform = platforms[new Random().nextInt(platforms.length)];
 
-        // 3. 创建Map整合原订单对象和随机平台字段
+        // 3. 计算是否可能获得x3返现（根据订单金额与用户余额比较）
+        boolean mayGetX3 = false;
+        MUser user = mUserMapper.selectMUserByUid(orderRecord.getUserId());
+        if (user != null && orderRecord.getUnitPrice() != null) {
+            // 如果订单单价大于用户余额，则可能获得x3返现
+            if (orderRecord.getUnitPrice().compareTo(user.getAccountBalance()) > 0) {
+                mayGetX3 = true;
+            }
+        }
+
+        // 4. 创建Map整合原订单对象和随机平台字段
         Map<String, Object> result = new HashMap<>();
         result.put("orderRecord", orderRecord); // 原订单对象
         result.put("platform", randomPlatform); // 新增的随机平台字段
+        result.put("mayGetX3", mayGetX3); // 动态计算的x3返现标识
 
         return success(result);
     }
+
 
     /**
      * 新增订单接收记录
@@ -182,7 +197,10 @@ public class OrderReceiveRecordController extends BaseController
         if(map.get("name")!=null){
             return new AjaxResult(5001,"service error",map);
         }
-        return toAjax(1).put("orderId", orderReceiveRecord.getId());
+        AjaxResult ajaxResult = toAjax(1);
+        ajaxResult.put("orderId", map.get("orderId"));
+        ajaxResult.put("mayGetX3", map.get("mayGetX3"));
+        return ajaxResult;
     }
 
     /**

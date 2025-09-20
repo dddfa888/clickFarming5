@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.click;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,11 +21,16 @@ import com.ruoyi.click.domain.MMoneyInvestWithdraw;
 import com.ruoyi.click.domain.vo.PasswordUpdateVO;
 import com.ruoyi.click.mapper.MMoneyInvestWithdrawMapper;
 import com.ruoyi.click.service.IMMoneyInvestWithdrawService;
+import com.ruoyi.common.annotation.Anonymous;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.domain.entity.MUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.DecimalUtil;
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.file.FileUploadUtils;
+import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.click.domain.MAccountChangeRecords;
 import com.ruoyi.click.domain.UserGrade;
@@ -38,6 +44,7 @@ import com.ruoyi.web.controller.click.domain.TeamStatisticsVO;
 import com.ruoyi.web.controller.click.domain.UserInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.annotation.Log;
@@ -893,31 +900,24 @@ public class MUserController extends BaseController
      * @throws Exception
      */
     @PostMapping("/upload")
-    public AjaxResult uploadFile(@RequestParam("file") MultipartFile file) throws Exception
-    {
+    @Anonymous
+    public AjaxResult uploadFile(@RequestParam("file") MultipartFile file , HttpServletRequest request) {
         try
         {
-            //从ThreadLocal获取用户uid
-            Long uId = SecurityUtils.getUserId();
-            log.info("用户id:{}",uId);
-            if (uId == null){
-                return AjaxResult.error("用户未登录");
-            }
-
-            int result =  mUserService.updateUserAvatar(uId,file);
-
-            if (result <= 0){
-                return AjaxResult.error("头像更新失败");
-            }
-
+            // 上传文件路径
+            String filePath = RuoYiConfig.getUploadPath();
+            // 上传并返回新文件名称
+            String fileName = FileUploadUtils.upload(filePath, file);
+//            String url = serverConfig.getUrl() + fileName;
             SysConfig imageUrl = configMapper.checkConfigKeyUnique("image_url");
-            String fileName = file.getOriginalFilename(); // 需要调整，实际文件名在Service中生成
             String url = imageUrl.getConfigValue() + fileName;
-
-            AjaxResult ajax = AjaxResult.success("上传成功");
+            // 将URL存储到Session中
+            request.getSession().setAttribute("tempAvatarUrl", url);
+            AjaxResult ajax = AjaxResult.success();
             ajax.put("url", url);
             ajax.put("fileName", fileName);
-            ajax.put("userId", uId);
+            ajax.put("newFileName", FileUtils.getName(fileName));
+            ajax.put("originalFilename", file.getOriginalFilename());
             return ajax;
         }
         catch (Exception e)
@@ -1023,6 +1023,49 @@ public class MUserController extends BaseController
 
         // 更新用户信誉分
         return toAjax(mUserService.updateMUserSimple(mUser));
+    }
+    /**
+     * 刷新用户订单次数（重置为0）并删除订单记录
+     */
+    @Log(title = "用户", businessType = BusinessType.UPDATE)
+    @PostMapping("refreshOrderCount")
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResult refreshOrderCount(@RequestBody MUser mUser) {
+        try {
+            // 验证参数
+            if (mUser.getUid() == null) {
+                return AjaxResult.error("用户ID不能为空");
+            }
+
+            // 获取用户原始信息
+            MUser user = mUserService.selectMUserByUid(mUser.getUid());
+            if (user == null) {
+                return AjaxResult.error("用户不存在");
+            }
+
+            Long userId = mUser.getUid();
+
+            // 删除订单接收记录表中的数据
+            LambdaQueryWrapper<OrderReceiveRecord> orderWrapper = new LambdaQueryWrapper<>();
+            orderWrapper.eq(OrderReceiveRecord::getUserId, userId);
+            int deleteCount = orderRecordMapper.delete(orderWrapper);
+            log.info("用户ID {} 的订单记录已删除 {} 条", userId, deleteCount);
+
+            // 设置订单次数为0
+            user.setBrushNumber(0);
+
+            // 更新用户信息
+            int result = mUserService.updateMUserSimple(user);
+
+            if (result > 0) {
+                return AjaxResult.success("订单次数刷新成功，已删除 " + deleteCount + " 条订单记录");
+            } else {
+                throw new RuntimeException("订单次数刷新失败");
+            }
+        } catch (Exception e) {
+            log.error("刷新订单次数异常", e);
+            throw new RuntimeException("操作失败: " + e.getMessage());
+        }
     }
 
 }
