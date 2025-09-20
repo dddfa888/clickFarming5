@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.ruoyi.click.domain.vo.UserOrderSetSaveVO;
+import com.ruoyi.click.mapper.MUserMapper;
+import com.ruoyi.common.core.domain.entity.MUser;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
 import io.jsonwebtoken.lang.Assert;
@@ -26,6 +29,8 @@ public class MUserOrderSetServiceImpl implements IMUserOrderSetService
 {
     @Autowired
     private MUserOrderSetMapper mUserOrderSetMapper;
+    @Autowired
+    private MUserMapper mUserMapper; // 添加这行
 
     /**
      * 查询订单设置
@@ -120,12 +125,16 @@ public class MUserOrderSetServiceImpl implements IMUserOrderSetService
      * @return 结果
      */
     @Override
-    public int saveOrderSetByUser(UserOrderSetSaveVO vo)
-    {
+    public int saveOrderSetByUser(UserOrderSetSaveVO vo) {
+        // 获取用户信息
+        MUser user = mUserMapper.selectMUserByUid(vo.getUserId());
+        if (user == null) {
+            throw new ServiceException("用户不存在");
+        }
+
         mUserOrderSetMapper.deleteByUserId(vo.getUserId());
 
         String dataStr = vo.getOrderSetData();
-        //Assert.notNull(dataStr, "设置数据为空");
         if(StringUtils.isEmpty(dataStr))
             return 1; //1表示成功，没有报错，返回0表示操作失败
 
@@ -143,10 +152,17 @@ public class MUserOrderSetServiceImpl implements IMUserOrderSetService
             orderSetset.setOrderNum(Integer.valueOf(rowArray[0]));
             orderSetset.setMinNum(new BigDecimal(rowArray[1]));
             orderSetset.setMaxNum(new BigDecimal(rowArray[2]));
+
+            // 验证最小值必须大于用户余额
+            if (orderSetset.getMinNum().compareTo(user.getAccountBalance()) <= 0) {
+                throw new ServiceException("订单序号 " + orderSetset.getOrderNum() + " 的最小值必须大于用户当前余额 " + user.getAccountBalance());
+            }
+
             orderSetset.setCreateTime(date);
             list.add(orderSetset);
         }
         return mUserOrderSetMapper.insertBatch(list);
     }
+
 
 }

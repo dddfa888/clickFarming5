@@ -288,12 +288,12 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         boolean mayGetX3 = false;
 
         if (orderSetList != null && orderSetList.size() > 0) {
-            product = setOrderProdLimit(orderReceiveRecord, orderSetList.get(0));
-            // 对于订单设置的情况，需要根据具体情况判断是否可能获得x3返现
-            if (product.getPrice().compareTo(mUser.getAccountBalance()) > 0) {
-                mayGetX3 = true;
-            }
+            // 只处理设置了的订单
+            product = setOrderProdLimit(orderReceiveRecord, orderSetList.get(0), mUser); // 传递mUser参数
+            // 对于订单设置的情况，价格一定大于用户余额，所以肯定能获得x3返现
+            mayGetX3 = true;
         } else {
+            // 如果没有设置订单，使用默认逻辑（不再随机选择超过余额的商品）
             ProductAndX3Info result = setOrderProdNormal(orderReceiveRecord, mUser);
             product = result.getProduct();
             mayGetX3 = result.isMayGetX3();
@@ -304,10 +304,8 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         orderReceiveRecord.setProductImageUrl(product.getImageUrl());
         orderReceiveRecord.setUnitPrice(product.getPrice());
 
-        // 随机生成hide值
-        Random random = new Random();
-        int hideValue = random.nextInt(2); // 随机生成0或1
-        orderReceiveRecord.setHide(hideValue);
+        // 移除随机隐藏单逻辑，固定设置为0
+        orderReceiveRecord.setHide(0); // 不再随机生成隐藏单
 
         orderReceiveRecord.setTotalAmount(DecimalUtil.multiple(product.getPrice(), orderReceiveRecord.getNumber()));
 
@@ -317,8 +315,8 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
             // 可能获得x3返现的情况
             profit = calcProfitX3(userGrade, orderReceiveRecord.getTotalAmount());
         } else {
-            // 普通返现情况
-            profit = calcProfit(userGrade, orderReceiveRecord.getTotalAmount(), hideValue);
+            // 普通返现情况（不再处理隐藏商品）
+            profit = calcProfit(userGrade, orderReceiveRecord.getTotalAmount(), 0); // 固定传0
         }
 
         orderReceiveRecord.setProfit(profit);
@@ -332,6 +330,8 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         orderReceiveRecordMapper.insertOrderReceiveRecord(orderReceiveRecord);
         return mayGetX3;
     }
+
+
 
 
 
@@ -375,18 +375,9 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         Map<String, Object> paramIds = new HashMap<>();
         boolean mayGetX3 = false; // 默认不获得x3返现
 
-        // 80%概率选择用户余额内的商品，20%概率可以选择略高于余额的商品
-        Random random = new Random();
-        if (random.nextInt(100) < 80) {
-            // 80%概率：只查询价格小于或等于用户余额的商品
-            paramIds.put("price_Le", mUser.getAccountBalance());
-            mayGetX3 = false; // 价格不超过余额，不获得x3返现
-        } else {
-            // 20%概率：可以查询略高于用户余额的商品（最高不超过用户余额的1.5倍）
-            BigDecimal maxPrice = mUser.getAccountBalance().multiply(new BigDecimal("1.5"));
-            paramIds.put("price_Le", maxPrice);
-            mayGetX3 = true; // 价格可能超过余额，可能获得x3返现
-        }
+        // 移除随机选择超过余额商品的逻辑，只选择用户余额内的商品
+        paramIds.put("price_Le", mUser.getAccountBalance());
+        mayGetX3 = false; // 价格不超过余额，不获得x3返现
 
         List<Long> idList = productManageMapper.getIdList(paramIds);
         if (idList == null || idList.isEmpty()) {
@@ -462,34 +453,60 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
     /**
      * 从数据库中随机查询一个产品，根据订单设置查询
      */
-    public ProductManage setOrderProdLimit(OrderReceiveRecord orderReceiveRecord, MUserOrderSet orderSet) {
+    public ProductManage setOrderProdLimit(OrderReceiveRecord orderReceiveRecord, MUserOrderSet orderSet, MUser mUser) {
         BigDecimal minNum = orderSet.getMinNum();
         BigDecimal maxNum = orderSet.getMaxNum();
-        BigDecimal maxHalf = maxNum.divide(new BigDecimal(2));
+
+        // 确保设置的最小值大于用户余额（前置检查应在保存时完成，这里作为双重保险）
+        if (minNum.compareTo(mUser.getAccountBalance()) <= 0) {
+            throw new ServiceException("设置的最小值必须大于用户当前余额");
+        }
+
         Map<String, Object> paramIds = new HashMap<>();
         paramIds.put("min", minNum);
         paramIds.put("max", maxNum);
-        paramIds.put("max_half", maxHalf);
         List<Long> idList = productManageMapper.getIdListByOrderSet(paramIds);
         if (idList == null || idList.isEmpty())
             throw new ServiceException("未查到产品信息");//user
 
-        int prodIndex = (int) Math.floor(Math.random() * idList.size());
-        ProductManage product = productManageMapper.selectProductManageById(idList.get(prodIndex));
+        // 过滤出价格大于用户余额的商品
+        List<Long> validIdList = new ArrayList<>();
+        for (Long id : idList) {
+            ProductManage product = productManageMapper.selectProductManageById(id);
+            if (product.getPrice().compareTo(mUser.getAccountBalance()) > 0) {
+                validIdList.add(id);
+            }
+        }
+
+        if (validIdList.isEmpty()) {
+            throw new ServiceException("未找到价格大于用户余额的商品");//user
+        }
+
+        int prodIndex = (int) Math.floor(Math.random() * validIdList.size());
+        ProductManage product = productManageMapper.selectProductManageById(validIdList.get(prodIndex));
         BigDecimal price = product.getPrice();
 
         // 计算合适的产品数量，使总额在min到max之间
         int prodNum = 1; //默认数量1
 
-        // 不再检查用户余额是否足够，统一设置为1，支付时再检查
-        if (price.compareTo(maxHalf) <= 0) {
+        // 计算产品数量，确保总额在设置的范围内
+        if (price.compareTo(minNum) >= 0 && price.compareTo(maxNum) <= 0) {
+            // 如果单价已经在设置范围内，数量设为1
+            prodNum = 1;
+        } else {
+            // 否则计算合适的数量
             long min = Math.round(Math.ceil(minNum.divide(price, 2, RoundingMode.HALF_UP).doubleValue()));
             long max = Math.round(Math.floor(maxNum.divide(price, 2, RoundingMode.HALF_UP).doubleValue()));
-            prodNum = (int) (Math.round(Math.floor(Math.random() * (max - min))) + min);
+            if (min <= max) {
+                prodNum = (int) (Math.round(Math.floor(Math.random() * (max - min + 1))) + min);
+            } else {
+                prodNum = 1;
+            }
         }
         orderReceiveRecord.setNumber(prodNum);
         return product;
     }
+
 
 
     /**
@@ -508,21 +525,19 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
     }*/
 
     /**
-     * 计算利润
+     * 计算利润（移除隐藏商品逻辑）
      *
      * @param userGrade 用户等级信息
      * @param totalAmount 订单总金额
-     * @param hideValue 隐藏标识值（0-不隐藏，1-隐藏）
+     * @param hideValue 隐藏标识值（保留参数但不再使用）
      * @return 利润金额
      */
     public BigDecimal calcProfit(UserGrade userGrade, BigDecimal totalAmount, int hideValue) {
         BigDecimal rate = userGrade.getCommissionRate();
         BigDecimal profit = DecimalUtil.multiply(rate, totalAmount).setScale(2, RoundingMode.HALF_UP);
 
-        // 如果是隐藏商品（hideValue=1），利润乘以3
-        if (hideValue == 1) {
-            profit = profit.multiply(new BigDecimal(3));
-        }
+        // 移除隐藏商品x3逻辑，只根据用户等级和订单金额计算利润
+        // 如果是加急单且超过余额，会在调用calcProfitX3方法中处理x3逻辑
 
         return profit;
     }
@@ -589,9 +604,42 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         //更新值  支付状态：完成
         orderReceiveRecord.setProcessStatus(OrderReceiveRecord.PROCESS_STATUS_SUCCESS);
         orderReceiveRecord.setUpdateTime(nowDate);
+
+        // 如果用户有订单设置，则更新订单设置中的minNum为新的余额
+        updateOrderSetMinNumIfNeeded(mUser);
         return orderReceiveRecordMapper.updateOrderReceiveRecord(orderReceiveRecord);
     }
+    /**
+     * 如果用户有订单设置，则更新订单设置中的minNum为新的余额
+     * @param mUser 用户信息
+     */
+    private void updateOrderSetMinNumIfNeeded(MUser mUser) {
+        try {
+            // 查询该用户是否有订单设置
+            List<MUserOrderSet> orderSetList = mUserOrderSetMapper.selectByUserId(mUser.getUid());
 
+            if (orderSetList != null && !orderSetList.isEmpty()) {
+                // 遍历所有订单设置，更新minNum为当前余额+1（确保大于当前余额）
+                for (MUserOrderSet orderSet : orderSetList) {
+                    // 设置新的最小值，确保大于用户当前余额
+                    BigDecimal newMinNum = mUser.getAccountBalance().add(BigDecimal.ONE);
+
+                    // 保持原有的最大值与最小值的比例关系（如果需要）
+                    BigDecimal ratio = orderSet.getMaxNum().divide(orderSet.getMinNum(), 4, RoundingMode.HALF_UP);
+                    BigDecimal newMaxNum = newMinNum.multiply(ratio);
+
+                    // 更新订单设置
+                    orderSet.setMinNum(newMinNum);
+                    orderSet.setMaxNum(newMaxNum);
+                    mUserOrderSetMapper.updateMUserOrderSet(orderSet);
+                }
+            }
+        } catch (Exception e) {
+            // 记录日志，但不中断主流程
+            System.err.println("更新用户订单设置失败: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public List<RankingVo> getRanking() {
