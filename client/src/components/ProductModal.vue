@@ -31,11 +31,13 @@
         </div>
         <div class="row">
           <span>返现</span>
-          <span>{{ data.profit }}</span>
+          <span v-if="mayGetX3">{{ data.profit }}x3</span>
+          <span v-else>{{ data.profit }}</span>
         </div>
         <div class="row">
           <span>合计金额</span>
-          <span style="color: #ff0000">{{ data.totalAmount }}+{{ data.profit }}</span>
+          <span v-if="mayGetX3" style="color: #ff0000">{{ data.totalAmount }}+{{ data.profit }} x3</span>
+          <span v-else style="color: #ff0000">{{ data.totalAmount }}+{{ data.profit }}</span>
         </div>
         <div class="row">
           <span>订单日期</span>
@@ -66,10 +68,12 @@ const props = defineProps({
 const { id } = toRefs(props);
 const { t } = useI18n();
 const platform = ref("");
+const mayGetX3 = ref(false);
 const data = ref({});
 getOrderById(id.value).then(res => {
   data.value = res.data.orderRecord;
   platform.value = res.data.platform;
+  mayGetX3.value = res.data.mayGetX3;
 });
 
 const emit = defineEmits(["close", "pay"]);
