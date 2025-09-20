@@ -606,40 +606,40 @@ public class OrderReceiveRecordServiceImpl implements IOrderReceiveRecordService
         orderReceiveRecord.setUpdateTime(nowDate);
 
         // 如果用户有订单设置，则更新订单设置中的minNum为新的余额
-        updateOrderSetMinNumIfNeeded(mUser);
+//        updateOrderSetMinNumIfNeeded(mUser);
         return orderReceiveRecordMapper.updateOrderReceiveRecord(orderReceiveRecord);
     }
     /**
      * 如果用户有订单设置，则更新订单设置中的minNum为新的余额
-     * @param mUser 用户信息
+//     * @param mUser 用户信息
      */
-    private void updateOrderSetMinNumIfNeeded(MUser mUser) {
-        try {
-            // 查询该用户是否有订单设置
-            List<MUserOrderSet> orderSetList = mUserOrderSetMapper.selectByUserId(mUser.getUid());
-
-            if (orderSetList != null && !orderSetList.isEmpty()) {
-                // 遍历所有订单设置，更新minNum为当前余额+1（确保大于当前余额）
-                for (MUserOrderSet orderSet : orderSetList) {
-                    // 设置新的最小值，确保大于用户当前余额
-                    BigDecimal newMinNum = mUser.getAccountBalance().add(BigDecimal.ONE);
-
-                    // 保持原有的最大值与最小值的比例关系（如果需要）
-                    BigDecimal ratio = orderSet.getMaxNum().divide(orderSet.getMinNum(), 4, RoundingMode.HALF_UP);
-                    BigDecimal newMaxNum = newMinNum.multiply(ratio);
-
-                    // 更新订单设置
-                    orderSet.setMinNum(newMinNum);
-                    orderSet.setMaxNum(newMaxNum);
-                    mUserOrderSetMapper.updateMUserOrderSet(orderSet);
-                }
-            }
-        } catch (Exception e) {
-            // 记录日志，但不中断主流程
-            System.err.println("更新用户订单设置失败: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+//    private void updateOrderSetMinNumIfNeeded(MUser mUser) {
+//        try {
+//            // 查询该用户是否有订单设置
+//            List<MUserOrderSet> orderSetList = mUserOrderSetMapper.selectByUserId(mUser.getUid());
+//
+//            if (orderSetList != null && !orderSetList.isEmpty()) {
+//                // 遍历所有订单设置，更新minNum为当前余额+1（确保大于当前余额）
+//                for (MUserOrderSet orderSet : orderSetList) {
+//                    // 设置新的最小值，确保大于用户当前余额
+//                    BigDecimal newMinNum = mUser.getAccountBalance().add(BigDecimal.ONE);
+//
+//                    // 保持原有的最大值与最小值的比例关系（如果需要）
+//                    BigDecimal ratio = orderSet.getMaxNum().divide(orderSet.getMinNum(), 4, RoundingMode.HALF_UP);
+//                    BigDecimal newMaxNum = newMinNum.multiply(ratio);
+//
+//                    // 更新订单设置
+//                    orderSet.setMinNum(newMinNum);
+//                    orderSet.setMaxNum(newMaxNum);
+//                    mUserOrderSetMapper.updateMUserOrderSet(orderSet);
+//                }
+//            }
+//        } catch (Exception e) {
+//            // 记录日志，但不中断主流程
+//            System.err.println("更新用户订单设置失败: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
 
     @Override
     public List<RankingVo> getRanking() {
