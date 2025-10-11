@@ -278,15 +278,13 @@ public class MUserServiceImpl extends ServiceImpl<MUserMapper, MUser>  implement
         mUser.setRegisterType("1");
         mUser.setPhoneNumber(model.getPhone());
         mUser.setStatus(1);
+        // 添加头像处理
+        mUser.setHeadImg(model.getHeadImg());
         // TODO 此处需要思考
         mUser.setLevel(1);
-//        UserGrade minGrade = userGradeService.getOne(
-//                new LambdaQueryWrapper<UserGrade>()
-//                        .orderByAsc(UserGrade::getSortNum)
-//                        .last("LIMIT 1")
-//        );
         mUserMapper.insertMUser(mUser);
     }
+
 
     @Override
     public MUser getUserOne(String loginAccount, String loginPassword) {

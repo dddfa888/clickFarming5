@@ -27,6 +27,17 @@ public class LoginBody
      */
     private String uuid;
 
+    /** 头像URL */
+    private String headImg;
+
+    public String getHeadImg() {
+        return headImg;
+    }
+
+    public void setHeadImg(String headImg) {
+        this.headImg = headImg;
+    }
+
     public String getUsername()
     {
         return username;

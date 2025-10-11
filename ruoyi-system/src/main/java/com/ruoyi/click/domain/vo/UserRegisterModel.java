@@ -1,5 +1,6 @@
 package com.ruoyi.click.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -36,4 +37,11 @@ public class UserRegisterModel {
      */
     @NotBlank(message = "邀请码不能为空")
     private String invitationCode;
+
+    /**
+     * 头像路径
+     */
+//    @NotBlank(message = "头像路径不能为空")
+    @JsonProperty("headimg")
+    private String headImg;
 }
