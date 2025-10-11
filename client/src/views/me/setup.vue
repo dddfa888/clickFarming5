@@ -16,12 +16,12 @@
           <img src="../../assets/img/right.png" alt />
         </span>
       </div>
-      <div class="option-item">
+      <!--<div class="option-item">
         <span>检查更新</span>
         <span class="arrow">
           <img src="../../assets/img/right.png" alt />
         </span>
-      </div>
+      </div>-->
       <div class="option-item center logout" @click="logout">退出登录</div>
     </div>
   </div>
